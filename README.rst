@@ -26,15 +26,16 @@ This utility can be installed with **pip**:
 Configuration
 -------------
 
-The first time the utility is executed, it:
+The first time the utility is executed:
 
-- creates its configuration directory **{HOME}/.cloud**
-- copies a sample config.ini file into that directory
-- Informs the user to edit and their credential information to that file
-- while editing the config.ini file
+- It creates the config directory **{HOME}/.cloud**
+- It copies the sample config.ini file to the config dir
+- Tells the user to add their credential information to config.ini
 
-  - be careful not to change the names of the keys - the titles left of the '=' symbol
-  - comment lines (those beginning with #) may be deleted
+Notes while editing the config.ini file:
+
+- be careful not to change the names of the keys (titles left of the '=' symbol)
+- comment lines may be deleted (those beginning with #)
 
 **config.ini sections**
 
@@ -45,12 +46,12 @@ The first time the utility is executed, it:
   providers = aws,azure,gcp
 
   # the "providers" key specifies which cloud providers to work with
-  # the list can contain any subset or combination of "aws", "azure" and "gcp"
+  # it may contain any subset or combination of "aws", "azure" and "gcp"
   # each provider listed must have a corresponding section of the same name
   #   the corresponding section contains the security credentials for that provider
 
 
-**[aws] section** - specifies your AWS security credentials and our default datacenter region. `Information on AWS Credentials <http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html>`_
+**[aws] section** - specifies your AWS security credentials and default datacenter region. `Information on AWS Credentials <http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html>`_
 
 
 .. code::
@@ -73,7 +74,7 @@ The first time the utility is executed, it:
   az_app_sec = 22918C9e1cCC7665a+b3e4052f942630aE979CF68/v=
 
 
-**[gcp] section** - specifies your Google Compute Service Account, the name of your private key (use a JSON formatted key), and your Project ID.  `Information on Setting up Service Account Authentication <https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances>`_
+**[gcp] section** - specifies your Google Compute Service Account, the name of your access key (use JSON formatted key), and your Project ID.  `Information on Setting up Service Account Authentication <https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances>`_
 
 
 .. code::

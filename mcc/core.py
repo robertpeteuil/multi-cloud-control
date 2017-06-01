@@ -34,7 +34,7 @@ import os
 import shutil
 import sys
 
-__version__ = "0.0.10"
+__version__ = "0.0.11"
 
 
 def main():
