@@ -2,7 +2,7 @@
 
 License:
 
-    MCC - Control and connect to AWS EC2 instances from command line
+    MCC - Unified CLI Utility for AWS, Azure and GCP Instance Control.
     Copyright (C) 2017  Robert Peteuil
 
     This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@ License:
 
 URL:       https://github.com/robertpeteuil/multi-cloud-control
 Author:    Robert Peteuil
+
 """
 from __future__ import absolute_import, print_function
 import configparser
