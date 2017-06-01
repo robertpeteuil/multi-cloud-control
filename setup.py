@@ -18,8 +18,9 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
     name='mcc',
     packages=['mcc'],
+    package_data={'mcc': ['config.ini']},
     entry_points={'console_scripts': ['mcc=mcc.core:main']},
-    version='0.0.8',
+    version='0.0.10',
     author="Robert Peteuil",
     author_email="robert.s.peteuil@gmail.com",
     url='https://github.com/robertpeteuil/aws-shortcuts',
@@ -28,7 +29,9 @@ setup(
     platforms='any',
     keywords='Unified Cloud Utility Instance AWS EC2 Azure GCP Multi-Provider',
     install_requires=['apache-libcloud',
+                      'PyCrypto',
                       'prettytable',
+                      'configparser',
                       'colorama'],
     classifiers=[
         'Development Status :: 3 - Alpha',

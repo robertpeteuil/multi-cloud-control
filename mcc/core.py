@@ -2,7 +2,7 @@
 
 License:
 
-    MCC - Control and connect to AWS EC2 instances from command line
+    MCC - Unified CLI Utility for AWS, Azure and GCP Instance Control.
     Copyright (C) 2017  Robert Peteuil
 
     This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@ License:
 
 URL:       https://github.com/robertpeteuil/multi-cloud-control
 Author:    Robert Peteuil
+
 """
 from __future__ import absolute_import, print_function
 import configparser
@@ -27,14 +28,18 @@ from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from mcc.colors import C_NORM, C_TI, C_STAT
 from mcc.configdir import CONFIG_DIR
+from pkg_resources import resource_filename
 from prettytable import PrettyTable
+import os
+import shutil
+import sys
 
-__version__ = "0.0.8"
+__version__ = "0.0.10"
 
 
 def main():
     nodes = []
-    cld_svc_map = {"ec2": collect_ec2_nodes,
+    cld_svc_map = {"aws": collect_aws_nodes,
                    "azure": collect_az_nodes,
                    "gcp": collect_gcp_nodes}
 
@@ -49,34 +54,43 @@ def main():
 
 
 def read_creds():
-    # home_dir = expanduser("~")
-    # os_spec = {"nt": "\\"}
-    # fs_sep = os_spec.get(os.name, "/")
+    config_file = (u"{0}config.ini".format(CONFIG_DIR))
+    check_config(config_file)
     config = configparser.ConfigParser(allow_no_value=True)
-    config_file = (u"{0}.credentials.ini".format(CONFIG_DIR))
     config.read(config_file)
-    providers = (config['info']['providers']).split(',')
+    providers = [e.strip() for e in (config['info']['providers']).split(',')]
     cred = {}
     for item in providers:
         cred.update(dict(list(config[item].items())))
     return (providers, cred)
 
 
-def collect_ec2_nodes(cred):
-    ec2_nodes = []
+def check_config(config_file):
+    if not os.path.isfile(config_file):
+        if not os.path.exists(CONFIG_DIR):
+            os.makedirs(CONFIG_DIR)
+        filename = resource_filename("mcc", "config.ini")
+        # filename = resource_filename(Requirement.parse("mcc"), "config.ini")
+        shutil.copyfile(filename, config_file)
+        print("Please add credential information to {}".format(config_file))
+        sys.exit()
+
+
+def collect_aws_nodes(cred):
+    aws_nodes = []
     driver = get_driver(Provider.EC2)
-    ec2_obj = driver(cred['ec2_acc_id'],
-                     cred['ec2_sec_key'],
-                     region=cred['ec2_reg'])
-    ec2_nodes = ec2_obj.list_nodes()
-    for node in ec2_nodes:
+    aws_obj = driver(cred['aws_access_key_id'],
+                     cred['aws_secret_access_key'],
+                     region=cred['aws_default_region'])
+    aws_nodes = aws_obj.list_nodes()
+    for node in aws_nodes:
         node.cloud = "AWS"
         node.private_ips = ip_to_str(node.private_ips)
         node.public_ips = ip_to_str(node.public_ips)
         node.zone = node.extra['availability']
         node.size = node.extra['instance_type']
         node.type = node.extra['instance_lifecycle']
-    return ec2_nodes
+    return aws_nodes
 
 
 def collect_az_nodes(cred):
@@ -103,8 +117,9 @@ def collect_az_nodes(cred):
 def collect_gcp_nodes(cred):
     gcp_nodes = []
     driver = get_driver(Provider.GCE)
-    gcp_obj = driver(cred['gcp_svc_email'],
-                     cred['gcp_pem'],
+    gcp_pem = CONFIG_DIR + cred['gcp_pem_file']
+    gcp_obj = driver(cred['gcp_svc_acct_email'],
+                     gcp_pem,
                      project=cred['gcp_proj_id'])
     gcp_nodes = gcp_obj.list_nodes()
     for node in gcp_nodes:
