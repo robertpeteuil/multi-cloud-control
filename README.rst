@@ -14,6 +14,22 @@ Planned future enhancements:
 - image / snapshot instances
 - change instance configuration (disk, network, HW)
 
+Installation
+------------
+
+This utility can be installed with **pip**:
+
+.. code:: shell
+
+  pip install mcc
+
+Configuration
+-------------
+
+The first time the utility is run, it creates its configuration directory, {HOME}/.cloud, and copies a sample config.ini file into it.
+The sample config.ini lists the credential information you need to populate for each platform.
+When editing the file, be careful not to change the section titles or item names.
+
 Supported Platforms & Python Versions
 -------------------------------------
 
@@ -25,12 +41,3 @@ Platforms:
 - macOS (OS X)
 
 Windows support is planned at the beta stage
-
-Installation
-------------
-
-This utility can be installed with **pip**:
-
-.. code:: shell
-
-  pip install mcc
