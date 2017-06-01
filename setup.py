@@ -30,7 +30,7 @@ setup(
     keywords='Unified Cloud Utility Instance AWS EC2 Azure GCP Multi-Provider',
     install_requires=['apache-libcloud',
                       'pycrypto',
-                      'prettytable',
+                      'PrettyTable',
                       'configparser',
                       'colorama'],
     classifiers=[
