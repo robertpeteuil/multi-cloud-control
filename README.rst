@@ -41,11 +41,11 @@ The first time the utility is executed, it:
 .. code::
 
   [info]
-  # example providers list = connect and use all three providers
+  # example - connect to all three providers
   providers = aws,azure,gcp
 
   # the "providers" key specifies which cloud providers to work with
-  # the list can contain any subset or combination of "aws", "azure' and "gcp"
+  # the list can contain any subset or combination of "aws", "azure" and "gcp"
   # each provider listed must have a corresponding section of the same name
   #   the corresponding section contains the security credentials for that provider
 
@@ -73,7 +73,7 @@ The first time the utility is executed, it:
   az_app_sec = 22918C9e1cCC7665a+b3e4052f942630aE979CF68/v=
 
 
-**[gcp] section** - specifies your Google Compute Service Account, the name of your private key (use a JSON formatted key), and your Project ID.  `Information on Setting up Servie Account Authentication <https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances>`_
+**[gcp] section** - specifies your Google Compute Service Account, the name of your private key (use a JSON formatted key), and your Project ID.  `Information on Setting up Service Account Authentication <https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances>`_
 
 
 .. code::
@@ -84,7 +84,7 @@ The first time the utility is executed, it:
   gcp_proj_id = sampleproject-634368
 
   # list the filename of the JSON key in this file
-  # copy the key-file to the config directory: {HOME}/.cloud
+  # copy the file itself to the config directory: {HOME}/.cloud
 
 
 Supported Platforms & Python Versions
