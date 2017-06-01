@@ -27,9 +27,13 @@ from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from mcc.colors import C_NORM, C_TI, C_STAT
 from mcc.configdir import CONFIG_DIR
+from pkg_resources import resource_filename
 from prettytable import PrettyTable
+import os
+import shutil
+import sys
 
-__version__ = "0.0.9"
+__version__ = "0.0.10"
 
 
 def main():
@@ -49,15 +53,26 @@ def main():
 
 
 def read_creds():
-    config = configparser.ConfigParser(allow_no_value=True)
     config_file = (u"{0}config.ini".format(CONFIG_DIR))
+    check_config(config_file)
+    config = configparser.ConfigParser(allow_no_value=True)
     config.read(config_file)
     providers = [e.strip() for e in (config['info']['providers']).split(',')]
-    # providers = (config['info']['providers']).split(',')
     cred = {}
     for item in providers:
         cred.update(dict(list(config[item].items())))
     return (providers, cred)
+
+
+def check_config(config_file):
+    if not os.path.isfile(config_file):
+        if not os.path.exists(CONFIG_DIR):
+            os.makedirs(CONFIG_DIR)
+        filename = resource_filename("mcc", "config.ini")
+        # filename = resource_filename(Requirement.parse("mcc"), "config.ini")
+        shutil.copyfile(filename, config_file)
+        print("Please add credential information to {}".format(config_file))
+        sys.exit()
 
 
 def collect_aws_nodes(cred):
