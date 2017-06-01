@@ -9,6 +9,7 @@ listing basic information from instances on AWS, Azure and GCP in one report
 with one simple command: **mcc**.
 
 Planned future enhancements:
+
 - start and stop instances
 - connect to instances via ssh
 - image / snapshot instances
