@@ -29,7 +29,7 @@ setup(
     platforms='any',
     keywords='Unified Cloud Utility Instance AWS EC2 Azure GCP Multi-Provider',
     install_requires=['apache-libcloud',
-                      'PyCrypto',
+                      'pycrypto',
                       'prettytable',
                       'configparser',
                       'colorama'],
