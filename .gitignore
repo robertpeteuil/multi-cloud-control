@@ -1,0 +1,19 @@
+# general things to ignore
+build/
+dist/
+*.egg-info/
+*.egg
+*.py[cod]
+__pycache__/
+*.so
+*~
+
+# due to using testing tools
+test.py
+testdata.py
+.tox
+.cache
+.coverage
+coverage.xml
+.coverage.*
+htmlcov/
