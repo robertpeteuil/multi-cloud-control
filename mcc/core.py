@@ -26,60 +26,57 @@ from __future__ import absolute_import, print_function
 import configparser
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
-from mcc.colors import C_NORM, C_TI, C_STAT
-from mcc.configdir import CONFIG_DIR
-from prettytable import PrettyTable
+from mcc.confdir import CONFIG_DIR
+import mcc.dispout as disp
 import os
 import sys
-from multiprocessing import Pool
-# from multiprocessing.dummy import Pool as ThreadPool
+# from multiprocessing import Pool
+from multiprocessing.dummy import Pool as ThreadPool
 # from pprint import pprint
 
-__version__ = "0.0.12"
+__version__ = "0.0.13"
 cred = {}
 
 
 def main():
-
+    """Retreive and display instance data then process commands."""
     providers = read_config()
 
     nodes = collect_data(providers)
 
+    disp.print_list_table(nodes)
+
     # pprint(nodes)
 
-    # NESTED LIST TABLES
-    print_list_table(nodes)
-    # create: funct - conv nested list to dict
-    # funct print table for dict
-
-    # FLAT LIST TABLES
-    # print_table(nodes)
-    # print()
+    # FLAT LIST TABLES (old)
+    # disp.print_table(nodes)
     # table with indexed dict
-    # print_indx_table(nodes)
+    # disp.print_indx_table(nodes)
 
 
 def collect_data(providers):
-        cld_svc_map = {"aws": collect_aws_nodes,
-                       "azure": collect_az_nodes,
-                       "gcp": collect_gcp_nodes}
-        # services = [collect_aws_nodes, collect_az_nodes, collect_gcp_nodes]
-        services = []
-        for item in providers:
-            services.append(cld_svc_map[item])
-        nodes = []
-        # pool = ThreadPool()
-        pool = Pool()
-        nodes = pool.map(get_nodes, services)
-        return nodes
+    """Orchestrate collection of node data from all providers with a pool."""
+    cld_svc_map = {"aws": collect_aws_nodes,
+                   "azure": collect_az_nodes,
+                   "gcp": collect_gcp_nodes}
+    services = []
+    for item in providers:
+        services.append(cld_svc_map[item])
+    nodes = []
+    pool = ThreadPool()
+    # pool = Pool(3)
+    nodes = pool.map(get_nodes, services)
+    return nodes
 
 
 def get_nodes(funcnm):
+    """Call appropriate function for provider and retreive nodes."""
     nodes = funcnm(cred)
     return nodes
 
 
 def read_config():
+    """Read config file and gather credentials."""
     global cred
     config_file = (u"{0}config.ini".format(CONFIG_DIR))
     if not os.path.isfile(config_file):
@@ -87,14 +84,13 @@ def read_config():
     config = configparser.ConfigParser(allow_no_value=True)
     config.read(config_file)
     providers = [e.strip() for e in (config['info']['providers']).split(',')]
-    # cred = {}
     for item in providers:
         cred.update(dict(list(config[item].items())))
     return providers
-    # return (providers, cred)
 
 
 def make_config(config_file):
+    """Create config.ini on first use, make dir and copy sample."""
     from pkg_resources import resource_filename
     import shutil
     if not os.path.exists(CONFIG_DIR):
@@ -106,6 +102,7 @@ def make_config(config_file):
 
 
 def collect_aws_nodes(cred):
+    """Collect nodes from AWS and retreive details specific to AWS."""
     aws_nodes = []
     driver = get_driver(Provider.EC2)
     aws_obj = driver(cred['aws_access_key_id'],
@@ -123,6 +120,7 @@ def collect_aws_nodes(cred):
 
 
 def collect_az_nodes(cred):
+    """Collect nodes from Azure and retreive details specific to Azure."""
     az_nodes = []
     driver = get_driver(Provider.AZURE_ARM)
     az_obj = driver(tenant_id=cred['az_tenant_id'],
@@ -144,6 +142,7 @@ def collect_az_nodes(cred):
 
 
 def collect_gcp_nodes(cred):
+    """Collect nodes from GCP and retreive details specific to GCP."""
     gcp_nodes = []
     driver = get_driver(Provider.GCE)
     gcp_pem = CONFIG_DIR + cred['gcp_pem_file']
@@ -160,72 +159,12 @@ def collect_gcp_nodes(cred):
 
 
 def ip_to_str(raw_ip):
+    """Convert IP Address list to string or null."""
     if raw_ip:
         raw_ip = raw_ip[0]
     else:
         raw_ip = None
     return raw_ip
-
-
-def print_table(all_nodes):
-    h_name = C_TI + "NAME"
-    h_state = "STATE" + C_NORM
-    nt = PrettyTable()
-    nt.header = False
-    nt.add_row([h_name, "REGION", "CLOUD", "SIZE", "PUBLIC IP", h_state])
-    nt.padding_width = 2
-    nt.border = False
-    for node in all_nodes:
-        state = C_STAT[node.state] + node.state + C_NORM
-        if node.public_ips:
-            n_ip = node.public_ips
-        else:
-            n_ip = "-"
-        nt.add_row([node.name, node.zone, node.cloud, node.size,
-                    n_ip, state])
-    print(nt)
-
-
-def print_list_table(all_nodes):
-    h_name = C_TI + "NAME"
-    h_state = "STATE" + C_NORM
-    nt = PrettyTable()
-    nt.header = False
-    nt.add_row([h_name, "REGION", "CLOUD", "SIZE", "PUBLIC IP", h_state])
-    nt.padding_width = 2
-    nt.border = False
-    for item in all_nodes:
-        for node in item:
-            state = C_STAT[node.state] + node.state + C_NORM
-            if node.public_ips:
-                n_ip = node.public_ips
-            else:
-                n_ip = "-"
-            nt.add_row([node.name, node.zone, node.cloud, node.size,
-                        n_ip, state])
-    print(nt)
-
-
-def print_indx_table(all_nodes):
-    node_list = {}
-    for i, j in enumerate(all_nodes):
-        node_list[i] = j
-    h_nm = C_TI + "NUM"
-    h_state = "STATE" + C_NORM
-    nt = PrettyTable()
-    nt.header = False
-    nt.add_row([h_nm, "NAME", "REGION", "CLOUD", "SIZE", "PUBLIC IP", h_state])
-    nt.padding_width = 2
-    nt.border = False
-    for i, node in node_list.items():
-        state = C_STAT[node.state] + node.state + C_NORM
-        if node.public_ips:
-            n_ip = node.public_ips
-        else:
-            n_ip = "-"
-        nt.add_row([i + 1, node.name, node.zone, node.cloud, node.size,
-                    n_ip, state])
-    print(nt)
 
 
 if __name__ == '__main__':
