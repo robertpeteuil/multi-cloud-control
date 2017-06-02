@@ -28,52 +28,81 @@ from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from mcc.colors import C_NORM, C_TI, C_STAT
 from mcc.configdir import CONFIG_DIR
-from pkg_resources import resource_filename
 from prettytable import PrettyTable
 import os
-import shutil
 import sys
+from multiprocessing import Pool
+# from multiprocessing.dummy import Pool as ThreadPool
+# from pprint import pprint
 
-__version__ = "0.0.11"
+__version__ = "0.0.12"
+cred = {}
 
 
 def main():
-    nodes = []
-    cld_svc_map = {"aws": collect_aws_nodes,
-                   "azure": collect_az_nodes,
-                   "gcp": collect_gcp_nodes}
 
-    (providers, cred) = read_creds()
+    providers = read_config()
 
-    for item in providers:
-        nodes += cld_svc_map[item](cred)
+    nodes = collect_data(providers)
 
-    print_table(nodes)
+    # pprint(nodes)
+
+    # NESTED LIST TABLES
+    print_list_table(nodes)
+    # create: funct - conv nested list to dict
+    # funct print table for dict
+
+    # FLAT LIST TABLES
+    # print_table(nodes)
     # print()
+    # table with indexed dict
     # print_indx_table(nodes)
 
 
-def read_creds():
+def collect_data(providers):
+        cld_svc_map = {"aws": collect_aws_nodes,
+                       "azure": collect_az_nodes,
+                       "gcp": collect_gcp_nodes}
+        # services = [collect_aws_nodes, collect_az_nodes, collect_gcp_nodes]
+        services = []
+        for item in providers:
+            services.append(cld_svc_map[item])
+        nodes = []
+        # pool = ThreadPool()
+        pool = Pool()
+        nodes = pool.map(get_nodes, services)
+        return nodes
+
+
+def get_nodes(funcnm):
+    nodes = funcnm(cred)
+    return nodes
+
+
+def read_config():
+    global cred
     config_file = (u"{0}config.ini".format(CONFIG_DIR))
-    check_config(config_file)
+    if not os.path.isfile(config_file):
+        make_config(config_file)
     config = configparser.ConfigParser(allow_no_value=True)
     config.read(config_file)
     providers = [e.strip() for e in (config['info']['providers']).split(',')]
-    cred = {}
+    # cred = {}
     for item in providers:
         cred.update(dict(list(config[item].items())))
-    return (providers, cred)
+    return providers
+    # return (providers, cred)
 
 
-def check_config(config_file):
-    if not os.path.isfile(config_file):
-        if not os.path.exists(CONFIG_DIR):
-            os.makedirs(CONFIG_DIR)
-        filename = resource_filename("mcc", "config.ini")
-        # filename = resource_filename(Requirement.parse("mcc"), "config.ini")
-        shutil.copyfile(filename, config_file)
-        print("Please add credential information to {}".format(config_file))
-        sys.exit()
+def make_config(config_file):
+    from pkg_resources import resource_filename
+    import shutil
+    if not os.path.exists(CONFIG_DIR):
+        os.makedirs(CONFIG_DIR)
+    filename = resource_filename("mcc", "config.ini")
+    shutil.copyfile(filename, config_file)
+    print("Please add credential information to {}".format(config_file))
+    sys.exit()
 
 
 def collect_aws_nodes(cred):
@@ -84,7 +113,7 @@ def collect_aws_nodes(cred):
                      region=cred['aws_default_region'])
     aws_nodes = aws_obj.list_nodes()
     for node in aws_nodes:
-        node.cloud = "AWS"
+        node.cloud = "aws"
         node.private_ips = ip_to_str(node.private_ips)
         node.public_ips = ip_to_str(node.public_ips)
         node.zone = node.extra['availability']
@@ -102,7 +131,7 @@ def collect_az_nodes(cred):
                     secret=cred['az_app_sec'])
     az_nodes = az_obj.list_nodes()
     for node in az_nodes:
-        node.cloud = "Azure"
+        node.cloud = "azure"
         node.private_ips = ip_to_str(node.private_ips)
         node.public_ips = ip_to_str(node.public_ips)
         node.zone = node.extra['location']
@@ -123,7 +152,7 @@ def collect_gcp_nodes(cred):
                      project=cred['gcp_proj_id'])
     gcp_nodes = gcp_obj.list_nodes()
     for node in gcp_nodes:
-        node.cloud = "GCP"
+        node.cloud = "gcp"
         node.private_ips = ip_to_str(node.private_ips)
         node.public_ips = ip_to_str(node.public_ips)
         node.zone = node.extra['zone'].name
@@ -143,7 +172,7 @@ def print_table(all_nodes):
     h_state = "STATE" + C_NORM
     nt = PrettyTable()
     nt.header = False
-    nt.add_row([h_name, "CLOUD", "REGION", "SIZE", "PUBLIC IP", h_state])
+    nt.add_row([h_name, "REGION", "CLOUD", "SIZE", "PUBLIC IP", h_state])
     nt.padding_width = 2
     nt.border = False
     for node in all_nodes:
@@ -152,8 +181,28 @@ def print_table(all_nodes):
             n_ip = node.public_ips
         else:
             n_ip = "-"
-        nt.add_row([node.name, node.cloud, node.zone, node.size,
+        nt.add_row([node.name, node.zone, node.cloud, node.size,
                     n_ip, state])
+    print(nt)
+
+
+def print_list_table(all_nodes):
+    h_name = C_TI + "NAME"
+    h_state = "STATE" + C_NORM
+    nt = PrettyTable()
+    nt.header = False
+    nt.add_row([h_name, "REGION", "CLOUD", "SIZE", "PUBLIC IP", h_state])
+    nt.padding_width = 2
+    nt.border = False
+    for item in all_nodes:
+        for node in item:
+            state = C_STAT[node.state] + node.state + C_NORM
+            if node.public_ips:
+                n_ip = node.public_ips
+            else:
+                n_ip = "-"
+            nt.add_row([node.name, node.zone, node.cloud, node.size,
+                        n_ip, state])
     print(nt)
 
 
@@ -165,7 +214,7 @@ def print_indx_table(all_nodes):
     h_state = "STATE" + C_NORM
     nt = PrettyTable()
     nt.header = False
-    nt.add_row([h_nm, "NAME", "CLOUD", "REGION", "SIZE", "PUBLIC IP", h_state])
+    nt.add_row([h_nm, "NAME", "REGION", "CLOUD", "SIZE", "PUBLIC IP", h_state])
     nt.padding_width = 2
     nt.border = False
     for i, node in node_list.items():
@@ -174,7 +223,7 @@ def print_indx_table(all_nodes):
             n_ip = node.public_ips
         else:
             n_ip = "-"
-        nt.add_row([i + 1, node.name, node.cloud, node.zone, node.size,
+        nt.add_row([i + 1, node.name, node.zone, node.cloud, node.size,
                     n_ip, state])
     print(nt)
 
