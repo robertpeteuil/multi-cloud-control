@@ -31,10 +31,10 @@ import mcc.dispout as disp
 import os
 import sys
 from multiprocessing import Pool
-from multiprocessing.dummy import Pool as ThreadPool
-# from pprint import pprint
+# from multiprocessing.dummy import Pool as ThreadPool
+from pprint import pprint
 
-__version__ = "0.0.14"
+__version__ = "0.0.15"
 cred = {}
 
 
@@ -44,14 +44,25 @@ def main():
 
     nodes = collect_data(providers)
 
-    disp.print_list_table(nodes)
+    disp.print_table2(nodes)
 
     # pprint(nodes)
+    print("\ndict conversion--\n")
 
-    # FLAT LIST TABLES (old)
-    # disp.print_table(nodes)
-    # table with indexed dict
-    # disp.print_indx_table(nodes)
+    node_dict = conv_data(nodes)
+    disp.print_indx_table2(node_dict)
+    # pprint(node_dict)
+
+
+def conv_data(nodes):
+    """Convert node data from nested-list to dit."""
+    node_dict = {}
+    x = 1
+    for item in nodes:
+        for node in item:
+            node_dict[x] = node
+            x += 1
+    return node_dict
 
 
 def collect_data(providers):
@@ -62,15 +73,11 @@ def collect_data(providers):
     services = []
     for item in providers:
         services.append(cld_svc_map[item])
-    # pool = Pool()
-    pool = Pool(4)
-    result = {}
+    # pool = ThreadPool()
+    pool = Pool(3)
+    #     result[i] = pool.apply_async(item, [cred])
     nodes = []
-    for i, item in enumerate(services):
-        result[i] = pool.apply_async(item, [cred])
-    for i in result:
-        nodes.append(result[i].get(timeout=9))
-    # nodes = pool.map(get_nodes, services)
+    nodes = pool.map(get_nodes, services)
     pool.close()
     pool.join()
     del pool
@@ -79,14 +86,9 @@ def collect_data(providers):
 
 def get_nodes(funcnm):
     """Call appropriate function for provider and retreive nodes."""
-    pool = ThreadPool(6)
-    results = []
-    results.append(pool.apply_async(funcnm, [cred]))
-    pool.close()
-    pool.join()
-    # nodes = funcnm(cred)
-    return results
-    # return nodes
+    nodes = []
+    nodes = funcnm(cred)
+    return nodes
 
 
 def read_config():
