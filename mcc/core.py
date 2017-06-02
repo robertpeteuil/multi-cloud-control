@@ -30,11 +30,11 @@ from mcc.confdir import CONFIG_DIR
 import mcc.dispout as disp
 import os
 import sys
-# from multiprocessing import Pool
+from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 # from pprint import pprint
 
-__version__ = "0.0.13"
+__version__ = "0.0.14"
 cred = {}
 
 
@@ -62,17 +62,31 @@ def collect_data(providers):
     services = []
     for item in providers:
         services.append(cld_svc_map[item])
+    # pool = Pool()
+    pool = Pool(4)
+    result = {}
     nodes = []
-    pool = ThreadPool()
-    # pool = Pool(3)
-    nodes = pool.map(get_nodes, services)
+    for i, item in enumerate(services):
+        result[i] = pool.apply_async(item, [cred])
+    for i in result:
+        nodes.append(result[i].get(timeout=9))
+    # nodes = pool.map(get_nodes, services)
+    pool.close()
+    pool.join()
+    del pool
     return nodes
 
 
 def get_nodes(funcnm):
     """Call appropriate function for provider and retreive nodes."""
-    nodes = funcnm(cred)
-    return nodes
+    pool = ThreadPool(6)
+    results = []
+    results.append(pool.apply_async(funcnm, [cred]))
+    pool.close()
+    pool.join()
+    # nodes = funcnm(cred)
+    return results
+    # return nodes
 
 
 def read_config():
