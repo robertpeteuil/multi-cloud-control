@@ -28,13 +28,14 @@ from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from mcc.confdir import CONFIG_DIR
 import mcc.dispout as disp
-import os
-import sys
 from multiprocessing import Pool
+from multiprocessing import cpu_count
 from multiprocessing.dummy import Pool as ThreadPool
+import os
 from pprint import pprint
+import sys
 
-__version__ = "0.0.17"
+__version__ = "0.0.18"
 # cred = {}
 
 
@@ -57,8 +58,7 @@ def list_only():
 def initialize():
     """Read Config file and retrieve instance data."""
     (cred, providers) = read_config()
-    # (nodes, conn_objs) = collect_data(cred, providers)
-    (nodes, conn_objs) = collect_data_new(cred, providers)
+    (nodes, conn_objs) = collect_data(cred, providers)
     return (nodes, conn_objs)
 
 
@@ -75,78 +75,40 @@ def conv_data(nodes):
 
 def collect_data(cred, providers):
     """Orchestrate collection of node data from all providers with a pool."""
-    from functools import partial
     cld_svc_map = {"aws": [aws_conn, aws_nodes],
                    "azure": [az_conn, az_nodes],
                    "gcp": [gcp_conn, gcp_nodes]}
-    # cld_svc_map = {"aws": aws_nodes,
-    #                "azure": az_nodes,
-    #                "gcp": gcp_nodes}
-    conn_fn = []
-    node_fn = []
-    for item in providers:
-        conn_fn.append(cld_svc_map[item][0])
-        node_fn.append(cld_svc_map[item][1])
-        # node_fn.append(cld_svc_map[item])
-    pool = ThreadPool()
-    # pool = Pool()
-    #     result[i] = pool.apply_async(item, [cred])
-    c_objs = []
-    c_objs = pool.map(partial(get_conn, cred=cred), conn_fn)
-    # c_objs = pool.map(get_conn, conn_fn)
-    pool.close()
-    pool.join()
-    # pool = ThreadPool()
-    pool = Pool()
-    nodes = []
-    # nodes = pool.map(partial(get_nodes, c_obj=c_objs), node_fn)
-    nodes = pool.map(get_nodes, node_fn)
-    pool.close()
-    pool.join()
-    del pool
-    conn_objs = {}
-    for i, item in enumerate(providers):
-        conn_objs[item] = c_objs[i]
-    return (nodes, conn_objs)
-
-
-def collect_data_new(cred, providers):
-    """Orchestrate collection of node data from all providers with a pool."""
-    cld_svc_map = {"aws": [aws_conn, aws_nodes],
-                   "azure": [az_conn, az_nodes],
-                   "gcp": [gcp_conn, gcp_nodes]}
-    # pool = ThreadPool(12)
-    pool = Pool(3)
-    # Get objects containing results of connections (= connection-objects)
+    (procs, thrds) = pool_sizer()
+    pool = Pool(procs)
     conn_r = {}
     for i, item in enumerate(providers):
         conn_r[item] = pool.apply_async(get_conn, [cld_svc_map[item][0], cred])
-        # conn_r[i] = pool.apply_async(get_conn, [cld_svc_map[item][0], cred])
-    # pool.close()
-    # pool.join()
-    # make list of connection-objects from result-objects
     conn_objs = {}
     for k, v in conn_r.items():
         conn_objs[k] = v.get()
-    # for i in conn_r:
-    #     conn_objs[i] = conn_r[i].get()
-    # pool = ThreadPool()
-    # pool = Pool()
     node_r = {}
-    # Get objects containing results, which are nodes
+    pool = ThreadPool(thrds)
     for i, item in enumerate(providers):
         node_r[i] = pool.apply_async(get_nodes, [cld_svc_map[item][1],
                                                  conn_objs[item]])
-        # node_r[i] = pool.apply_async(get_nodes, [cld_svc_map[item][1],
-        #                                          conn_objs[i]])
     pool.close()
     pool.join()
     del pool
-    # make list of nodes from result-objects
     node_list = []
     for i in node_r:
         node_list.append(node_r[i].get())
     return (node_list, conn_objs)
+
+
+def pool_sizer():
+    """Determine number of processes to create based on CPU."""
+    if cpu_count() > 2:
+        procs = 3
+        thrds = 9
+    else:
+        procs = cpu_count()
+        thrds = 6
+    return (procs, thrds)
 
 
 def get_conn(funcnm, cred):
@@ -166,7 +128,6 @@ def get_nodes(funcnm, c_obj):
 def read_config():
     """Read config file and gather credentials."""
     cred = {}
-    # global cred
     config_file = (u"{0}config.ini".format(CONFIG_DIR))
     if not os.path.isfile(config_file):
         make_config(config_file)
@@ -174,7 +135,6 @@ def read_config():
     config.read(config_file, encoding='utf-8')
     providers = [e.strip() for e in (config['info']['providers']).split(',')]
     for item in providers:
-        # cred.update(dict(config[item].items()))
         cred.update(dict(list(config[item].items())))
     return (cred, providers)
 
@@ -193,7 +153,6 @@ def make_config(config_file):
 
 def aws_conn(cred):
     """Establish connection to AWS service."""
-    # global aws_obj
     driver = get_driver(Provider.EC2)
     aws_obj = driver(cred['aws_access_key_id'],
                      cred['aws_secret_access_key'],
@@ -204,7 +163,6 @@ def aws_conn(cred):
 def aws_nodes(c_obj):
     """Collect nodes from AWS and retreive details specific to AWS."""
     aws_nodes = []
-    # aws_nodes = aws_obj.list_nodes()
     aws_nodes = c_obj.list_nodes()
     for node in aws_nodes:
         node.cloud = "aws"
@@ -218,7 +176,6 @@ def aws_nodes(c_obj):
 
 def az_conn(cred):
     """Establish connection to Azure service."""
-    # global az_obj
     driver = get_driver(Provider.AZURE_ARM)
     az_obj = driver(tenant_id=cred['az_tenant_id'],
                     subscription_id=cred['az_sub_id'],
@@ -230,7 +187,6 @@ def az_conn(cred):
 def az_nodes(c_obj):
     """Collect nodes from Azure and retreive details specific to Azure."""
     az_nodes = []
-    # az_nodes = az_obj.list_nodes()
     az_nodes = c_obj.list_nodes()
     for node in az_nodes:
         node.cloud = "azure"
@@ -247,7 +203,6 @@ def az_nodes(c_obj):
 
 def gcp_conn(cred):
     """Establish connection to Azure service."""
-    # global gcp_obj
     driver = get_driver(Provider.GCE)
     gcp_pem = CONFIG_DIR + cred['gcp_pem_file']
     gcp_obj = driver(cred['gcp_svc_acct_email'],
@@ -259,7 +214,6 @@ def gcp_conn(cred):
 def gcp_nodes(c_obj):
     """Collect nodes from GCP and retreive details specific to GCP."""
     gcp_nodes = []
-    # gcp_nodes = gcp_obj.list_nodes()
     gcp_nodes = c_obj.list_nodes()
     for node in gcp_nodes:
         node.cloud = "gcp"
