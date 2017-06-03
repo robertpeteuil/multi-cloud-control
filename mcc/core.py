@@ -32,26 +32,33 @@ import os
 import sys
 from multiprocessing import Pool
 # from multiprocessing.dummy import Pool as ThreadPool
-from pprint import pprint
+# from pprint import pprint
 
-__version__ = "0.0.15"
+__version__ = "0.0.16"
 cred = {}
 
 
 def main():
     """Retreive and display instance data then process commands."""
-    providers = read_config()
-
-    nodes = collect_data(providers)
-
-    disp.print_table2(nodes)
+    nodes = initialize()
+    node_dict = conv_data(nodes)
+    disp.indx_table(node_dict)
 
     # pprint(nodes)
-    print("\ndict conversion--\n")
-
-    node_dict = conv_data(nodes)
-    disp.print_indx_table2(node_dict)
     # pprint(node_dict)
+
+
+def list():
+    """Retreive and display instance data then exit."""
+    nodes = initialize()
+    disp.list_table(nodes)
+
+
+def initialize():
+    """Read Config file and retrieve instance data."""
+    providers = read_config()
+    nodes = collect_data(providers)
+    return nodes
 
 
 def conv_data(nodes):
@@ -101,7 +108,8 @@ def read_config():
     config.read(config_file)
     providers = [e.strip() for e in (config['info']['providers']).split(',')]
     for item in providers:
-        cred.update(dict(list(config[item].items())))
+        cred.update(dict(config[item].items()))
+        # cred.update(dict(list(config[item].items())))
     return providers
 
 
