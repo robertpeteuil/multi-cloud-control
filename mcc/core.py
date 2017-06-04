@@ -27,32 +27,34 @@ import configparser
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from mcc.confdir import CONFIG_DIR
-import mcc.dispout as disp
+import mcc.tables as table
+from multiprocessing import Process
 from multiprocessing import Pool
 from multiprocessing import cpu_count
 from multiprocessing.dummy import Pool as ThreadPool
 import os
-from pprint import pprint
+# from pprint import pprint
 import sys
 
 __version__ = "0.0.18"
-# cred = {}
 
 
 def main():
     """Retreive and display instance data then process commands."""
     (nodes, conn_objs) = initialize()
     node_dict = conv_data(nodes)
-    disp.indx_table(node_dict)
+    table.indx_table(node_dict)
+    # idx_tbl = table.indx_table(node_dict)
 
-    pprint(conn_objs)
+    # print(idx_tbl)
+    # pprint(conn_objs)
     # pprint(node_dict)
 
 
 def list_only():
     """Retreive and display instance data then exit."""
     (nodes, conn_objs) = initialize()
-    disp.list_table(nodes)
+    table.list_table(nodes)
 
 
 def initialize():
@@ -83,6 +85,8 @@ def collect_data(cred, providers):
     conn_r = {}
     for i, item in enumerate(providers):
         conn_r[item] = pool.apply_async(get_conn, [cld_svc_map[item][0], cred])
+    p = Process(target=symbolizer, name='delay-indicator')
+    p.start()
     conn_objs = {}
     for k, v in conn_r.items():
         conn_objs[k] = v.get()
@@ -97,6 +101,11 @@ def collect_data(cred, providers):
     node_list = []
     for i in node_r:
         node_list.append(node_r[i].get())
+    p.terminate()
+    sys.stdout.write("\033[A\n")
+    # sys.stdout.write("\x1b[K\n")
+    sys.stdout.write("\033[?25h")
+    sys.stdout.flush()
     return (node_list, conn_objs)
 
 
@@ -109,6 +118,19 @@ def pool_sizer():
         procs = cpu_count()
         thrds = 6
     return (procs, thrds)
+
+
+def symbolizer():
+    """Display animation while loading."""
+    from time import sleep
+    sys.stdout.write("\033[?25l")
+    sys.stdout.flush()
+    for x in range(100):
+        symb = ['\\', '|', '/', '-']
+        sys.stdout.write('\rAuthentication & Node Retrieval: %s'
+                         % (symb[x % 4]))
+        sys.stdout.flush()
+        sleep(0.1)
 
 
 def get_conn(funcnm, cred):
