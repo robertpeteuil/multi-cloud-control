@@ -31,7 +31,7 @@ import os
 # from pprint import pprint
 import sys
 
-__version__ = "0.0.19"
+__version__ = "0.0.20"
 
 
 def main():
@@ -55,7 +55,7 @@ def list_only():
 def initialize():
     """Read Config file and retrieve instance data."""
     (cred, providers) = read_config()
-    (nodes, conn_objs) = conn.collect_data(cred, providers)
+    (nodes, conn_objs) = conn.begin_collect(cred, providers)
     return (nodes, conn_objs)
 
 

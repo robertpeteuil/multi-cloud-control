@@ -30,9 +30,36 @@ from multiprocessing import Process
 from multiprocessing import Pool
 from multiprocessing import cpu_count
 import sys
+import os
+
+
+def begin_collect(cred, providers):
+    """Check the host machine and determine collection function to use."""
+    if os.uname()[4].startswith("arm"):
+        collfunc = collect_data
+    elif cpu_count() == 1:
+        collfunc = collect_data
+    else:
+        collfunc = collect_data_mt
+    (node_list, conn_objs) = collfunc(cred, providers)
+    return (node_list, conn_objs)
 
 
 def collect_data(cred, providers):
+    """Orchestrate collection of node data from all providers with a pool."""
+    cld_svc_map = {"aws": [aws_conn, aws_nodes],
+                   "azure": [az_conn, az_nodes],
+                   "gcp": [gcp_conn, gcp_nodes]}
+    conn_objs = []
+    for item in providers:
+        conn_objs.append(cld_svc_map[item][0](cred))
+    node_list = []
+    for i, object in enumerate(conn_objs):
+        node_list.append(cld_svc_map[providers[i]][1](object))
+    return (node_list, conn_objs)
+
+
+def collect_data_mt(cred, providers):
     """Orchestrate collection of node data from all providers with a pool."""
     cld_svc_map = {"aws": [aws_conn, aws_nodes],
                    "azure": [az_conn, az_nodes],
@@ -76,8 +103,8 @@ def collect_data(cred, providers):
 def pool_sizer():
     """Determine number of processes to create based on CPU."""
     cc = cpu_count()
-    ctp = {16: 12, 8: 6, 4: 3, 2: 2}
-    procs = ctp.get(cc, cc - 2)
+    ctp = {16: 12, 8: 6, 4: 3, 2: 2, 1: 1}
+    procs = ctp.get(cc, cc - 1)
     return procs
 
 
@@ -92,7 +119,6 @@ def busy_disp_off(dobj):
     """Turn OFF busy_display to show working statues."""
     dobj.terminate()
     sys.stdout.write("\033[A\n")
-    # sys.stdout.write("\x1b[K\n")
     sys.stdout.write("\033[?25h")  # turn cusor back on
     sys.stdout.flush()
 
@@ -127,20 +153,6 @@ def results_to_node_list(providers, node_r):
     for item in providers:
         node_list.append(node_dict[item])
     return node_list
-
-
-# def get_conn(funcnm, cred):
-#     """Call function and make connection."""
-#     conn_obj = []
-#     conn_obj = funcnm(cred)
-#     return conn_obj
-
-
-# def get_nodes(funcnm, c_obj):
-#     """Call function and retreive info."""
-#     rinfo = []
-#     rinfo = funcnm(c_obj)
-#     return rinfo
 
 
 def aws_conn(cred):
