@@ -23,7 +23,7 @@ Author:    Robert Peteuil
 
 """
 from __future__ import absolute_import, print_function
-from mcc.colors import C_NORM, C_TI, C_STAT
+from mcc.colors import C_NORM, C_TI, C_STAT, C_WARN
 from prettytable import PrettyTable
 
 
@@ -59,10 +59,13 @@ def indx_table(node_dict):
     nt.border = False
     for i, node in node_dict.items():
         state = C_STAT[node.state] + node.state + C_NORM
+        inum = C_WARN + str(i) + C_NORM
         if node.public_ips:
             n_ip = node.public_ips
         else:
             n_ip = "-"
-        nt.add_row([i, node.name, node.zone, node.cloud, node.size,
+        nt.add_row([inum, node.name, node.zone, node.cloud, node.size,
                     n_ip, state])
     print(nt)
+    # idx_tbl = print(nt.get_string())
+    # return idx_tbl
