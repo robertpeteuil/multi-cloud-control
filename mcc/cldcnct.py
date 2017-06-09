@@ -23,46 +23,18 @@ Author:    Robert Peteuil
 
 """
 from __future__ import absolute_import, print_function
-from libcloud.compute.types import Provider
-from libcloud.compute.providers import get_driver
-from mcc.confdir import CONFIG_DIR
-from multiprocessing import cpu_count
-import sys
-import os
 import gevent
 from gevent.pool import Pool
 from gevent import monkey
+from libcloud.compute.types import Provider
+from libcloud.compute.providers import get_driver
+from mcc.confdir import CONFIG_DIR
+import sys
 monkey.patch_all()
 
 
-def begin_collect(cred, providers):
-    """Check the host machine and determine collection function to use."""
-    if os.uname()[4].startswith("arm"):
-        collfunc = collect_data
-    elif cpu_count() == 1:
-        collfunc = collect_data
-    else:
-        collfunc = collect_data_mt
-    node_list = collfunc(cred, providers)
-    conn_objs = {}
-    return (node_list, conn_objs)
-
-
 def collect_data(cred, providers):
-    """Orchestrate collection of node data from all providers with a pool."""
-    cld_svc_map = {"aws": get_aws,
-                   "azure": get_az,
-                   "gcp": get_gcp}
-    collec_fn = []
-    for item in providers:
-        collec_fn.append([cld_svc_map[item], cred])
-    node_list = []
-    node_list = map(get_conn_new, collec_fn)
-    return node_list
-
-
-def collect_data_mt(cred, providers):
-    """Orchestrate collection of node data with gevent lib."""
+    """Collect node data asyncronously using gevent lib."""
     cld_svc_map = {"aws": get_aws,
                    "azure": get_az,
                    "gcp": get_gcp}
@@ -133,11 +105,11 @@ def get_aws(cred):
                      region=cred['aws_default_region'])
     aws_nodes = []
     aws_nodes = aws_obj.list_nodes()
-    aws_nodes = clean_aws(aws_nodes)
+    aws_nodes = adj_nodes_aws(aws_nodes)
     return aws_nodes
 
 
-def clean_aws(aws_nodes):
+def adj_nodes_aws(aws_nodes):
     """Retreive details specific to AWS."""
     for node in aws_nodes:
         node.cloud = "aws"
@@ -158,11 +130,11 @@ def get_az(cred):
                     secret=cred['az_app_sec'])
     az_nodes = []
     az_nodes = az_obj.list_nodes()
-    az_nodes = clean_az(az_nodes)
+    az_nodes = adj_nodes_az(az_nodes)
     return az_nodes
 
 
-def clean_az(az_nodes):
+def adj_nodes_az(az_nodes):
     """Retreive details specific to Azure."""
     for node in az_nodes:
         node.cloud = "azure"
@@ -186,11 +158,11 @@ def get_gcp(cred):
                      project=cred['gcp_proj_id'])
     gcp_nodes = []
     gcp_nodes = gcp_obj.list_nodes(ex_use_disk_cache=True)
-    gcp_nodes = clean_gcp(gcp_nodes)
+    gcp_nodes = adj_nodes_gcp(gcp_nodes)
     return gcp_nodes
 
 
-def clean_gcp(gcp_nodes):
+def adj_nodes_gcp(gcp_nodes):
     """Retreive details specific to GCP."""
     for node in gcp_nodes:
         node.cloud = "gcp"
