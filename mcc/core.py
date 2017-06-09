@@ -26,14 +26,13 @@ from __future__ import absolute_import, print_function
 import configparser
 from mcc.confdir import CONFIG_DIR
 import mcc.tables as table
-# import mcc.conncloud as conn
-import mcc.conncloud2 as conn
+import mcc.cldcnct as conn
 import mcc.uimode as ui
 import os
 # from pprint import pprint
 import sys
 
-__version__ = "0.0.22"
+__version__ = "0.0.23"
 
 
 def main():
