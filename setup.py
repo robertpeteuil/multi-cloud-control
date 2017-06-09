@@ -21,7 +21,7 @@ setup(
     package_data={'mcc': ['config.ini']},
     entry_points={'console_scripts': ['mccx=mcc.core:main',
                                       'mcc=mcc.core:list_only']},
-    version='0.0.20',
+    version='0.0.22',
     author="Robert Peteuil",
     author_email="robert.s.peteuil@gmail.com",
     url='https://github.com/robertpeteuil/multi-cloud-control',
@@ -34,6 +34,8 @@ setup(
                       'pycrypto>=2.6.1',
                       'PrettyTable>=0.7.2',
                       'configparser>=3.5.0',
+                      'blessed>=1.14.2',
+                      'gevent',
                       'colorama'],
     classifiers=[
         'Development Status :: 3 - Alpha',
