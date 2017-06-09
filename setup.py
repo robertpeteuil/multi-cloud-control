@@ -21,7 +21,7 @@ setup(
     package_data={'mcc': ['config.ini']},
     entry_points={'console_scripts': ['mccx=mcc.core:main',
                                       'mcc=mcc.core:list_only']},
-    version='0.0.23',
+    version='0.0.24',
     author="Robert Peteuil",
     author_email="robert.s.peteuil@gmail.com",
     url='https://github.com/robertpeteuil/multi-cloud-control',
