@@ -119,6 +119,7 @@ def busy_disp_off(dobj):
     """Turn OFF busy_display to show working statues."""
     dobj.terminate()
     sys.stdout.write("\033[A\n")
+    sys.stdout.write("                                                 \r")
     sys.stdout.write("\033[?25h")  # turn cusor back on
     sys.stdout.flush()
 
@@ -218,7 +219,7 @@ def gcp_conn(cred):
 def gcp_nodes(c_obj):
     """Collect nodes from GCP and retreive details specific to GCP."""
     gcp_nodes = []
-    gcp_nodes = c_obj.list_nodes()
+    gcp_nodes = c_obj.list_nodes(ex_use_disk_cache=True)
     for node in gcp_nodes:
         node.cloud = "gcp"
         node.private_ips = ip_to_str(node.private_ips)
