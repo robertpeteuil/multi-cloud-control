@@ -23,9 +23,9 @@ Author:    Robert Peteuil
 
 """
 from __future__ import absolute_import, print_function
-import gevent
-from gevent.pool import Pool
+from gevent.pool import Group
 from gevent import monkey
+import gevent
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from mcc.confdir import CONFIG_DIR
@@ -45,16 +45,16 @@ def collect_data(cred, providers):
         collec_fn.append([cld_svc_map[item], cred])
     # fetch nodes
     node_list = []
-    pool = Pool()
-    node_list = pool.map(get_conn_new, collec_fn)
-    pool.join()
+    group = Group()
+    node_list = group.map(get_conn_new, collec_fn)
+    group.join()
     # turn off display-indicator that indicated working
     busy_disp_off(dobj=busy_obj)
     return node_list
 
 
 def get_conn_new(flist):
-    """Call function and make connection."""
+    """Call function for each provider."""
     cnodes = []
     cnodes = flist[0](flist[1])
     return cnodes
@@ -77,7 +77,6 @@ def busy_disp_off(dobj):
 
 def busy_display():
     """Display animation while loading."""
-    from time import sleep
     sys.stdout.write("\033[?25l")  # turn cursor off
     sys.stdout.flush()
     for x in range(200):
@@ -85,7 +84,7 @@ def busy_display():
         sys.stdout.write('\rAuthentication & Node Retrieval: %s'
                          % (symb[x % 4]))
         sys.stdout.flush()
-        sleep(0.12)
+        gevent.sleep(0.1)
 
 
 def ip_to_str(raw_ip):
