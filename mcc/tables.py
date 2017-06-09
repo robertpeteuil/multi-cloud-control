@@ -48,7 +48,7 @@ def list_table(all_nodes):
     print(nt)
 
 
-def indx_table(node_dict):
+def indx_table(node_dict, strmode=False):
     """Print Table for NEW dict=formatted list."""
     h_nm = C_TI + "NUM"
     h_state = "STATE" + C_NORM
@@ -66,6 +66,8 @@ def indx_table(node_dict):
             n_ip = "-"
         nt.add_row([inum, node.name, node.zone, node.cloud, node.size,
                     n_ip, state])
-    print(nt)
-    # idx_tbl = print(nt.get_string())
-    # return idx_tbl
+    if not strmode:
+        print(nt)
+    else:
+        idx_tbl = nt.get_string()
+        return idx_tbl
