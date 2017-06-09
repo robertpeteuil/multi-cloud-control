@@ -26,20 +26,23 @@ from __future__ import absolute_import, print_function
 import configparser
 from mcc.confdir import CONFIG_DIR
 import mcc.tables as table
-import mcc.conncloud as conn
+# import mcc.conncloud as conn
+import mcc.conncloud2 as conn
+import mcc.uimode as ui
 import os
 # from pprint import pprint
 import sys
 
-__version__ = "0.0.20"
+__version__ = "0.0.22"
 
 
 def main():
     """Retreive and display instance data then process commands."""
     (nodes, conn_objs) = initialize()
     node_dict = make_node_dict(nodes)
-    table.indx_table(node_dict)
-    # idx_tbl = table.indx_table(node_dict)
+    # table.indx_table(node_dict)
+    idx_tbl = table.indx_table(node_dict, True)
+    ui.create_ui(idx_tbl)
 
     # print(idx_tbl)
     # pprint(conn_objs)
