@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function
 from blessed import Terminal
 import sys
 from time import sleep
-
+from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN
 
 term = Terminal()
 
@@ -44,75 +44,115 @@ def main(fmt_table, inst_max):
             run_selected_cmd(ui_inst)
 
 
-def create_ui(fmt_table):
+def create_ui(fmt_table, inst_max):
     """Create the base UI in command mode."""
-    inst_max = 5  # max # of instances - need to pass here from main
     # print(term.enter_fullscreen())
     # print(term.move(5, 0))
-    sys.stdout.write("\033[?25l")  # turn cursor off
+    # sys.stdout.write("\033[?25l")  # turn cursor off
+    print("\033[?25l", end="")  # turn cursor off
     print(fmt_table)
-    cmd_bar = "ENTER COMMAND -  (R)un   (S)top   (Q)uit:  "
-    # sys.stdout.wrt("\n\n{0:<{width}}".format(cmd_bar, width=term.width - 2))
-    # width = term.width - 2
-    # sys.stdout.write("\n\n{0:<{1}}".format(cmd_bar, width))
-    sys.stdout.write("\n\n{0}".format(cmd_bar))
-    sys.stdout.flush()
-    # print(term.move(term.height - 4, 0) + cmd_bar)
+    print("\n\n")
+    cmd_processor(fmt_table, inst_max)
+    return
 
+
+def uiprint(toprint):
+    """Print provided text without charrage return."""
+    sys.stdout.write(toprint)
+    sys.stdout.flush()
+
+
+def cmd_processor(fmt_table, inst_max):
+    """Display Command Bar and run get-command fucntion."""
+    while inst_max:
+        erase_ln()
+        cmd_bar = ("\r{0}ENTER COMMAND{1}\t{2}(R){1}un\t{3}"
+                   "(S){1}top\t{4}(Q){1}uit:  ".
+                   format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
+        # print("{}".format(cmd_bar), end='')
+        uiprint(cmd_bar)
+        # sys.stdout.flush()
+        cmd_entry(inst_max)
+        # sys.stdout.write("\n\n{0}".format(cmd_bar))
+    return
+
+
+def cmd_entry(inst_max):
+    """Get main command selection."""
     with term.cbreak():
         val = ''
         while val.lower() != 'q':
-            val = term.inkey(timeout=90)
-            if not val:
-                # timeout
-                print("\nIt sure is quiet in here ...")
-            elif val.lower() == 'r':
-                cmd_run(inst_max)
-                erase_ln()
+            val = term.inkey()
+            # val = term.inkey(timeout=300)
+            # if not val:
+            #     # timeout
+            #     print("\nIt sure is quiet in here ...")
+            if val.lower() == 'r':
+                cmd_target("Run", inst_max)
+                return
             elif val.is_sequence:
-                print("\nseq: {0}.".format((str(val), val.name, val.code)))
+                uiprint("seq: {0}.".format((str(val), val.name, val.code)))
             elif val:
-                print("\ngot {0}.".format(val))
+                uiprint("got {0}.".format(val))
+    # erase_ln()
     print('exiting')
-    sys.stdout.write("\033[?25h")  # turn cusor back on
-    sys.stdout.flush()
-    # print(term.exit_fullscreen())
+    uiprint("\033[?25h")  # turn cusor back on
+    # sys.stdout.write("\033[?25h")  # turn cusor back on
+    # sys.stdout.flush()
+    sys.exit()
 
 
 def erase_ln():
-    sys.stdout.write("\033[A")
+    """Erase line above and position cursor on that line."""
+    uiprint("\033[A")
+    # sys.stdout.write("\033[A")
     blank_ln = " " * term.width
-    sys.stdout.write(blank_ln)
-    sys.stdout.write("\033[A")
-    sys.stdout.flush()
+    uiprint(blank_ln)
+    # sys.stdout.write(blank_ln)
+    # sys.stdout.write("\033[A")
+    # sys.stdout.flush()
+    return
 
 
-def cmd_run(inst_max):
-    """Execute Run Instance Command."""
-    sys.stdout.write("\n'Run Instance' - Select Instance (0 Aborts):  ")
-    sys.stdout.flush()
+def disp_cmd_title(cmd_title):
+    """Display Title and function statement for current command."""
+    uiprint(cmd_title)
+
+
+def cmd_target(cmdname, inst_max):
+    """Determine Instance and execute command."""
+    erase_ln()
+    cmd_title = ("\r'{1}{0}{2} Instance' - Select {3}Instance #{2} (0"
+                 " Aborts):  ".format(cmdname, C_TI, C_NORM, C_WARN))
+    disp_cmd_title(cmd_title)
+    # sys.stdout.flush()
     with term.cbreak():
         inst_raw = ''
         inst_num = 999
         while inst_num != 0:
-            inst_raw = term.inkey(timeout=90)
+            inst_raw = term.inkey()
+            # inst_raw = term.inkey(timeout=90)
             try:
                 inst_num = int(inst_raw)
             except:
-                inst_num = 0
-            if not inst_num:
-                # timeout
-                print("\nIt sure is quiet in here ...")
-            elif inst_num < inst_max:
-                print("\nRunnning Instance {}".format(inst_num))
-                sleep(1)
+                inst_num = 999
+            # if not inst_num:
+            #     # timeout
+            #     print("\nIt sure is quiet in here ...")
+            if inst_num < inst_max:
+                erase_ln()
+                uiprint("\rRunnning Instance {}".format(inst_num))
+                sleep(3)
                 erase_ln()
                 return
             else:
-                print("\nInvalid Entry")
+                uiprint("Invalid Entry")
                 sleep(0.5)
+                # no to go up, erase to right edge
+                #  instead of calling erase_ln
                 erase_ln()
-        print("Aborting")
+                disp_cmd_title(cmd_title)
+        uiprint("Aborting")
         sleep(1)
         erase_ln()
         return
