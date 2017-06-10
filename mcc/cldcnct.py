@@ -102,8 +102,10 @@ def get_aws(cred):
     aws_obj = driver(cred['aws_access_key_id'],
                      cred['aws_secret_access_key'],
                      region=cred['aws_default_region'])
+    gevent.sleep(0)
     aws_nodes = []
     aws_nodes = aws_obj.list_nodes()
+    # gevent.sleep(0)
     aws_nodes = adj_nodes_aws(aws_nodes)
     return aws_nodes
 
@@ -127,8 +129,10 @@ def get_az(cred):
                     subscription_id=cred['az_sub_id'],
                     key=cred['az_app_id'],
                     secret=cred['az_app_sec'])
+    gevent.sleep(0)
     az_nodes = []
     az_nodes = az_obj.list_nodes()
+    # gevent.sleep(0)
     az_nodes = adj_nodes_az(az_nodes)
     return az_nodes
 
@@ -155,8 +159,10 @@ def get_gcp(cred):
     gcp_obj = driver(cred['gcp_svc_acct_email'],
                      gcp_pem,
                      project=cred['gcp_proj_id'])
+    gevent.sleep(0)
     gcp_nodes = []
     gcp_nodes = gcp_obj.list_nodes(ex_use_disk_cache=True)
+    # gevent.sleep(0)
     gcp_nodes = adj_nodes_gcp(gcp_nodes)
     return gcp_nodes
 
