@@ -24,15 +24,16 @@ Author:    Robert Peteuil
 """
 from __future__ import absolute_import, print_function
 import configparser
+from collections import OrderedDict
 from mcc.confdir import CONFIG_DIR
 import mcc.tables as table
-import mcc.cldcnct as cldcn
+import mcc.cldcnct as cld
 import mcc.uimode as ui
 import os
 # from pprint import pprint
 import sys
 
-__version__ = "0.0.24"
+__version__ = "0.0.25"
 
 
 def main():
@@ -41,7 +42,7 @@ def main():
     node_dict = make_node_dict(nodes)
     # table.indx_table(node_dict)
     idx_tbl = table.indx_table(node_dict, True)
-    ui.create_ui(idx_tbl)
+    ui.create_ui(idx_tbl, len(idx_tbl))
 
     # print(idx_tbl)
     # pprint(node_dict)
@@ -55,44 +56,87 @@ def list_only():
 
 def initialize():
     """Read Config file and retrieve instance data."""
-    (cred, providers) = read_config()
-    nodes = cldcn.collect_data(cred, providers)
+    (cred, providers) = config_read()
+    nodes = cld.collect_data(cred, providers)
     return nodes
 
 
-def make_node_dict(nodes):
+def make_node_dict(full_list):
     """Convert node data from nested-list to dict."""
     node_dict = {}
     x = 1
-    for item in nodes:
+    for item in full_list:
         for node in item:
             node_dict[x] = node
             x += 1
     return node_dict
 
 
-def read_config():
-    """Read config file and gather credentials."""
-    cred = {}
+def config_read():
+    """Read config info from config file."""
     config_file = (u"{0}config.ini".format(CONFIG_DIR))
     if not os.path.isfile(config_file):
-        make_config(config_file)
+        config_make(config_file)
     config = configparser.ConfigParser(allow_no_value=True)
-    config.read(config_file, encoding='utf-8')
-    providers = [e.strip() for e in (config['info']['providers']).split(',')]
-    for item in providers:
-        cred.update(dict(list(config[item].items())))
+    try:
+        config.read(config_file, encoding='utf-8')
+    except IOError:
+        print("Error reading config file: {}".format(config_file))
+        sys.exit()
+    # Read and de-duplicate provider-list
+    providers = config_prov(config)
+    # Read credentials for each provider specified
+    (cred, to_remove) = config_cred(config, providers)
+    # remove unsupported and credentialess providers
+    for item in to_remove:
+        providers.remove(item)
     return (cred, providers)
 
 
-def make_config(config_file):
+def config_prov(config):
+    """Read providers from configfile and de-duplicate it."""
+    try:
+        providers = [e.strip() for e in (config['info']
+                                         ['providers']).split(',')]
+    except KeyError as e:
+        print("Error reading config item: {}".format(e))
+        sys.exit()
+    providers = list(OrderedDict.fromkeys(providers))
+    return providers
+
+
+def config_cred(config, providers):
+    """Read credentials from configfile."""
+    expected = ['aws', 'azure', 'gcp']
+    cred = {}
+    to_remove = []
+    for item in providers:
+        if item in expected:
+            try:
+                cred.update(dict(list(config[item].items())))
+            except KeyError as e:
+                print("No credentials section in config file for {} -"
+                      " provider will be skipped.".format(e))
+                to_remove.append(item)
+        else:
+            print("Unsupported provider: '{}' listed in config - ignoring"
+                  .format(item))
+            to_remove.append(item)
+    return (cred, to_remove)
+
+
+def config_make(config_file):
     """Create config.ini on first use, make dir and copy sample."""
     from pkg_resources import resource_filename
     import shutil
     if not os.path.exists(CONFIG_DIR):
         os.makedirs(CONFIG_DIR)
     filename = resource_filename("mcc", "config.ini")
-    shutil.copyfile(filename, config_file)
+    try:
+        shutil.copyfile(filename, config_file)
+    except IOError:
+        print("Error copying sample config file: {}".format(config_file))
+        sys.exit()
     print("Please add credential information to {}".format(config_file))
     sys.exit()
 
