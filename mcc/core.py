@@ -33,7 +33,7 @@ import os
 # from pprint import pprint
 import sys
 
-__version__ = "0.0.25"
+__version__ = "0.0.26"
 
 
 def main():
@@ -42,7 +42,8 @@ def main():
     node_dict = make_node_dict(nodes)
     # table.indx_table(node_dict)
     idx_tbl = table.indx_table(node_dict, True)
-    ui.create_ui(idx_tbl, len(idx_tbl))
+    # ui.create_ui(idx_tbl, len(idx_tbl))
+    ui.create_ui(idx_tbl, node_dict)
 
     # print(idx_tbl)
     # pprint(node_dict)

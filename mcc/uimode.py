@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function
 from blessed import Terminal
 import sys
 from time import sleep
-from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN
+from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN, C_STAT
 
 term = Terminal()
 
@@ -44,15 +44,14 @@ def main(fmt_table, inst_max):
             run_selected_cmd(ui_inst)
 
 
-def create_ui(fmt_table, inst_max):
+def create_ui(fmt_table, node_dict):
     """Create the base UI in command mode."""
     # print(term.enter_fullscreen())
     # print(term.move(5, 0))
     # sys.stdout.write("\033[?25l")  # turn cursor off
-    print("\033[?25l", end="")  # turn cursor off
-    print(fmt_table)
-    print("\n\n")
-    cmd_processor(fmt_table, inst_max)
+    uiprint("\033[?25l")  # turn cursor off
+    print("{}\n".format(fmt_table))
+    cmd_processor(node_dict)
     return
 
 
@@ -62,70 +61,72 @@ def uiprint(toprint):
     sys.stdout.flush()
 
 
-def cmd_processor(fmt_table, inst_max):
+def cmd_processor(node_dict):
     """Display Command Bar and run get-command fucntion."""
-    while inst_max:
-        erase_ln()
-        cmd_bar = ("\r{0}ENTER COMMAND{1}\t{2}(R){1}un\t{3}"
-                   "(S){1}top\t{4}(Q){1}uit:  ".
+    while node_dict:
+        cmd_bar = ("\rENTER COMMAND -   {2}(R){1}un Node   {3}"
+                   "(S){1}top Node   {4}(Q){1}uit:  ".
                    format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
-        # print("{}".format(cmd_bar), end='')
         uiprint(cmd_bar)
-        # sys.stdout.flush()
-        cmd_entry(inst_max)
-        # sys.stdout.write("\n\n{0}".format(cmd_bar))
+        cmd_entry(node_dict)
+        erase_ln()
     return
 
 
-def cmd_entry(inst_max):
+def cmd_entry(node_dict):
     """Get main command selection."""
     with term.cbreak():
         val = ''
         while val.lower() != 'q':
             val = term.inkey()
             # val = term.inkey(timeout=300)
-            # if not val:
-            #     # timeout
-            #     print("\nIt sure is quiet in here ...")
             if val.lower() == 'r':
-                cmd_target("Run", inst_max)
+                uiprint("Run")
+                sleep(0.75)
+                cmd_target("run", node_dict)
+                return
+            if val.lower() == 's':
+                uiprint("Stop")
+                sleep(0.75)
+                cmd_target("stop", node_dict)
                 return
             elif val.is_sequence:
                 uiprint("seq: {0}.".format((str(val), val.name, val.code)))
-            elif val:
-                uiprint("got {0}.".format(val))
-    # erase_ln()
-    print('exiting')
+            # elif val:
+            #     uiprint("got {0}.".format(val))
+    uiprint("Quitting")
     uiprint("\033[?25h")  # turn cusor back on
-    # sys.stdout.write("\033[?25h")  # turn cusor back on
-    # sys.stdout.flush()
     sys.exit()
 
 
 def erase_ln():
     """Erase line above and position cursor on that line."""
-    uiprint("\033[A")
-    # sys.stdout.write("\033[A")
     blank_ln = " " * term.width
-    uiprint(blank_ln)
-    # sys.stdout.write(blank_ln)
-    # sys.stdout.write("\033[A")
-    # sys.stdout.flush()
+    # ORIGINAL WORKING METHOD
+    # uiprint("\033[A")
+    # uiprint(blank_ln)
+
+    # NEW METHOD - don't need to go up
+    uiprint("\r{}".format(blank_ln))
     return
 
 
 def disp_cmd_title(cmd_title):
     """Display Title and function statement for current command."""
+    erase_ln()
     uiprint(cmd_title)
 
 
-def cmd_target(cmdname, inst_max):
-    """Determine Instance and execute command."""
-    erase_ln()
-    cmd_title = ("\r'{1}{0}{2} Instance' - Select {3}Instance #{2} (0"
-                 " Aborts):  ".format(cmdname, C_TI, C_NORM, C_WARN))
+def cmd_target(cmdname, node_dict):
+    """Determine Node and execute command."""
+    cmd_display_lu = {"run": "RUNNING", "stop": "STOPPING"}
+    cmdaction = cmd_display_lu.get(cmdname, "unknown")
+    cmddisp = cmdname.upper()
+    inst_max = len(node_dict)
+    cmd_title = ("\r{1}{0} NODE{2} - Select {3}NODE #{2}"
+                 " ({4}0 = Exit{2}):  ".
+                 format(cmddisp, C_TI, C_NORM, C_WARN, MAGENTA))
     disp_cmd_title(cmd_title)
-    # sys.stdout.flush()
     with term.cbreak():
         inst_raw = ''
         inst_num = 999
@@ -136,23 +137,22 @@ def cmd_target(cmdname, inst_max):
                 inst_num = int(inst_raw)
             except:
                 inst_num = 999
-            # if not inst_num:
-            #     # timeout
-            #     print("\nIt sure is quiet in here ...")
+            if inst_num == 0:
+                uiprint("Exiting {0}{2}{1} COMMAND".
+                        format(C_WARN, C_NORM, cmddisp))
+                sleep(1)
+                return
             if inst_num < inst_max:
                 erase_ln()
-                uiprint("\rRunnning Instance {}".format(inst_num))
+                uiprint("\r{2}{0} NODE{3}: {4}{1}{3}".
+                        format(cmdaction, inst_num,
+                               C_STAT[cmdaction.lower()], C_NORM, C_WARN))
                 sleep(3)
-                erase_ln()
                 return
             else:
-                uiprint("Invalid Entry")
-                sleep(0.5)
-                # no to go up, erase to right edge
-                #  instead of calling erase_ln
-                erase_ln()
+                uiprint("{0}Invalid Entry{1}".format(C_ERR, C_NORM))
+                sleep(1)
                 disp_cmd_title(cmd_title)
-        uiprint("Aborting")
-        sleep(1)
-        erase_ln()
-        return
+                # Alternate method:
+                #   go up & only erase-line to right edge
+                #   instead of calling erase_ln & re-printing title
