@@ -22,7 +22,27 @@ This utility can be installed with **pip**:
 
 .. code:: shell
 
-  pip install mcc
+  sudo -H pip install mcc
+
+Possible Pre-Reqs
+-----------------
+
+This utility uses the Python pycrypto library, which may require compilation to install on your system.  If a normal install fails, install the build dependancies with these commands:
+
+RedHat / CentOS Based Systems
+
+.. code:: shell
+
+  sudo yum groupinstall "Development tools"
+  sudo yum install python-devel
+
+Debian Based Systems:
+
+.. code:: shell
+
+  sudo apt-get install build-essential
+  sudo apt-get install python-dev  # for python2.x installs
+  sudo apt-get install python3-dev  # for python3.x installs
 
 Configuration
 -------------
