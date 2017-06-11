@@ -30,10 +30,9 @@ import mcc.tables as table
 import mcc.cldcnct as cld
 import mcc.uimode as ui
 import os
-# from pprint import pprint
 import sys
 
-__version__ = "0.0.27"
+__version__ = "0.0.28"
 
 
 def main():
@@ -43,11 +42,9 @@ def main():
     while cmd_mode:
         nodes = cld.collect_data(cred, providers)
         node_dict = make_node_dict(nodes)
-        # table.indx_table(node_dict)
         idx_tbl = table.indx_table(node_dict, True)
-        # pprint(node_dict)
-        # print(idx_tbl)
         cmd_mode = ui.ui_main(idx_tbl, node_dict)
+    print("\033[?25h")
 
 
 def list_only():
@@ -55,13 +52,6 @@ def list_only():
     (cred, providers) = config_read()
     nodes = cld.collect_data(cred, providers)
     table.list_table(nodes)
-
-
-# def initialize():
-#     """Read Config file and retrieve instance data."""
-#     (cred, providers) = config_read()
-#     nodes = cld.collect_data(cred, providers)
-#     return nodes
 
 
 def make_node_dict(full_list):
