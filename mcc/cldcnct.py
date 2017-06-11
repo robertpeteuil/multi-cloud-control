@@ -39,6 +39,8 @@ def collect_data(cred, providers):
                    "azure": get_az,
                    "gcp": get_gcp}
     # turn on display-indicator to indicated working
+    sys.stdout.write("\rAuthentication & Node Retrieval   ")
+    sys.stdout.flush()
     busy_obj = busy_disp_on()
     collec_fn = []
     for item in providers:
@@ -50,6 +52,9 @@ def collect_data(cred, providers):
     group.join()
     # turn off display-indicator that indicated working
     busy_disp_off(dobj=busy_obj)
+    sys.stdout.write("\r                                                 \r")
+    sys.stdout.write("\033[?25h")  # turn cusor back on
+    sys.stdout.flush()
     return node_list
 
 
@@ -69,20 +74,20 @@ def busy_disp_on():
 def busy_disp_off(dobj):
     """Turn OFF busy_display to show working statues."""
     dobj.kill(block=False)
-    sys.stdout.write("\033[A\n")
-    sys.stdout.write("                                                 \r")
-    sys.stdout.write("\033[?25h")  # turn cusor back on
+    sys.stdout.write("\033[D \033[D")
+    # sys.stdout.write("\033[A\n")
+    # sys.stdout.write("\r                                                 \r")
+    # sys.stdout.write("\033[?25h")  # turn cusor back on
     sys.stdout.flush()
 
 
 def busy_display():
-    """Display animation while loading."""
+    """Display animation to show activity."""
     sys.stdout.write("\033[?25l")  # turn cursor off
     sys.stdout.flush()
-    for x in range(200):
+    for x in range(600):
         symb = ['\\', '|', '/', '-']
-        sys.stdout.write('\rAuthentication & Node Retrieval: %s'
-                         % (symb[x % 4]))
+        sys.stdout.write("\033[D{}".format(symb[x % 4]))
         sys.stdout.flush()
         gevent.sleep(0.1)
 
