@@ -25,6 +25,7 @@ Author:    Robert Peteuil
 from __future__ import absolute_import, print_function
 from blessed import Terminal
 import sys
+from mcc.cldcnct import busy_disp_on, busy_disp_off
 # import os
 from time import sleep
 from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN, C_STAT
@@ -32,31 +33,36 @@ from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN, C_STAT
 term = Terminal()
 
 
-def create_ui(fmt_table, node_dict):
+def ui_main(fmt_table, node_dict):
     """Create the base UI in command mode."""
     uiprint("\033[?25l")  # turn cursor off
     print("{}\n".format(fmt_table))
+    sys.stdout.flush()
     tar_valid = False
     cmd_todo = get_cmd(node_dict)
     while cmd_todo != "quit":
-        uiprint(cmd_todo.title())
-        sleep(0.5)
+        # uiprint(cmd_todo.title())
+        # sleep(0.5)
         inst_num = tar_selection(cmd_todo, len(node_dict))
         if inst_num != 0:
-            (tar_valid, val_mess) = tar_validate(node_dict, inst_num, cmd_todo)
+            (tar_valid, tar_mess) = tar_validate(node_dict, inst_num, cmd_todo)
             if tar_valid:
-                uiprint(val_mess)
+                cmd_result = cmd_exec(node_dict[inst_num], cmd_todo, tar_mess)
+                uiprint(cmd_result)
                 sleep(2)
+                # since a node has changed, need to :
+                #   delete - current line, each-line up to #-nodes+2
+                #   'return True' to "reloop" in core:main, which will:
+                #      re-collect nodes, make dict, make table, re-call ui_main
             else:
-                uiprint(val_mess)
+                uiprint(tar_mess)
                 sleep(2)
         else:
             uiprint(" - Exit Command")
             sleep(0.5)
         cmd_todo = get_cmd(node_dict)
-    uiprint("Quitting")
     uiprint("\033[?25h")  # turn cursor on
-    sys.exit()
+    return False
 
 
 def get_cmd(node_dict):
@@ -68,10 +74,11 @@ def get_cmd(node_dict):
     while not cmd_valid:
         with term.cbreak():
             flush_input()
-            val = term.inkey()
+            # val = term.inkey()
+            val = input_by_key()
         cmd_todo, cmd_valid = key_cmd_lu.get(val.lower(), ["invalid", False])
         if not cmd_valid:
-            uiprint("{0}Invalid Entry{1}".format(C_ERR, C_NORM))
+            uiprint(" - {0}Invalid Entry{1}".format(C_ERR, C_NORM))
             sleep(0.5)
             disp_cmd_bar()
     return cmd_todo
@@ -80,7 +87,7 @@ def get_cmd(node_dict):
 def tar_selection(cmdname, inst_max):
     """Determine Node via alternate input method."""
     cmddisp = cmdname.upper()
-    cmd_title = ("\r{1}{0} NODE{2} - Enter {3}NODE #{2} and 'enter'"
+    cmd_title = ("\r{1}{0} NODE{2} - Enter {3}Node #{2}"
                  " ({4}0 = Exit Command{2}):  ".
                  format(cmddisp, C_TI, C_NORM, C_WARN, MAGENTA))
     disp_cmd_title(cmd_title)
@@ -88,6 +95,10 @@ def tar_selection(cmdname, inst_max):
     with term.cbreak():
         while not inst_valid:
             inst_num = input_by_key()
+            try:
+                inst_num = int(inst_num)
+            except ValueError:
+                inst_num = 99999
             if inst_num <= inst_max:
                 inst_valid = True
             else:
@@ -103,15 +114,59 @@ def tar_validate(node_dict, inst_num, cmdname):
               "stop": ["running", "stopping", "stopped"]}
     if req_lu[cmdname][0] == node_dict[inst_num].state:
         tar_valid = True
-        val_mess = (" - {0}{2}{1} Node".
+        tar_mess = ("{0}{2}{1} Node {3}{4}{1}".
                     format(C_STAT[req_lu[cmdname][1]], C_NORM,
-                           req_lu[cmdname][1].title()))
+                           req_lu[cmdname][1].title(), C_WARN, inst_num))
     else:
         tar_valid = False
-        val_mess = (" - {0}Aborting {1}{2} - Node Already {3}".
+        tar_mess = (" - {0}Aborting {1}{2} - Node Already {3}".
                     format(C_ERR, cmdname.title(), C_NORM,
                            req_lu[cmdname][2].title()))
-    return (tar_valid, val_mess)
+    return (tar_valid, tar_mess)
+
+
+def cmd_exec(tar_node, cmdname, tar_mess):
+    """Confirm command and execute it."""
+    cmd_lu = {"run": ["ex_start_node", "wait_until_running", "Successfull"],
+              "stop": ["ex_stop_node", "", "Initiated"]}
+    conf_mess = ("\r{0} - Continue? [y/N] ".
+                 format(tar_mess))
+    if input_yn(conf_mess):
+        exec_mess = "\rEXECUTING COMMAND - {0}   ".format(tar_mess)
+        disp_erase_ln()
+        uiprint(exec_mess)
+        # turn on busy indicator
+        busy_obj = busy_disp_on()
+        cmd_one = cmd_lu[cmdname][0]
+        cmd_two = cmd_lu[cmdname][1]
+        cmdpre = getattr(tar_node, "driver")
+        maincmd = getattr(cmdpre, cmd_one)
+        response = maincmd(tar_node)  # noqa
+        if cmd_two:
+            cmdpre = getattr(tar_node, "driver")
+            seccmd = getattr(cmdpre, cmd_two)
+            response = seccmd([tar_node])  # noqa
+            #   returns on success - [(Node, ip_addresses)]
+        cmd_result = "- {0} {1}".format(cmdname.title(),
+                                        cmd_lu[cmdname][2])
+        # turn off busy indicator
+        busy_disp_off(busy_obj)
+    else:
+        cmd_result = "- Command Aborted"
+    return cmd_result
+
+
+def input_yn(conf_mess):
+    """Print Confirmation Message and Get Y/N response from user."""
+    disp_erase_ln()
+    uiprint(conf_mess)
+    with term.cbreak():
+        flush_input()
+        # val = term.inkey()
+        val = input_by_key()
+        # uiprint(val)
+        sleep(0.5)
+    return bool(val.lower() == 'y')
 
 
 def uiprint(toprint):
@@ -156,23 +211,21 @@ def flush_input():
 
 def input_by_key():
     """Get user input using inkey to prevent /n printing at end."""
-    inst_num = ''
+    usr_inp = ''
     input_valid = True
     with term.cbreak():
         while input_valid:
             flush_input()
+            uiprint("\033[?25h")  # turn cursor on
             key_raw = term.inkey()
             if key_raw.name == "KEY_ENTER":
                 input_valid = False
+                uiprint("\033[?25l")  # turn cursor off
                 break
             if key_raw.name == 'KEY_DELETE':
-                inst_num = inst_num[:-1]
+                usr_inp = usr_inp[:-1]
                 uiprint("\033[D \033[D")
             if not key_raw.is_sequence:
-                inst_num += key_raw
+                usr_inp += key_raw
                 uiprint(key_raw)
-        try:
-            inst_num = int(inst_num)
-        except ValueError:
-            inst_num = 99999
-    return inst_num
+    return usr_inp
