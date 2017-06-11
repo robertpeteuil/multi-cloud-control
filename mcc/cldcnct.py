@@ -23,13 +23,16 @@ Author:    Robert Peteuil
 
 """
 from __future__ import absolute_import, print_function
+from builtins import range
 from gevent.pool import Group
 from gevent import monkey
 import gevent
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
+from libcloud.common.types import InvalidCredsError
 from mcc.confdir import CONFIG_DIR
 import sys
+from requests.exceptions import SSLError
 monkey.patch_all()
 
 
@@ -39,7 +42,7 @@ def collect_data(cred, providers):
                    "azure": get_az,
                    "gcp": get_gcp}
     # turn on display-indicator to indicated working
-    sys.stdout.write("\rAuthentication & Node Retrieval   ")
+    sys.stdout.write("\rAuthentication & Node Retrieval:  ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
     collec_fn = []
@@ -75,9 +78,6 @@ def busy_disp_off(dobj):
     """Turn OFF busy_display to show working statues."""
     dobj.kill(block=False)
     sys.stdout.write("\033[D \033[D")
-    # sys.stdout.write("\033[A\n")
-    # sys.stdout.write("\r                                                 \r")
-    # sys.stdout.write("\033[?25h")  # turn cusor back on
     sys.stdout.flush()
 
 
@@ -104,9 +104,16 @@ def ip_to_str(raw_ip):
 def get_aws(cred):
     """Establish connection to AWS service."""
     driver = get_driver(Provider.EC2)
-    aws_obj = driver(cred['aws_access_key_id'],
-                     cred['aws_secret_access_key'],
-                     region=cred['aws_default_region'])
+    try:
+        aws_obj = driver(cred['aws_access_key_id'],
+                         cred['aws_secret_access_key'],
+                         region=cred['aws_default_region'])
+    except SSLError:
+        print("\r SSL Error with AWS               ", end='')
+        return []
+    except InvalidCredsError:
+        print("\r Error with AWS Credentials       ", end='')
+        return []
     gevent.sleep(0)
     aws_nodes = []
     aws_nodes = aws_obj.list_nodes()
@@ -130,10 +137,17 @@ def adj_nodes_aws(aws_nodes):
 def get_az(cred):
     """Establish connection to Azure service."""
     driver = get_driver(Provider.AZURE_ARM)
-    az_obj = driver(tenant_id=cred['az_tenant_id'],
-                    subscription_id=cred['az_sub_id'],
-                    key=cred['az_app_id'],
-                    secret=cred['az_app_sec'])
+    try:
+        az_obj = driver(tenant_id=cred['az_tenant_id'],
+                        subscription_id=cred['az_sub_id'],
+                        key=cred['az_app_id'],
+                        secret=cred['az_app_sec'])
+    except SSLError:
+        print("\r SSL Error with Azure             ", end='')
+        return []
+    except InvalidCredsError:
+        print("\r Error with Azure Credentials     ", end='')
+        return []
     gevent.sleep(0)
     az_nodes = []
     az_nodes = az_obj.list_nodes()
@@ -161,9 +175,16 @@ def get_gcp(cred):
     """Establish connection to GCP."""
     driver = get_driver(Provider.GCE)
     gcp_pem = CONFIG_DIR + cred['gcp_pem_file']
-    gcp_obj = driver(cred['gcp_svc_acct_email'],
-                     gcp_pem,
-                     project=cred['gcp_proj_id'])
+    try:
+        gcp_obj = driver(cred['gcp_svc_acct_email'],
+                         gcp_pem,
+                         project=cred['gcp_proj_id'])
+    except SSLError:
+        print("\r SSL Error with GCP               ", end='')
+        return []
+    except InvalidCredsError:
+        print("\r Error with GCP Credentials       ", end='')
+        return []
     gevent.sleep(0)
     gcp_nodes = []
     gcp_nodes = gcp_obj.list_nodes(ex_use_disk_cache=True)
