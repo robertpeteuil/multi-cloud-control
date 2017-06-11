@@ -27,7 +27,7 @@ from blessed import Terminal
 import sys
 # import os
 from time import sleep
-from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN
+from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN, C_STAT
 
 term = Terminal()
 
@@ -39,15 +39,17 @@ def create_ui(fmt_table, node_dict):
     tar_valid = False
     cmd_todo = get_cmd(node_dict)
     while cmd_todo != "quit":
+        uiprint(cmd_todo.title())
+        sleep(0.5)
         inst_num = tar_selection(cmd_todo, len(node_dict))
         if inst_num != 0:
-            tar_valid = tar_validate(node_dict, inst_num, cmd_todo)
+            (tar_valid, val_mess) = tar_validate(node_dict, inst_num, cmd_todo)
             if tar_valid:
-                uiprint(" - valid target")
-                sleep(1.5)
+                uiprint(val_mess)
+                sleep(2)
             else:
-                uiprint(" - bad target node")
-                sleep(1.5)
+                uiprint(val_mess)
+                sleep(2)
         else:
             uiprint(" - Exit Command")
             sleep(0.5)
@@ -59,26 +61,16 @@ def create_ui(fmt_table, node_dict):
 
 def get_cmd(node_dict):
     """Get main command selection."""
+    key_cmd_lu = {"q": ["quit", True], "r": ["run", True],
+                  "s": ["stop", True]}
     disp_cmd_bar()
     cmd_valid = False
     while not cmd_valid:
         with term.cbreak():
             flush_input()
             val = term.inkey()
-        if val.lower() == 'q':
-            cmd_todo = "quit"
-            cmd_valid = True
-        elif val.lower() == 'r':
-            cmd_todo = "run"
-            cmd_valid = True
-            uiprint("Run")
-            sleep(0.5)
-        elif val.lower() == 's':
-            cmd_todo = "stop"
-            cmd_valid = True
-            uiprint("Stop")
-            sleep(0.5)
-        else:
+        cmd_todo, cmd_valid = key_cmd_lu.get(val.lower(), ["invalid", False])
+        if not cmd_valid:
             uiprint("{0}Invalid Entry{1}".format(C_ERR, C_NORM))
             sleep(0.5)
             disp_cmd_bar()
@@ -107,19 +99,19 @@ def tar_selection(cmdname, inst_max):
 
 def tar_validate(node_dict, inst_num, cmdname):
     """Validate that command can be performed on target node."""
-    req_state_lu = {"run": ["stopped", "running"],
-                    "stop": ["running", "stopped"]}
-    # req_state = req_state_lu[cmdname][0]
-    # tar_state = node_dict[inst_num].state
-    if req_state_lu[cmdname][0] == node_dict[inst_num].state:
+    req_lu = {"run": ["stopped", "starting", "running"],
+              "stop": ["running", "stopping", "stopped"]}
+    if req_lu[cmdname][0] == node_dict[inst_num].state:
         tar_valid = True
-        uiprint(" - {} node".format(req_state_lu[cmdname][1]))
-        sleep(0.5)
+        val_mess = (" - {0}{2}{1} Node".
+                    format(C_STAT[req_lu[cmdname][1]], C_NORM,
+                           req_lu[cmdname][1].title()))
     else:
         tar_valid = False
-        uiprint(" - node already {}".format(req_state_lu[cmdname][1]))
-        sleep(0.5)
-    return tar_valid
+        val_mess = (" - {0}Aborting {1}{2} - Node Already {3}".
+                    format(C_ERR, cmdname.title(), C_NORM,
+                           req_lu[cmdname][2].title()))
+    return (tar_valid, val_mess)
 
 
 def uiprint(toprint):
