@@ -29,7 +29,9 @@ import sys
 from mcc.cldcnct import busy_disp_on, busy_disp_off
 from time import sleep
 from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN, C_STAT
+from gevent import monkey
 
+monkey.patch_all()
 term = Terminal()
 
 
@@ -49,8 +51,8 @@ def ui_main(fmt_table, node_dict):
                 uiprint(" - {}".format(cmd_result))
                 sleep(1)
                 if cmd_result != "Command Aborted":
-                    datalines = len(node_dict) + 2
-                    disp_clear_old(datalines)
+                    # datalines = len(node_dict) + 2
+                    disp_clear(len(node_dict))
                     return True
             else:
                 uiprint(tar_mess)
@@ -72,7 +74,6 @@ def get_cmd(node_dict):
     while not cmd_valid:
         with term.cbreak():
             flush_input()
-            # val = term.inkey()
             val = input_by_key()
         cmd_todo, cmd_valid = key_cmd_lu.get(val.lower(), ["invalid", False])
         if not cmd_valid:
@@ -135,8 +136,7 @@ def cmd_exec(tar_node, cmdname, tar_mess):
         exec_mess = "\rEXECUTING COMMAND - {0}   ".format(tar_mess)
         disp_erase_ln()
         uiprint(exec_mess)
-        # turn on busy indicator
-        busy_obj = busy_disp_on()
+        busy_obj = busy_disp_on()  # turn on busy indicator
         cmd_one = cmd_lu[cmdname][0]
         cmd_two = cmd_lu[cmdname][1]
         cmdpre = getattr(tar_node, "driver")
@@ -146,11 +146,9 @@ def cmd_exec(tar_node, cmdname, tar_mess):
             cmdpre = getattr(tar_node, "driver")
             seccmd = getattr(cmdpre, cmd_two)
             response = seccmd([tar_node])  # noqa
-            #   returns on success - [(Node, ip_addresses)]
         cmd_result = "{0} {1}".format(cmdname.title(),
                                       cmd_lu[cmdname][2])
-        # turn off busy indicator
-        busy_disp_off(busy_obj)
+        busy_disp_off(busy_obj)  # turn off busy indicator
     else:
         cmd_result = "Command Aborted"
     return cmd_result
@@ -162,9 +160,7 @@ def input_yn(conf_mess):
     uiprint(conf_mess)
     with term.cbreak():
         flush_input()
-        # val = term.inkey()
         val = input_by_key()
-        # uiprint(val)
         sleep(0.5)
     return bool(val.lower() == 'y')
 
@@ -190,8 +186,9 @@ def disp_cmd_bar():
     uiprint(cmd_bar)
 
 
-def disp_clear_old(numlines):
+def disp_clear(numlines):
     """Clear previous display info from screen in prep for new data."""
+    numlines += 2
     disp_erase_ln()
     for i in range(numlines, 0, -1):
         uiprint("\033[A")
@@ -200,9 +197,8 @@ def disp_clear_old(numlines):
 
 def disp_erase_ln():
     """Erase line above and position cursor on that line."""
-    blank_ln = " " * term.width
-    # uiprint("\033[A")   # go up one line
-    uiprint("\r{}".format(blank_ln))
+    blank_ln = " " * (term.width - 1)
+    uiprint("\r{0}".format(blank_ln))
     return
 
 
@@ -210,7 +206,7 @@ def flush_input():
     """Flush the input buffer on posix and windows."""
     try:
         import sys, termios  # noqa
-        termios.tcflush(sys.stdin, termios.TCIOFLUSH)
+        termios.tcflush(sys.stdin, termios.TCIFLUSH)
     except ImportError:
         import msvcrt
         while msvcrt.kbhit():
@@ -221,9 +217,9 @@ def input_by_key():
     """Get user input using inkey to prevent /n printing at end."""
     usr_inp = ''
     input_valid = True
+    flush_input()
     with term.cbreak():
         while input_valid:
-            flush_input()
             uiprint("\033[?25h")  # turn cursor on
             key_raw = term.inkey()
             if key_raw.name == "KEY_ENTER":
