@@ -23,136 +23,242 @@ Author:    Robert Peteuil
 
 """
 from __future__ import absolute_import, print_function
+# from builtins import input
 from blessed import Terminal
 import sys
+from termios import tcflush, TCIFLUSH
+# import os
 from time import sleep
-from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN, C_STAT
+from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN
 
 term = Terminal()
 
 
-def main(fmt_table, inst_max):
-    """Create an control UI."""
-    # this is the sample flow
-    create_ui(fmt_table)  # print table and cmd_bar
-    ui_cmd = ""
-    while ui_cmd != 'quit':
-        ui_cmd = get_ui_cmd()  # get user specified function
-        ui_inst = 999
-        while ui_inst != 0:
-            ui_inst = get_ui_instance(inst_max)
-            run_selected_cmd(ui_inst)
-
-
 def create_ui(fmt_table, node_dict):
     """Create the base UI in command mode."""
-    # print(term.enter_fullscreen())
-    # print(term.move(5, 0))
-    # sys.stdout.write("\033[?25l")  # turn cursor off
     uiprint("\033[?25l")  # turn cursor off
     print("{}\n".format(fmt_table))
-    cmd_processor(node_dict)
-    return
+    tar_valid = False
+    cmd_todo = get_cmd(node_dict)
+    while cmd_todo != "quit":
+        inst_num = tar_selection(cmd_todo, len(node_dict))
+        if inst_num != 0:
+            tar_valid = tar_validate(node_dict, inst_num, cmd_todo)
+            if tar_valid:
+                uiprint(" - valid target")
+                sleep(1.5)
+            else:
+                uiprint(" - bad target node")
+                sleep(1.5)
+        else:
+            uiprint(" - Exit Command")
+            sleep(0.5)
+        cmd_todo = get_cmd(node_dict)
+    uiprint("Quitting")
+    uiprint("\033[?25h")  # turn cursor on
+    sys.exit()
+
+
+# def create_ui_old(fmt_table, node_dict):
+#     """Create the base UI in command mode."""
+#     uiprint("\033[?25l")  # turn cursor off
+#     print("{}\n".format(fmt_table))
+#     get_cmd(node_dict)
+#     return
 
 
 def uiprint(toprint):
-    """Print provided text without charrage return."""
+    """Print text without charrage return."""
     sys.stdout.write(toprint)
     sys.stdout.flush()
 
 
-def cmd_processor(node_dict):
-    """Display Command Bar and run get-command fucntion."""
-    while node_dict:
-        cmd_bar = ("\rENTER COMMAND -   {2}(R){1}un Node   {3}"
-                   "(S){1}top Node   {4}(Q){1}uit:  ".
-                   format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
-        uiprint(cmd_bar)
-        cmd_entry(node_dict)
-        erase_ln()
-    return
+def disp_cmd_title(cmd_title):
+    """Display Title and function statement for current command."""
+    disp_erase_ln()
+    uiprint(cmd_title)
 
 
-def cmd_entry(node_dict):
-    """Get main command selection."""
-    with term.cbreak():
-        val = ''
-        while val.lower() != 'q':
-            val = term.inkey()
-            # val = term.inkey(timeout=300)
-            if val.lower() == 'r':
-                uiprint("Run")
-                sleep(0.75)
-                cmd_target("run", node_dict)
-                return
-            if val.lower() == 's':
-                uiprint("Stop")
-                sleep(0.75)
-                cmd_target("stop", node_dict)
-                return
-            elif val.is_sequence:
-                uiprint("seq: {0}.".format((str(val), val.name, val.code)))
-            # elif val:
-            #     uiprint("got {0}.".format(val))
-    uiprint("Quitting")
-    uiprint("\033[?25h")  # turn cusor back on
-    sys.exit()
+def disp_cmd_bar():
+    """Display Command Bar."""
+    cmd_bar = ("\rSELECT COMMAND -   {2}(R){1}un Node   {3}"
+               "(S){1}top Node   {4}(Q){1}uit:  ".
+               format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
+    disp_erase_ln()
+    uiprint(cmd_bar)
 
 
-def erase_ln():
+def disp_erase_ln():
     """Erase line above and position cursor on that line."""
     blank_ln = " " * term.width
-    # ORIGINAL WORKING METHOD
-    # uiprint("\033[A")
-    # uiprint(blank_ln)
-
-    # NEW METHOD - don't need to go up
+    # uiprint("\033[A")   # go up one line
     uiprint("\r{}".format(blank_ln))
     return
 
 
-def disp_cmd_title(cmd_title):
-    """Display Title and function statement for current command."""
-    erase_ln()
-    uiprint(cmd_title)
+# def get_cmd(node_dict):
+#     """Display Command Bar and run get-command fucntion."""
+#     while node_dict:
+#         cmd_bar = ("\rENTER COMMAND -   {2}(R){1}un Node   {3}"
+#                    "(S){1}top Node   {4}(Q){1}uit:  ".
+#                    format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
+#         uiprint(cmd_bar)
+#         cmd_entry(node_dict)
+#         disp_erase_ln()
+#     return
 
 
-def cmd_target(cmdname, node_dict):
-    """Determine Node and execute command."""
-    cmd_display_lu = {"run": "RUNNING", "stop": "STOPPING"}
-    cmdaction = cmd_display_lu.get(cmdname, "unknown")
+def get_cmd(node_dict):
+    """Get main command selection."""
+    disp_cmd_bar()
+    cmd_valid = False
+    # cmd_todo = ""
+    # val = ''
+    # while val.lower() != 'q':
+    while not cmd_valid:
+        with term.cbreak():
+            tcflush(sys.stdin, TCIFLUSH)
+            val = term.inkey()
+        if val.lower() == 'q':
+            cmd_todo = "quit"
+            cmd_valid = True
+            # break
+            # uiprint("Quitting")
+            # uiprint("\033[?25h")  # turn cusor back on
+            # sys.exit()
+        elif val.lower() == 'r':
+            cmd_todo = "run"
+            cmd_valid = True
+            uiprint("Run")
+            sleep(0.5)
+            # break
+            # tar_selection("run", node_dict)
+            # disp_cmd_bar()
+        elif val.lower() == 's':
+            cmd_todo = "stop"
+            cmd_valid = True
+            uiprint("Stop")
+            sleep(0.5)
+            # break
+            # tar_selection("stop", node_dict)
+            # # cmd_target("stop", node_dict)
+            # disp_cmd_bar()
+        # elif val.is_sequence:
+        #     uiprint("seq: {0}.".format((str(val), val.name, val.code)))
+        else:
+            uiprint("{0}Invalid Entry{1}".format(C_ERR, C_NORM))
+            sleep(0.5)
+            disp_cmd_bar()
+    return cmd_todo
+
+
+# def cmd_target(cmdname, node_dict):
+#     """Determine Node and execute command."""
+#     # cmd_display_lu = {"run": "RUNNING", "stop": "STOPPING"}
+#     # cmdaction = cmd_display_lu.get(cmdname, "unknown")
+#     cmddisp = cmdname.upper()
+#     inst_max = len(node_dict)
+#     cmd_title = ("\r{1}{0} NODE{2} - Select {3}NODE #{2}"
+#                  " ({4}0 = Exit Command{2}):  ".
+#                  format(cmddisp, C_TI, C_NORM, C_WARN, MAGENTA))
+#     disp_cmd_title(cmd_title)
+#
+#     inst_raw = ''
+#     inst_num = 999
+#     while inst_num != 0:
+#         with term.cbreak():
+#             inst_raw = term.inkey()
+#         try:
+#             inst_num = int(inst_raw)
+#         except ValueError:
+#             inst_num = 999
+#         if inst_num == 0:
+#             # uiprint("Exiting {0}{2}{1} COMMAND".
+#             #         format(C_WARN, C_NORM, cmddisp))
+#             # uiprint("Returning to Main")
+#             uiprint("Exit Command")
+#             sleep(0.5)
+#             return
+#         elif inst_num < inst_max:
+#             uiprint(str(inst_num))
+#             sleep(0.25)
+#             tar_validate(node_dict, inst_num, cmdname)
+#             # uiprint(" - {1}{0} NODE{2}".
+#             #         format(cmdaction, C_STAT[cmdaction.lower()], C_NORM))
+#             # sleep(2.5)
+#             return
+#         else:
+#             uiprint("{0}Invalid Entry{1}".format(C_ERR, C_NORM))
+#             sleep(0.5)
+#             disp_cmd_title(cmd_title)
+#             # Alternate method:
+#             #   go up & only erase-line to right edge
+#             #   instead of calling disp_erase_ln & re-printing title
+
+
+def input_by_key():
+    """Get user input using inkey to prevent /n printing at end."""
+    # key_raw = ''
+    inst_num = ''
+    input_valid = True
+    with term.cbreak():
+        while input_valid:
+            tcflush(sys.stdin, TCIFLUSH)
+            key_raw = term.inkey()
+            if key_raw.name == "KEY_ENTER":
+                input_valid = False
+                break
+            if key_raw.name == 'KEY_DELETE':
+                inst_num = inst_num[:-1]
+                uiprint("\033[D \033[D")
+            if not key_raw.is_sequence:
+                inst_num += key_raw
+                uiprint(key_raw)
+        try:
+            inst_num = int(inst_num)
+        except ValueError:
+            inst_num = 99999
+    return inst_num
+
+
+def tar_selection(cmdname, inst_max):
+    """Determine Node via alternate input method."""
     cmddisp = cmdname.upper()
-    inst_max = len(node_dict)
-    cmd_title = ("\r{1}{0} NODE{2} - Select {3}NODE #{2}"
-                 " ({4}0 = Exit{2}):  ".
+    cmd_title = ("\r{1}{0} NODE{2} - Enter {3}NODE #{2} and 'enter'"
+                 " ({4}0 = Exit Command{2}):  ".
                  format(cmddisp, C_TI, C_NORM, C_WARN, MAGENTA))
     disp_cmd_title(cmd_title)
+    inst_valid = False
     with term.cbreak():
-        inst_raw = ''
-        inst_num = 999
-        while inst_num != 0:
-            inst_raw = term.inkey()
-            # inst_raw = term.inkey(timeout=90)
-            try:
-                inst_num = int(inst_raw)
-            except:
-                inst_num = 999
-            if inst_num == 0:
-                uiprint("Exiting {0}{2}{1} COMMAND".
-                        format(C_WARN, C_NORM, cmddisp))
-                sleep(1)
-                return
-            if inst_num < inst_max:
-                erase_ln()
-                uiprint("\r{2}{0} NODE{3}: {4}{1}{3}".
-                        format(cmdaction, inst_num,
-                               C_STAT[cmdaction.lower()], C_NORM, C_WARN))
-                sleep(3)
-                return
+        while not inst_valid:
+            inst_num = input_by_key()
+            # if inst_num == 0:
+            #     uiprint(" - Exit Command")
+            #     sleep(0.5)
+            #     return
+            if inst_num <= inst_max:
+                inst_valid = True
+                # tar_validate(node_dict, inst_num, cmdname)
+                # return
             else:
-                uiprint("{0}Invalid Entry{1}".format(C_ERR, C_NORM))
-                sleep(1)
+                uiprint(" - {0}Invalid Entry{1}".format(C_ERR, C_NORM))
+                sleep(0.5)
                 disp_cmd_title(cmd_title)
-                # Alternate method:
-                #   go up & only erase-line to right edge
-                #   instead of calling erase_ln & re-printing title
+    return inst_num
+
+
+def tar_validate(node_dict, inst_num, cmdname):
+    """Validate that command can be performed on target node."""
+    req_state_lu = {"run": ["stopped", "running"],
+                    "stop": ["running", "stopped"]}
+    # req_state = req_state_lu[cmdname][0]
+    # tar_state = node_dict[inst_num].state
+    if req_state_lu[cmdname][0] == node_dict[inst_num].state:
+        tar_valid = True
+        uiprint(" - {} node".format(req_state_lu[cmdname][1]))
+        sleep(0.5)
+    else:
+        tar_valid = False
+        uiprint(" - node already {}".format(req_state_lu[cmdname][1]))
+        sleep(0.5)
+    return tar_valid
