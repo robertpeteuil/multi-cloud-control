@@ -1,4 +1,4 @@
-"""Process User Interface and execute commands..
+"""Process User Interface and execute commands.
 
 License:
 
@@ -55,70 +55,6 @@ def create_ui(fmt_table, node_dict):
     uiprint("Quitting")
     uiprint("\033[?25h")  # turn cursor on
     sys.exit()
-
-
-def uiprint(toprint):
-    """Print text without charrage return."""
-    sys.stdout.write(toprint)
-    sys.stdout.flush()
-
-
-def disp_cmd_title(cmd_title):
-    """Display Title and function statement for current command."""
-    disp_erase_ln()
-    uiprint(cmd_title)
-
-
-def disp_cmd_bar():
-    """Display Command Bar."""
-    cmd_bar = ("\rSELECT COMMAND -   {2}(R){1}un Node   {3}"
-               "(S){1}top Node   {4}(Q){1}uit:  ".
-               format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
-    disp_erase_ln()
-    uiprint(cmd_bar)
-
-
-def disp_erase_ln():
-    """Erase line above and position cursor on that line."""
-    blank_ln = " " * term.width
-    # uiprint("\033[A")   # go up one line
-    uiprint("\r{}".format(blank_ln))
-    return
-
-
-def flush_input():
-    """Flush the input buffer on posix and windows."""
-    try:
-        import sys, termios  # noqa
-        termios.tcflush(sys.stdin, termios.TCIOFLUSH)
-    except ImportError:
-        import msvcrt
-        while msvcrt.kbhit():
-            msvcrt.getch()
-
-
-def input_by_key():
-    """Get user input using inkey to prevent /n printing at end."""
-    inst_num = ''
-    input_valid = True
-    with term.cbreak():
-        while input_valid:
-            flush_input()
-            key_raw = term.inkey()
-            if key_raw.name == "KEY_ENTER":
-                input_valid = False
-                break
-            if key_raw.name == 'KEY_DELETE':
-                inst_num = inst_num[:-1]
-                uiprint("\033[D \033[D")
-            if not key_raw.is_sequence:
-                inst_num += key_raw
-                uiprint(key_raw)
-        try:
-            inst_num = int(inst_num)
-        except ValueError:
-            inst_num = 99999
-    return inst_num
 
 
 def get_cmd(node_dict):
@@ -184,3 +120,67 @@ def tar_validate(node_dict, inst_num, cmdname):
         uiprint(" - node already {}".format(req_state_lu[cmdname][1]))
         sleep(0.5)
     return tar_valid
+
+
+def uiprint(toprint):
+    """Print text without charrage return."""
+    sys.stdout.write(toprint)
+    sys.stdout.flush()
+
+
+def disp_cmd_title(cmd_title):
+    """Display Title and function statement for current command."""
+    disp_erase_ln()
+    uiprint(cmd_title)
+
+
+def disp_cmd_bar():
+    """Display Command Bar."""
+    cmd_bar = ("\rSELECT COMMAND -   {2}(R){1}un Node   {3}"
+               "(S){1}top Node   {4}(Q){1}uit:  ".
+               format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
+    disp_erase_ln()
+    uiprint(cmd_bar)
+
+
+def disp_erase_ln():
+    """Erase line above and position cursor on that line."""
+    blank_ln = " " * term.width
+    # uiprint("\033[A")   # go up one line
+    uiprint("\r{}".format(blank_ln))
+    return
+
+
+def flush_input():
+    """Flush the input buffer on posix and windows."""
+    try:
+        import sys, termios  # noqa
+        termios.tcflush(sys.stdin, termios.TCIOFLUSH)
+    except ImportError:
+        import msvcrt
+        while msvcrt.kbhit():
+            msvcrt.getch()
+
+
+def input_by_key():
+    """Get user input using inkey to prevent /n printing at end."""
+    inst_num = ''
+    input_valid = True
+    with term.cbreak():
+        while input_valid:
+            flush_input()
+            key_raw = term.inkey()
+            if key_raw.name == "KEY_ENTER":
+                input_valid = False
+                break
+            if key_raw.name == 'KEY_DELETE':
+                inst_num = inst_num[:-1]
+                uiprint("\033[D \033[D")
+            if not key_raw.is_sequence:
+                inst_num += key_raw
+                uiprint(key_raw)
+        try:
+            inst_num = int(inst_num)
+        except ValueError:
+            inst_num = 99999
+    return inst_num
