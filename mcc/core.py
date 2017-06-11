@@ -42,11 +42,9 @@ def main():
     node_dict = make_node_dict(nodes)
     # table.indx_table(node_dict)
     idx_tbl = table.indx_table(node_dict, True)
-    # ui.create_ui(idx_tbl, len(idx_tbl))
-    ui.create_ui(idx_tbl, node_dict)
-
-    # print(idx_tbl)
     # pprint(node_dict)
+    # print(idx_tbl)
+    ui.create_ui(idx_tbl, node_dict)
 
 
 def list_only():
