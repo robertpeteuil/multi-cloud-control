@@ -23,10 +23,10 @@ Author:    Robert Peteuil
 
 """
 from __future__ import absolute_import, print_function
+from builtins import range
 from blessed import Terminal
 import sys
 from mcc.cldcnct import busy_disp_on, busy_disp_off
-# import os
 from time import sleep
 from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN, C_STAT
 
@@ -41,25 +41,23 @@ def ui_main(fmt_table, node_dict):
     tar_valid = False
     cmd_todo = get_cmd(node_dict)
     while cmd_todo != "quit":
-        # uiprint(cmd_todo.title())
-        # sleep(0.5)
         inst_num = tar_selection(cmd_todo, len(node_dict))
         if inst_num != 0:
             (tar_valid, tar_mess) = tar_validate(node_dict, inst_num, cmd_todo)
             if tar_valid:
                 cmd_result = cmd_exec(node_dict[inst_num], cmd_todo, tar_mess)
-                uiprint(cmd_result)
-                sleep(2)
-                # since a node has changed, need to :
-                #   delete - current line, each-line up to #-nodes+2
-                #   'return True' to "reloop" in core:main, which will:
-                #      re-collect nodes, make dict, make table, re-call ui_main
+                uiprint(" - {}".format(cmd_result))
+                sleep(1)
+                if cmd_result != "Command Aborted":
+                    datalines = len(node_dict) + 2
+                    disp_clear_old(datalines)
+                    return True
             else:
                 uiprint(tar_mess)
                 sleep(2)
         else:
             uiprint(" - Exit Command")
-            sleep(0.5)
+            sleep(0.4)
         cmd_todo = get_cmd(node_dict)
     uiprint("\033[?25h")  # turn cursor on
     return False
@@ -110,13 +108,15 @@ def tar_selection(cmdname, inst_max):
 
 def tar_validate(node_dict, inst_num, cmdname):
     """Validate that command can be performed on target node."""
+    # cmd: [required-state, action-to-be-performed, already state]
     req_lu = {"run": ["stopped", "starting", "running"],
               "stop": ["running", "stopping", "stopped"]}
     if req_lu[cmdname][0] == node_dict[inst_num].state:
         tar_valid = True
-        tar_mess = ("{0}{2}{1} Node {3}{4}{1}".
+        tar_mess = ("{0}{2}{1} Node {3}{4}{1} '{5}'".
                     format(C_STAT[req_lu[cmdname][1]], C_NORM,
-                           req_lu[cmdname][1].title(), C_WARN, inst_num))
+                           req_lu[cmdname][1].title(), C_WARN, inst_num,
+                           node_dict[inst_num].name))
     else:
         tar_valid = False
         tar_mess = (" - {0}Aborting {1}{2} - Node Already {3}".
@@ -147,12 +147,12 @@ def cmd_exec(tar_node, cmdname, tar_mess):
             seccmd = getattr(cmdpre, cmd_two)
             response = seccmd([tar_node])  # noqa
             #   returns on success - [(Node, ip_addresses)]
-        cmd_result = "- {0} {1}".format(cmdname.title(),
-                                        cmd_lu[cmdname][2])
+        cmd_result = "{0} {1}".format(cmdname.title(),
+                                      cmd_lu[cmdname][2])
         # turn off busy indicator
         busy_disp_off(busy_obj)
     else:
-        cmd_result = "- Command Aborted"
+        cmd_result = "Command Aborted"
     return cmd_result
 
 
@@ -188,6 +188,14 @@ def disp_cmd_bar():
                format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
     disp_erase_ln()
     uiprint(cmd_bar)
+
+
+def disp_clear_old(numlines):
+    """Clear previous display info from screen in prep for new data."""
+    disp_erase_ln()
+    for i in range(numlines, 0, -1):
+        uiprint("\033[A")
+        disp_erase_ln()
 
 
 def disp_erase_ln():
