@@ -33,31 +33,35 @@ import os
 # from pprint import pprint
 import sys
 
-__version__ = "0.0.26"
+__version__ = "0.0.27"
 
 
 def main():
     """Retreive and display instance data then process commands."""
-    nodes = initialize()
-    node_dict = make_node_dict(nodes)
-    # table.indx_table(node_dict)
-    idx_tbl = table.indx_table(node_dict, True)
-    # pprint(node_dict)
-    # print(idx_tbl)
-    ui.create_ui(idx_tbl, node_dict)
+    (cred, providers) = config_read()
+    cmd_mode = True
+    while cmd_mode:
+        nodes = cld.collect_data(cred, providers)
+        node_dict = make_node_dict(nodes)
+        # table.indx_table(node_dict)
+        idx_tbl = table.indx_table(node_dict, True)
+        # pprint(node_dict)
+        # print(idx_tbl)
+        cmd_mode = ui.ui_main(idx_tbl, node_dict)
 
 
 def list_only():
     """Retreive and display instance data then exit."""
-    nodes = initialize()
+    (cred, providers) = config_read()
+    nodes = cld.collect_data(cred, providers)
     table.list_table(nodes)
 
 
-def initialize():
-    """Read Config file and retrieve instance data."""
-    (cred, providers) = config_read()
-    nodes = cld.collect_data(cred, providers)
-    return nodes
+# def initialize():
+#     """Read Config file and retrieve instance data."""
+#     (cred, providers) = config_read()
+#     nodes = cld.collect_data(cred, providers)
+#     return nodes
 
 
 def make_node_dict(full_list):
