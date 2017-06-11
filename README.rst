@@ -34,13 +34,13 @@ RedHat / CentOS Based Systems
 .. code:: shell
 
   sudo yum groupinstall "Development tools"
-  sudo yum install python-devel
+  sudo yum install gcc libffi-devel python-devel openssl-devel
 
 Debian Based Systems:
 
 .. code:: shell
 
-  sudo apt-get install build-essential
+  sudo apt-get install build-essential libssl-dev libffi-dev
   sudo apt-get install python-dev  # for python2.x installs
   sudo apt-get install python3-dev  # for python3.x installs
 
