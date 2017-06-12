@@ -26,35 +26,35 @@ INSTALL_REQUIRES = ['apache-libcloud>=2.0.0',
                     'pycrypto>=2.6.1',
                     'PrettyTable>=0.7.2']
 
-EXTRAS_REQUIRE = {}
+EXTRAS_REQUIRE = {
+    ":python_full_version<'2.7.9'": [
+        "pyopenssl",
+        "lxml>=3.8",
+        "cssselect>=1.0.1",
+        "ndg-httpsclient",
+        "pyasn1",
+        "backports.ssl_match_hostname"
+    ]
+}
 
 if int(setuptools.__version__.split(".", 1)[0]) < 18:
     assert "bdist_wheel" not in sys.argv, "setuptools 18 required for wheels."
     # For legacy setuptools + sdist.
-    if sys.version_info[0:3] < (2, 7, 7):
-        INSTALL_REQUIRES.append("requests>=2.17")
+    if sys.version_info[0:3] <= (2, 7, 8):
         INSTALL_REQUIRES.append("lxml>=3.8")
         INSTALL_REQUIRES.append("cssselect>=1.0.1")
         INSTALL_REQUIRES.append("ndg-httpsclient")
         INSTALL_REQUIRES.append("pyopenssl>=17.0.0")
         INSTALL_REQUIRES.append("pyasn1")
-        INSTALL_REQUIRES.append("urllib3>=1.21")
-else:
-    EXTRAS_REQUIRE[':python_version<="2.7.8"'] = ["pyopenssl",
-                                                  "requests>=2.17",
-                                                  "lxml>=3.8",
-                                                  "cssselect>=1.0.1",
-                                                  "ndg-httpsclient",
-                                                  "pyasn1",
-                                                  "urllib3>=1.21"]
+        INSTALL_REQUIRES.append("backports.ssl_match_hostname")
 
 setup(
     name='mcc',
     packages=['mcc'],
     package_data={'mcc': ['config.ini']},
-    entry_points={'console_scripts': ['mccx=mcc.core:main',
-                                      'mcc=mcc.core:list_only']},
-    version='0.0.30',
+    entry_points={'console_scripts': ['mcc=mcc.core:main',
+                                      'mccl=mcc.core:list_only']},
+    version='0.0.33',
     author="Robert Peteuil",
     author_email="robert.s.peteuil@gmail.com",
     url='https://github.com/robertpeteuil/multi-cloud-control',
