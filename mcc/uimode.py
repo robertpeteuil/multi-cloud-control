@@ -48,7 +48,7 @@ def ui_main(fmt_table, node_dict):
             (tar_valid, tar_mess) = tar_validate(node_dict, inst_num, cmd_todo)
             if tar_valid:
                 cmd_result = cmd_exec(node_dict[inst_num], cmd_todo, tar_mess)
-                uiprint(" - {}".format(cmd_result))
+                uiprint("- {}".format(cmd_result))
                 sleep(1)
                 if cmd_result != "Command Aborted":
                     # datalines = len(node_dict) + 2
@@ -58,8 +58,8 @@ def ui_main(fmt_table, node_dict):
                 uiprint(tar_mess)
                 sleep(2)
         else:
-            uiprint(" - Exit Command")
-            sleep(0.4)
+            uiprint(" - Exit")
+            sleep(0.2)
         cmd_todo = get_cmd(node_dict)
     uiprint("\033[?25h")  # turn cursor on
     return False
@@ -133,7 +133,7 @@ def cmd_exec(tar_node, cmdname, tar_mess):
     conf_mess = ("\r{0} - Continue? [y/N] ".
                  format(tar_mess))
     if input_yn(conf_mess):
-        exec_mess = "\rEXECUTING COMMAND - {0}   ".format(tar_mess)
+        exec_mess = "\rEXECUTING COMMAND - {0}  ".format(tar_mess)
         disp_erase_ln()
         uiprint(exec_mess)
         busy_obj = busy_disp_on()  # turn on busy indicator
