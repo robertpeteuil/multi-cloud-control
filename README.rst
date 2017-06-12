@@ -4,16 +4,42 @@ Unified CLI Utility for AWS, Azure and GCP Instance Control
 MCC: Command-Line Instance Control for Top 3 Enterprise Cloud Providers
 -----------------------------------------------------------------------
 
-The Multi-Cloud-Control utility, mcc, is currently in alpha and allows
-listing basic information from instances on AWS, Azure and GCP in one report
-with one simple command: **mcc**.
+Multi-Cloud-Control is currently in alpha and runs in two modes:
 
-Planned future enhancements:
+- **mcc** - Text UI that lists all instances from AWS, Azure and GCP in formatted table
 
-- start and stop instances
-- connect to instances via ssh
-- image / snapshot instances
-- change instance configuration (disk, network, HW)
+  - Accepts Commands to Start Nodes, Stop Nodes or Quit
+  - Additional commands planned include: connect via ssh, image/snapshot nodes, and change nore configuration (hardware, disks, network)
+
+- **mccl** - Display list of instances from all providers as table and exit
+
+Support Systems
+---------------
+
+Python 2.7, 3.3, 3.4, 3.5
+
+Platforms:
+
+- Linux
+- macOS (OS X)
+
+Pre-Reqs
+--------
+
+This utility uses some Python libraries which may require compilation during the installation process.
+
+RedHat / CentOS Based Systems
+
+.. code:: shell
+
+  sudo yum install gcc libffi-devel python-devel openssl-devel
+
+Debian / Ubuntu Based Systems:
+
+.. code:: shell
+
+  sudo apt-get install gcc libssl-dev libffi-dev python-dev
+  sudo apt-get install python3-dev  #  if using python3.x
 
 Installation
 ------------
@@ -22,27 +48,7 @@ This utility can be installed with **pip**:
 
 .. code:: shell
 
-  sudo -H pip install mcc
-
-Possible Pre-Reqs
------------------
-
-This utility uses the Python pycrypto library, which may require compilation to install on your system.  If a normal install fails, install the build dependancies with these commands:
-
-RedHat / CentOS Based Systems
-
-.. code:: shell
-
-  sudo yum groupinstall "Development tools"
-  sudo yum install gcc libffi-devel python-devel openssl-devel
-
-Debian Based Systems:
-
-.. code:: shell
-
-  sudo apt-get install build-essential libssl-dev libffi-dev
-  sudo apt-get install python-dev  # for python2.x installs
-  sudo apt-get install python3-dev  # for python3.x installs
+  sudo pip install mcc
 
 Configuration
 -------------
