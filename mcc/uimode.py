@@ -110,19 +110,25 @@ def tar_selection(cmdname, inst_max):
 def tar_validate(node_dict, inst_num, cmdname):
     """Validate that command can be performed on target node."""
     # cmd: [required-state, action-to-be-performed, already state]
-    req_lu = {"run": ["stopped", "starting", "running"],
-              "stop": ["running", "stopping", "stopped"]}
+    req_lu = {"run": ["stopped", "START", "running"],
+              "stop": ["running", "STOP", "stopped"]}
+    # req_lu = {"run": ["stopped", "starting", "running"],
+    #           "stop": ["running", "stopping", "stopped"]}
     if req_lu[cmdname][0] == node_dict[inst_num].state:
         tar_valid = True
-        tar_mess = ("{0}{2}{1} Node {3}{4}{1} '{5}'".
+        tar_mess = ("{0}{2}{1} Node {3}{4}{1} ({5} on {6})".
                     format(C_STAT[req_lu[cmdname][1]], C_NORM,
-                           req_lu[cmdname][1].title(), C_WARN, inst_num,
-                           node_dict[inst_num].name))
+                           req_lu[cmdname][1], C_WARN, inst_num,
+                           node_dict[inst_num].name,
+                           node_dict[inst_num].cloud))
+        # tar_mess = ("{0}{2}{1} Node {3}{4}{1} '{5}'".
+        #             format(C_STAT[req_lu[cmdname][1]], C_NORM,
+        #                    req_lu[cmdname][1].title(), C_WARN, inst_num,
+        #                    node_dict[inst_num].name))
     else:
         tar_valid = False
-        tar_mess = (" - {0}Aborting {1}{2} - Node Already {3}".
-                    format(C_ERR, cmdname.title(), C_NORM,
-                           req_lu[cmdname][2].title()))
+        tar_mess = (" - Node Already {2} - {0}Aborting{1}".
+                    format(C_ERR, C_NORM, req_lu[cmdname][2].title()))
     return (tar_valid, tar_mess)
 
 
@@ -148,6 +154,8 @@ def cmd_exec(tar_node, cmdname, tar_mess):
             response = seccmd([tar_node])  # noqa
         cmd_result = "{0} {1}".format(cmdname.title(),
                                       cmd_lu[cmdname][2])
+        if cmdname == "stop" and tar_node.cloud == "azure":
+            sleep(3)
         busy_disp_off(busy_obj)  # turn off busy indicator
     else:
         cmd_result = "Command Aborted"
