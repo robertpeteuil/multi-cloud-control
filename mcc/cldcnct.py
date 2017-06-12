@@ -85,7 +85,7 @@ def busy_display():
     """Display animation to show activity."""
     sys.stdout.write("\033[?25l")  # turn cursor off
     sys.stdout.flush()
-    for x in range(600):
+    for x in range(999):
         symb = ['\\', '|', '/', '-']
         sys.stdout.write("\033[D{}".format(symb[x % 4]))
         sys.stdout.flush()
