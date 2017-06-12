@@ -58,10 +58,11 @@ require replacing all occurences of the color var being changed.
 """
 
 
-C_STAT = {"running": C_GOOD, "starting": C_GOOD, "rebooting": C_GOOD,
+C_STAT = {"running": C_GOOD, "starting": C_GOOD, "rebooting": C_WARN,
           "pending": C_WARN, "suspended": C_WARN, "paused": C_WARN,
-          "stopping": C_NORM, "stopped": C_NORM, "error": C_ERR,
-          "unknown": C_WARN, "reconfiguring": C_WARN, "terminated": C_ERR}
+          "stopping": C_WARN, "stopped": C_NORM, "error": C_ERR,
+          "unknown": C_WARN, "reconfiguring": C_WARN, "terminated": C_NORM,
+          "START": C_GOOD, "STOP": C_ERR}
 """Color dictionary for instance status colors.
 
 Any value encountered in the AWS data must be listed or a KeyError is
