@@ -4,6 +4,10 @@ Unified CLI Utility for AWS, Azure and GCP Instance Control
 MCC: Command-Line Instance Control for Top 3 Enterprise Cloud Providers
 -----------------------------------------------------------------------
 
+|PyPi release| |lang|
+
+----------------------------
+
 Multi-Cloud-Control is currently in alpha and runs in two modes:
 
 - **mcc** - Text UI that lists all instances from AWS, Azure and GCP in formatted table
@@ -13,8 +17,8 @@ Multi-Cloud-Control is currently in alpha and runs in two modes:
 
 - **mccl** - Display list of instances from all providers as table and exit
 
-Support Systems
----------------
+Supported Platforms & Python Versions
+-------------------------------------
 
 Python 2.7, 3.3, 3.4, 3.5
 
@@ -55,14 +59,14 @@ Configuration
 
 The first time the utility is executed:
 
-- It creates the config directory **{HOME}/.cloud**
-- It copies the sample config.ini file to the config dir
-- Tells the user to add their credential information to config.ini
+- It creates its config directory **{HOME}/.cloud**
+- It copies a sample config.ini file to the config dir
+- It instructs the user to add their credential information to config.ini
 
 Notes while editing the config.ini file:
 
 - be careful not to change the names of the keys (titles left of the '=' symbol)
-- comment lines may be deleted (those beginning with #)
+- comment lines may be deleted (lines beginning with #)
 
 **config.ini sections**
 
@@ -72,10 +76,9 @@ Notes while editing the config.ini file:
   # example - connect to all three providers
   providers = aws,azure,gcp
 
-  # the "providers" key specifies which cloud providers to work with
+  # the "providers" key specifies which cloud providers to connect to
   # it may contain any subset or combination of "aws", "azure" and "gcp"
-  # each provider listed must have a corresponding section of the same name
-  #   the corresponding section contains the security credentials for that provider
+  # each provider listed must have a corresponding credentials section of the same name
 
 
 **[aws] section** - specifies your AWS security credentials and default datacenter region. `Information on AWS Credentials <http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html>`_
@@ -111,18 +114,11 @@ Notes while editing the config.ini file:
   gcp_pem_file = SampleProject-72fcfdb29717.json
   gcp_proj_id = sampleproject-634368
 
-  # list the filename of the JSON key in this file
-  # copy the file itself to the config directory: {HOME}/.cloud
+  # gcp_pem_file is the filename of the key (JSON file)
+  # copy the key (JSON file) to the config directory: {HOME}/.cloud
 
+.. |PyPi release| image:: https://img.shields.io/pypi/v/mcc.svg
+   :target: https://pypi.python.org/pypi/mcc
 
-Supported Platforms & Python Versions
--------------------------------------
-
-Python 2.7, 3.3, 3.4, 3.5, 3.6
-
-Platforms:
-
-- Linux
-- macOS (OS X)
-
-Windows support is planned in the future
+.. |lang| image:: https://img.shields.io/badge/language-python-3572A5.svg
+   :target: https://github.com/robertpeteuil/multi-cloud-control
