@@ -47,6 +47,7 @@ if int(setuptools.__version__.split(".", 1)[0]) < 18:
         INSTALL_REQUIRES.append("pyopenssl>=17.0.0")
         INSTALL_REQUIRES.append("pyasn1")
         INSTALL_REQUIRES.append("backports.ssl_match_hostname")
+        EXTRAS_REQUIRE = {}
 
 setup(
     name='mcc',
@@ -54,7 +55,7 @@ setup(
     package_data={'mcc': ['config.ini']},
     entry_points={'console_scripts': ['mcc=mcc.core:main',
                                       'mccl=mcc.core:list_only']},
-    version='0.0.33',
+    version='0.0.34',
     author="Robert Peteuil",
     author_email="robert.s.peteuil@gmail.com",
     url='https://github.com/robertpeteuil/multi-cloud-control',
