@@ -19,21 +19,21 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 INSTALL_REQUIRES = ['apache-libcloud>=2.0.0',
                     'blessed>=1.14.2',
-                    'colorama',
+                    'colorama>=0.3.9',
                     'configparser>=3.5.0',
                     'future>=0.14',
-                    'gevent',
+                    'gevent>=1.2.2',
                     'pycrypto>=2.6.1',
                     'PrettyTable>=0.7.2']
 
 EXTRAS_REQUIRE = {
     ":python_full_version<'2.7.9'": [
-        "pyopenssl",
+        "pyOpenSSL>=17.0.0",
         "lxml>=3.8",
         "cssselect>=1.0.1",
-        "ndg-httpsclient",
-        "pyasn1",
-        "backports.ssl_match_hostname"
+        "ndg-httpsclient>=0.4.0",
+        "pyasn1>=0.2.3",
+        "backports.ssl_match_hostname>=3.5.0"
     ]
 }
 
@@ -43,10 +43,10 @@ if int(setuptools.__version__.split(".", 1)[0]) < 18:
     if sys.version_info[0:3] <= (2, 7, 8):
         INSTALL_REQUIRES.append("lxml>=3.8")
         INSTALL_REQUIRES.append("cssselect>=1.0.1")
-        INSTALL_REQUIRES.append("ndg-httpsclient")
-        INSTALL_REQUIRES.append("pyopenssl>=17.0.0")
-        INSTALL_REQUIRES.append("pyasn1")
-        INSTALL_REQUIRES.append("backports.ssl_match_hostname")
+        INSTALL_REQUIRES.append("ndg-httpsclient>=0.4.0")
+        INSTALL_REQUIRES.append("pyOpenSSL>=17.0.0")
+        INSTALL_REQUIRES.append("pyasn1>=0.2.3")
+        INSTALL_REQUIRES.append("backports.ssl_match_hostname>=3.5.0")
         EXTRAS_REQUIRE = {}
 
 setup(
