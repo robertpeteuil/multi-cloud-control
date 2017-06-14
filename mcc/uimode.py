@@ -51,8 +51,7 @@ def ui_main(fmt_table, node_dict):
                 uiprint("- {}".format(cmd_result))
                 sleep(1)
                 if cmd_result != "Command Aborted":
-                    # datalines = len(node_dict) + 2
-                    disp_clear(len(node_dict))
+                    disp_clear(len(node_dict) + 2)
                     return True
             else:
                 uiprint(tar_mess)
@@ -67,19 +66,19 @@ def ui_main(fmt_table, node_dict):
 
 def get_cmd(node_dict):
     """Get main command selection."""
-    key_cmd_lu = {"q": ["quit", True], "r": ["run", True],
-                  "s": ["stop", True]}
+    key_lu = {"q": ["quit", True], "r": ["run", True],
+              "s": ["stop", True]}
     disp_cmd_bar()
     cmd_valid = False
-    while not cmd_valid:
-        with term.cbreak():
-            flush_input()
+    flush_input()
+    with term.cbreak():
+        while not cmd_valid:
             val = input_by_key()
-        cmd_todo, cmd_valid = key_cmd_lu.get(val.lower(), ["invalid", False])
-        if not cmd_valid:
-            uiprint(" - {0}Invalid Entry{1}".format(C_ERR, C_NORM))
-            sleep(0.5)
-            disp_cmd_bar()
+            cmd_todo, cmd_valid = key_lu.get(val.lower(), ["invalid", False])
+            if not cmd_valid:
+                uiprint("- {0}Invalid Entry{1}".format(C_ERR, C_NORM))
+                sleep(0.5)
+                disp_cmd_bar()
     return cmd_todo
 
 
@@ -91,6 +90,7 @@ def tar_selection(cmdname, inst_max):
                  format(cmddisp, C_TI, C_NORM, C_WARN, MAGENTA))
     disp_cmd_title(cmd_title)
     inst_valid = False
+    flush_input()
     with term.cbreak():
         while not inst_valid:
             inst_num = input_by_key()
@@ -112,8 +112,6 @@ def tar_validate(node_dict, inst_num, cmdname):
     # cmd: [required-state, action-to-be-performed, already state]
     req_lu = {"run": ["stopped", "START", "running"],
               "stop": ["running", "STOP", "stopped"]}
-    # req_lu = {"run": ["stopped", "starting", "running"],
-    #           "stop": ["running", "stopping", "stopped"]}
     if req_lu[cmdname][0] == node_dict[inst_num].state:
         tar_valid = True
         tar_mess = ("{0}{2}{1} Node {3}{4}{1} ({5} on {6})".
@@ -121,10 +119,6 @@ def tar_validate(node_dict, inst_num, cmdname):
                            req_lu[cmdname][1], C_WARN, inst_num,
                            node_dict[inst_num].name,
                            node_dict[inst_num].cloud))
-        # tar_mess = ("{0}{2}{1} Node {3}{4}{1} '{5}'".
-        #             format(C_STAT[req_lu[cmdname][1]], C_NORM,
-        #                    req_lu[cmdname][1].title(), C_WARN, inst_num,
-        #                    node_dict[inst_num].name))
     else:
         tar_valid = False
         tar_mess = (" - Node Already {2} - {0}Aborting{1}".
@@ -155,7 +149,7 @@ def cmd_exec(tar_node, cmdname, tar_mess):
         cmd_result = "{0} {1}".format(cmdname.title(),
                                       cmd_lu[cmdname][2])
         if cmdname == "stop" and tar_node.cloud == "azure":
-            sleep(3)
+            sleep(5)
         busy_disp_off(busy_obj)  # turn off busy indicator
     else:
         cmd_result = "Command Aborted"
@@ -196,7 +190,7 @@ def disp_cmd_bar():
 
 def disp_clear(numlines):
     """Clear previous display info from screen in prep for new data."""
-    numlines += 2
+    # numlines += 2
     disp_erase_ln()
     for i in range(numlines, 0, -1):
         uiprint("\033[A")
@@ -207,7 +201,6 @@ def disp_erase_ln():
     """Erase line above and position cursor on that line."""
     blank_ln = " " * (term.width - 1)
     uiprint("\r{0}".format(blank_ln))
-    return
 
 
 def flush_input():
