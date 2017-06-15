@@ -33,7 +33,7 @@ from libcloud.common.types import InvalidCredsError
 from mcc.confdir import CONFIG_DIR
 import sys
 from requests.exceptions import SSLError
-from pprint import pprint
+# from pprint import pprint
 monkey.patch_all()
 
 
@@ -43,7 +43,8 @@ def get_conns(cred, providers):
                    "azure": [conn_az, nodes_az],
                    "gcp": [conn_gcp, nodes_gcp]}
     # turn on display-indicator to indicated working
-    sys.stdout.write("\rAuthentication:  ")
+    # sys.stdout.write("\rAuthentication:  ")
+    sys.stdout.write("\rEstablishing Connections:   ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
     # Authenticate
@@ -82,7 +83,8 @@ def get_data(conn_objs, providers):
                    "azure": nodes_az,
                    "gcp": nodes_gcp}
     # turn on display-indicator to indicated working
-    sys.stdout.write("\rReading Info:  ")
+    # sys.stdout.write("\rReading Info:  ")
+    sys.stdout.write("\rCollecting Info:   ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
     # Gather Nodes
