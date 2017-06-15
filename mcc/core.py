@@ -32,15 +32,16 @@ import mcc.uimode as ui
 import os
 import sys
 
-__version__ = "0.0.34"
+__version__ = "0.0.35"
 
 
 def main():
     """Retreive and display instance data then process commands."""
     (cred, providers) = config_read()
     cmd_mode = True
+    conn_objs = cld.get_conns(cred, providers)
     while cmd_mode:
-        nodes = cld.collect_data(cred, providers)
+        nodes = cld.get_data(conn_objs, providers)
         node_dict = make_node_dict(nodes)
         idx_tbl = table.indx_table(node_dict, True)
         cmd_mode = ui.ui_main(idx_tbl, node_dict)
@@ -50,7 +51,9 @@ def main():
 def list_only():
     """Retreive and display instance data then exit."""
     (cred, providers) = config_read()
-    nodes = cld.collect_data(cred, providers)
+    # (nodes, conn_objs) = cld.collect_data(cred, providers)
+    conn_objs = cld.get_conns(cred, providers)
+    nodes = cld.get_data(conn_objs, providers)
     table.list_table(nodes)
 
 
