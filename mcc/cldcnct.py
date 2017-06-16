@@ -33,7 +33,7 @@ from libcloud.common.types import InvalidCredsError
 from mcc.confdir import CONFIG_DIR
 import sys
 from requests.exceptions import SSLError
-# from pprint import pprint
+
 monkey.patch_all()
 
 
@@ -43,7 +43,6 @@ def get_conns(cred, providers):
                    "azure": [conn_az, nodes_az],
                    "gcp": [conn_gcp, nodes_gcp]}
     # turn on display-indicator to indicated working
-    # sys.stdout.write("\rAuthentication:  ")
     sys.stdout.write("\rEstablishing Connections:   ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
@@ -51,7 +50,6 @@ def get_conns(cred, providers):
     conn_fn = []
     for item in providers:
         conn_fn.append([cld_svc_map[item][0], cred])
-    # fetch connection-objects
     cgroup = Group()
     conn_res = []
     conn_res = cgroup.map(get_conn_new, conn_fn)
@@ -59,21 +57,11 @@ def get_conns(cred, providers):
     conn_objs = {}
     for item in conn_res:
         conn_objs.update(item)
-    # # Gather Nodes
-    # collec_fn = []
-    # for item in providers:
-    #     collec_fn.append([cld_svc_map[item][1], conn_objs[item]])
-    # # fetch nodes
-    # ngroup = Group()
-    # node_list = []
-    # node_list = ngroup.map(get_conn_new, collec_fn)
-    # ngroup.join()
-    # turn off display-indicator that indicated working
+    # turn off busy display-indicator
     busy_disp_off(dobj=busy_obj)
     sys.stdout.write("\r                                                 \r")
     sys.stdout.write("\033[?25h")  # turn cusor back on
     sys.stdout.flush()
-    # return (node_list, conn_objs)
     return conn_objs
 
 
@@ -83,7 +71,6 @@ def get_data(conn_objs, providers):
                    "azure": nodes_az,
                    "gcp": nodes_gcp}
     # turn on display-indicator to indicated working
-    # sys.stdout.write("\rReading Info:  ")
     sys.stdout.write("\rCollecting Info:   ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
@@ -91,42 +78,16 @@ def get_data(conn_objs, providers):
     collec_fn = []
     for item in providers:
         collec_fn.append([cld_svc_map[item], conn_objs[item]])
-    # fetch nodes
     ngroup = Group()
     node_list = []
     node_list = ngroup.map(get_conn_new, collec_fn)
     ngroup.join()
-    # turn off display-indicator that indicated working
+    # turn off busy display-indicator
     busy_disp_off(dobj=busy_obj)
     sys.stdout.write("\r                                                 \r")
     sys.stdout.write("\033[?25h")  # turn cusor back on
     sys.stdout.flush()
     return node_list
-
-
-# def collect_data_orig(cred, providers):
-#     """Collect node data asyncronously using gevent lib."""
-#     cld_svc_map = {"aws": get_aws,
-#                    "azure": get_az,
-#                    "gcp": get_gcp}
-#     # turn on display-indicator to indicated working
-#     sys.stdout.write("\rAuthentication & Node Retrieval:  ")
-#     sys.stdout.flush()
-#     busy_obj = busy_disp_on()
-#     collec_fn = []
-#     for item in providers:
-#         collec_fn.append([cld_svc_map[item], cred])
-#     # fetch nodes
-#     node_list = []
-#     group = Group()
-#     node_list = group.map(get_conn_new, collec_fn)
-#     group.join()
-#     # turn off display-indicator that indicated working
-#     busy_disp_off(dobj=busy_obj)
-#     sys.stdout.write("\r                                                 \r")
-#     sys.stdout.write("\033[?25h")  # turn cusor back on
-#     sys.stdout.flush()
-#     return node_list
 
 
 def get_conn_new(flist):
@@ -189,30 +150,8 @@ def nodes_aws(c_obj):
     """Get node objects from AWS."""
     aws_nodes = []
     aws_nodes = c_obj.list_nodes()
-    # gevent.sleep(0)
     aws_nodes = adj_nodes_aws(aws_nodes)
     return aws_nodes
-
-
-# def get_aws(cred):
-#     """Establish connection to AWS service."""
-#     driver = get_driver(Provider.EC2)
-#     try:
-#         aws_obj = driver(cred['aws_access_key_id'],
-#                          cred['aws_secret_access_key'],
-#                          region=cred['aws_default_region'])
-#     except SSLError:
-#         print("\r SSL Error with AWS               ", end='')
-#         return []
-#     except InvalidCredsError:
-#         print("\r Error with AWS Credentials       ", end='')
-#         return []
-#     gevent.sleep(0)
-#     aws_nodes = []
-#     aws_nodes = aws_obj.list_nodes()
-#     # gevent.sleep(0)
-#     aws_nodes = adj_nodes_aws(aws_nodes)
-#     return aws_nodes
 
 
 def adj_nodes_aws(aws_nodes):
@@ -246,34 +185,10 @@ def conn_az(cred):
 
 def nodes_az(c_obj):
     """Get node objects from Azure."""
-    # gevent.sleep(0)
     az_nodes = []
     az_nodes = c_obj.list_nodes()
-    # gevent.sleep(0)
     az_nodes = adj_nodes_az(az_nodes)
     return az_nodes
-
-
-# def get_az(cred):
-#     """Establish connection to Azure service."""
-#     driver = get_driver(Provider.AZURE_ARM)
-#     try:
-#         az_obj = driver(tenant_id=cred['az_tenant_id'],
-#                         subscription_id=cred['az_sub_id'],
-#                         key=cred['az_app_id'],
-#                         secret=cred['az_app_sec'])
-#     except SSLError:
-#         print("\r SSL Error with Azure             ", end='')
-#         return []
-#     except InvalidCredsError:
-#         print("\r Error with Azure Credentials     ", end='')
-#         return []
-#     gevent.sleep(0)
-#     az_nodes = []
-#     az_nodes = az_obj.list_nodes()
-#     # gevent.sleep(0)
-#     az_nodes = adj_nodes_az(az_nodes)
-#     return az_nodes
 
 
 def adj_nodes_az(az_nodes):
@@ -289,28 +204,6 @@ def adj_nodes_az(az_nodes):
         group, unnsc = group_end.split("/", 1)
         node.group = group
     return az_nodes
-
-
-# def get_gcp(cred):
-#     """Establish connection to GCP."""
-#     driver = get_driver(Provider.GCE)
-#     gcp_pem = CONFIG_DIR + cred['gcp_pem_file']
-#     try:
-#         gcp_obj = driver(cred['gcp_svc_acct_email'],
-#                          gcp_pem,
-#                          project=cred['gcp_proj_id'])
-#     except SSLError:
-#         print("\r SSL Error with GCP               ", end='')
-#         return []
-#     except InvalidCredsError:
-#         print("\r Error with GCP Credentials       ", end='')
-#         return []
-#     gevent.sleep(0)
-#     gcp_nodes = []
-#     gcp_nodes = gcp_obj.list_nodes(ex_use_disk_cache=True)
-#     # gevent.sleep(0)
-#     gcp_nodes = adj_nodes_gcp(gcp_nodes)
-#     return gcp_nodes
 
 
 def conn_gcp(cred):
@@ -332,10 +225,8 @@ def conn_gcp(cred):
 
 def nodes_gcp(c_obj):
     """Get node objects from GCP."""
-    # gevent.sleep(0)
     gcp_nodes = []
     gcp_nodes = c_obj.list_nodes(ex_use_disk_cache=True)
-    # gevent.sleep(0)
     gcp_nodes = adj_nodes_gcp(gcp_nodes)
     return gcp_nodes
 
