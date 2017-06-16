@@ -72,7 +72,7 @@ def get_cmd(node_dict):
             val = input_by_key()
             cmd_todo, cmd_valid = key_lu.get(val.lower(), ["invalid", False])
             if not cmd_valid:
-                uiprint("- {0}Invalid Entry{1}".format(C_ERR, C_NORM))
+                uiprint(" - {0}Invalid Entry{1}".format(C_ERR, C_NORM))
                 sleep(0.5)
                 disp_cmd_bar()
     return cmd_todo
@@ -86,7 +86,7 @@ def node_cmd(cmd_todo, node_dict):
         (tar_valid, tar_mess) = tar_validate(node_dict, inst_num, cmd_todo)
         if tar_valid:
             cmd_result = cmd_exec(node_dict[inst_num], cmd_todo, tar_mess)
-            uiprint(" - {}".format(cmd_result))
+            uiprint(" - {1}{0}{2}".format(cmd_result, C_WARN, C_NORM))
             sleep(1)
             if cmd_result != "Command Aborted":
                 refresh_main = True
@@ -135,7 +135,7 @@ def tar_validate(node_dict, inst_num, cmdname):
                     format(C_STAT[req_lu[cmdname][1]], C_NORM,
                            req_lu[cmdname][1], C_WARN, inst_num,
                            node_dict[inst_num].name,
-                           node_dict[inst_num].cloud, C_TI))
+                           node_dict[inst_num].cloud_disp, C_TI))
     else:
         tar_valid = False
         tar_mess = (" - Node Already {2} - {0}Aborting{1}".
@@ -180,7 +180,6 @@ def input_yn(conf_mess):
     with term.cbreak():
         flush_input()
         val = input_by_key()
-        sleep(0.5)
     return bool(val.lower() == 'y')
 
 
