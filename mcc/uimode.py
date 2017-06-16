@@ -150,7 +150,7 @@ def cmd_exec(tar_node, cmdname, tar_mess):
     conf_mess = ("\r{0} - Continue? [y/N] ".
                  format(tar_mess))
     if input_yn(conf_mess):
-        exec_mess = "\rEXECUTING COMMAND - {0}  ".format(tar_mess)
+        exec_mess = "\rEXECUTING COMMAND - {0}:   ".format(tar_mess)
         disp_erase_ln()
         uiprint(exec_mess)
         busy_obj = busy_disp_on()  # turn on busy indicator
