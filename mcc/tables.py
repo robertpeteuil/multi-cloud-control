@@ -27,36 +27,71 @@ from mcc.colors import C_NORM, C_TI, C_STAT, C_WARN
 from prettytable import PrettyTable
 
 
-def list_table(all_nodes):
-    """Print Table for NEW nested-list all_nodes."""
-    h_name = C_TI + "NAME"
-    h_state = "STATE" + C_NORM
-    nt = PrettyTable()
-    nt.header = False
-    nt.add_row([h_name, "REGION", "CLOUD", "SIZE", "PUBLIC IP", h_state])
-    nt.padding_width = 2
-    nt.border = False
-    for item in all_nodes:
-        for node in item:
-            state = C_STAT[node.state] + node.state + C_NORM
-            if node.public_ips:
-                n_ip = node.public_ips
-            else:
-                n_ip = "-"
-            nt.add_row([node.name, node.zone, node.cloud, node.size,
-                        n_ip, state])
-    print(nt)
+# def list_table(all_nodes):
+#     """Print Table for NEW nested-list all_nodes."""
+#     h_name = C_TI + "NAME"
+#     h_state = "STATE" + C_NORM
+#     nt = PrettyTable()
+#     nt.header = False
+#     nt.add_row([h_name, "REGION", "CLOUD", "SIZE", "PUBLIC IP", h_state])
+#     nt.padding_width = 2
+#     nt.border = False
+#     for item in all_nodes:
+#         for node in item:
+#             state = C_STAT[node.state] + node.state + C_NORM
+#             if node.public_ips:
+#                 n_ip = node.public_ips
+#             else:
+#                 n_ip = "-"
+#             nt.add_row([node.name, node.zone, node.cloud, node.size,
+#                         n_ip, state])
+#     print(nt)
 
 
-def indx_table(node_dict, strmode=False):
-    """Print Table for NEW dict=formatted list."""
-    h_nm = C_TI + "NUM"
-    h_state = "STATE" + C_NORM
+# def indx_table(node_dict, strmode=False):
+#     """Print Table for NEW dict=formatted list."""
+#     h_nm = C_TI + "NUM"
+#     h_state = "STATE" + C_NORM
+#     nt = PrettyTable()
+#     nt.header = False
+#     nt.add_row([h_nm,"NAME","REGION", "CLOUD", "SIZE", "PUBLIC IP", h_state])
+#     nt.padding_width = 2
+#     nt.border = False
+#     for i, node in node_dict.items():
+#         state = C_STAT[node.state] + node.state + C_NORM
+#         inum = C_WARN + str(i) + C_NORM
+#         if node.public_ips:
+#             n_ip = node.public_ips
+#         else:
+#             n_ip = "-"
+#         nt.add_row([inum, node.name, node.zone, node.cloud, node.size,
+#                     n_ip, state])
+#     if not strmode:
+#         print(nt)
+#     else:
+#         idx_tbl = nt.get_string()
+#         return idx_tbl
+
+
+def indx_table_new(node_dict, strmode=False):
+    """Print Table for dict=formatted list conditionally include numbers."""
+    # True = keep as is, display numbers, col1 = NUM, 7 cols
+    # False = no numbers, col1 = NAME, 6 cols
     nt = PrettyTable()
     nt.header = False
-    nt.add_row([h_nm, "NAME", "REGION", "CLOUD", "SIZE", "PUBLIC IP", h_state])
     nt.padding_width = 2
     nt.border = False
+    clr_num = C_TI + "NUM"
+    clr_name = C_TI + "NAME"
+    clr_state = "STATE" + C_NORM
+    t_lu = {True: [clr_num, "NAME", "REGION", "CLOUD",
+                   "SIZE", "PUBLIC IP", clr_state],
+            False: [clr_name, "REGION", "CLOUD", "SIZE",
+                    "PUBLIC IP", clr_state]}
+    # h_nm = C_TI + "NUM"
+    # h_state = "STATE" + C_NORM
+    # nt.add_row([h_nm,"NAME","REGION", "CLOUD", "SIZE", "PUBLIC IP", h_state])
+    nt.add_row(t_lu[strmode])
     for i, node in node_dict.items():
         state = C_STAT[node.state] + node.state + C_NORM
         inum = C_WARN + str(i) + C_NORM
@@ -64,8 +99,12 @@ def indx_table(node_dict, strmode=False):
             n_ip = node.public_ips
         else:
             n_ip = "-"
-        nt.add_row([inum, node.name, node.zone, node.cloud, node.size,
-                    n_ip, state])
+        if strmode:
+            nt.add_row([inum, node.name, node.zone, node.cloud, node.size,
+                        n_ip, state])
+        else:
+            nt.add_row([node.name, node.zone, node.cloud, node.size,
+                        n_ip, state])
     if not strmode:
         print(nt)
     else:
