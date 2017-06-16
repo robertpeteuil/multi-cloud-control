@@ -86,7 +86,7 @@ def node_cmd(cmd_todo, node_dict):
         (tar_valid, tar_mess) = tar_validate(node_dict, inst_num, cmd_todo)
         if tar_valid:
             cmd_result = cmd_exec(node_dict[inst_num], cmd_todo, tar_mess)
-            uiprint("- {}".format(cmd_result))
+            uiprint(" - {}".format(cmd_result))
             sleep(1)
             if cmd_result != "Command Aborted":
                 refresh_main = True
