@@ -37,37 +37,33 @@ term = Terminal()
 
 def ui_main(fmt_table, node_dict):
     """Create the base UI in command mode."""
+    cmd_action = {"quit": False,
+                  "run": node_cmd,
+                  "stop": node_cmd,
+                  "update": True}
     uiprint("\033[?25l")  # turn cursor off
     print("{}\n".format(fmt_table))
     sys.stdout.flush()
-    tar_valid = False
-    cmd_todo = get_cmd(node_dict)
-    while cmd_todo != "quit":
-        inst_num = tar_selection(cmd_todo, len(node_dict))
-        if inst_num != 0:
-            (tar_valid, tar_mess) = tar_validate(node_dict, inst_num, cmd_todo)
-            if tar_valid:
-                cmd_result = cmd_exec(node_dict[inst_num], cmd_todo, tar_mess)
-                uiprint("- {}".format(cmd_result))
-                sleep(1)
-                if cmd_result != "Command Aborted":
-                    disp_clear(len(node_dict) + 2)
-                    return True
-            else:
-                uiprint(tar_mess)
-                sleep(2)
-        else:
-            uiprint(" - Exit")
-            sleep(0.2)
+    # refresh_main values:
+    #   None = loop main-cmd, True = refresh-list, False = exit-program
+    refresh_main = None
+    while refresh_main is None:
         cmd_todo = get_cmd(node_dict)
-    uiprint("\033[?25h")  # turn cursor on
-    return False
+        if callable(cmd_action[cmd_todo]):
+            refresh_main = cmd_action[cmd_todo](cmd_todo, node_dict)
+        else:
+            refresh_main = cmd_action[cmd_todo]
+    if refresh_main:
+        disp_clear(len(node_dict) + 2)
+    else:
+        uiprint("\033[?25h")  # turn cursor on
+    return refresh_main
 
 
 def get_cmd(node_dict):
     """Get main command selection."""
     key_lu = {"q": ["quit", True], "r": ["run", True],
-              "s": ["stop", True]}
+              "s": ["stop", True], "u": ["update", True]}
     disp_cmd_bar()
     cmd_valid = False
     flush_input()
@@ -80,6 +76,27 @@ def get_cmd(node_dict):
                 sleep(0.5)
                 disp_cmd_bar()
     return cmd_todo
+
+
+def node_cmd(cmd_todo, node_dict):
+    """Process commands that target specific nodes."""
+    inst_num = tar_selection(cmd_todo, len(node_dict))
+    refresh_main = None
+    if inst_num != 0:
+        (tar_valid, tar_mess) = tar_validate(node_dict, inst_num, cmd_todo)
+        if tar_valid:
+            cmd_result = cmd_exec(node_dict[inst_num], cmd_todo, tar_mess)
+            uiprint(" - {}".format(cmd_result))
+            sleep(1)
+            if cmd_result != "Command Aborted":
+                refresh_main = True
+        else:  # invalid target node
+            uiprint(tar_mess)
+            sleep(2)
+    else:  # 0 selected - exit command, but not entire program
+        uiprint(" - Exit")
+        sleep(0.2)
+    return refresh_main
 
 
 def tar_selection(cmdname, inst_max):
@@ -109,16 +126,16 @@ def tar_selection(cmdname, inst_max):
 
 def tar_validate(node_dict, inst_num, cmdname):
     """Validate that command can be performed on target node."""
-    # cmd: [required-state, action-to-be-performed, already state]
+    # cmd: [required-state, action-to-be-displayed, already state]
     req_lu = {"run": ["stopped", "START", "running"],
               "stop": ["running", "STOP", "stopped"]}
     if req_lu[cmdname][0] == node_dict[inst_num].state:
         tar_valid = True
-        tar_mess = ("{0}{2}{1} Node {3}{4}{1} ({5} on {6})".
+        tar_mess = ("{0}{2}{1} Node {3}{4}{1} ({7}{5}{1} on {3}{6}{1})".
                     format(C_STAT[req_lu[cmdname][1]], C_NORM,
                            req_lu[cmdname][1], C_WARN, inst_num,
                            node_dict[inst_num].name,
-                           node_dict[inst_num].cloud))
+                           node_dict[inst_num].cloud, C_TI))
     else:
         tar_valid = False
         tar_mess = (" - Node Already {2} - {0}Aborting{1}".
@@ -182,15 +199,14 @@ def disp_cmd_title(cmd_title):
 def disp_cmd_bar():
     """Display Command Bar."""
     cmd_bar = ("\rSELECT COMMAND -   {2}(R){1}un Node   {3}"
-               "(S){1}top Node   {4}(Q){1}uit:  ".
-               format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
+               "(S){1}top Node   {5}(U){1}pdate Info    {4}(Q){1}uit:  ".
+               format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA, C_WARN))
     disp_erase_ln()
     uiprint(cmd_bar)
 
 
 def disp_clear(numlines):
     """Clear previous display info from screen in prep for new data."""
-    # numlines += 2
     disp_erase_ln()
     for i in range(numlines, 0, -1):
         uiprint("\033[A")
