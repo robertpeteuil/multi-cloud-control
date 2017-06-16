@@ -31,9 +31,8 @@ import mcc.cldcnct as cld
 import mcc.uimode as ui
 import os
 import sys
-# from pprint import pprint
 
-__version__ = "0.0.35"
+__version__ = "0.0.36"
 
 
 def main():
@@ -43,8 +42,7 @@ def main():
     conn_objs = cld.get_conns(cred, providers)
     while cmd_mode:
         nodes = cld.get_data(conn_objs, providers)
-        # node_dict = make_node_dict(nodes)
-        node_dict = mk_sorted_node_dict(nodes)
+        node_dict = make_node_dict(nodes)
         idx_tbl = table.indx_table(node_dict, True)
         cmd_mode = ui.ui_main(idx_tbl, node_dict)
     print("\033[?25h")
@@ -58,44 +56,20 @@ def list_only():
     table.list_table(nodes)
 
 
-def make_node_dict(outer_list):
-    """Convert node data from nested-list to dict."""
-    node_dict = {}
-    x = 1
-    for inner_list in outer_list:
-        for node in inner_list:
-            node_dict[x] = node
-            x += 1
-    return node_dict
-
-
-def mk_sorted_node_dict(outer_list):
+def make_node_dict(outer_list, sort="zone"):
     """Convert node data from nested-list to sorted dict."""
-    # each entry - 1: {"cloud": "aws", "name": "skybox", "node": nodeobj
-    #  sort with: rn_sorted = OrderedDict(sorted(rn.items(), key=lambda k:
-    #                               (k[1]['cloud'], k[1]['name'].lower())))
-    # turn raw node info (list of lists) into dictionary with added keypairs
-    #    for cloud-provider, node-name to be used for sortingand node object
     raw_dict = {}
     x = 1
     for inner_list in outer_list:
         for node in inner_list:
             raw_dict[x] = node
             x += 1
-
-    # ATTEMPT TO GEN SORTED LIST THRU SORTED-KEY LIST
-    # Generate sorted key-list
-    # srt_order = sorted(raw_dict, key=lambda k:
-    #                    (raw_dict[k].cloud, raw_dict[k].name.lower()))
-    # print(srt_order)
-    # # generate sorted dict based on sorted key-list
-    # srt_dict = raw_dict.fromkeys(srt_order, raw_dict[srt_order])
-
-    # sort raw dict by cloud-provider then hostname
-    srt_dict = OrderedDict(sorted(raw_dict.items(), key=lambda k:
-                           (k[1].cloud, k[1].name.lower())))
-
-    # create dict with re-numbered keys in sorted order
+    if sort == "name":  # sort by provider - name
+        srt_dict = OrderedDict(sorted(raw_dict.items(), key=lambda k:
+                               (k[1].cloud, k[1].name.lower())))
+    else:  # sort by provider - zone - name
+        srt_dict = OrderedDict(sorted(raw_dict.items(), key=lambda k:
+                               (k[1].cloud, k[1].zone, k[1].name.lower())))
     x = 1
     node_dict = {}
     for i, v in srt_dict.items():
