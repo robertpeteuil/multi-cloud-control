@@ -137,12 +137,12 @@ def conn_aws(cred):
         aws_obj = driver(cred['aws_access_key_id'],
                          cred['aws_secret_access_key'],
                          region=cred['aws_default_region'])
-    except SSLError:
-        print("\r SSL Error with AWS               ", end='')
-        return []
-    except InvalidCredsError:
-        print("\r Error with AWS Credentials       ", end='')
-        return []
+    except SSLError as e:
+        print("\r SSL Error with AWS:  {}".format(e))
+        sys.exit()
+    except InvalidCredsError as e:
+        print("\r Error with AWS Credentials:  {}".format(e))
+        sys.exit()
     return {"aws": aws_obj}
 
 
@@ -158,6 +158,7 @@ def adj_nodes_aws(aws_nodes):
     """Retreive details specific to AWS."""
     for node in aws_nodes:
         node.cloud = "aws"
+        node.cloud_disp = "AWS"
         node.private_ips = ip_to_str(node.private_ips)
         node.public_ips = ip_to_str(node.public_ips)
         node.zone = node.extra['availability']
@@ -174,12 +175,12 @@ def conn_az(cred):
                         subscription_id=cred['az_sub_id'],
                         key=cred['az_app_id'],
                         secret=cred['az_app_sec'])
-    except SSLError:
-        print("\r SSL Error with Azure             ", end='')
-        return []
-    except InvalidCredsError:
-        print("\r Error with Azure Credentials     ", end='')
-        return []
+    except SSLError as e:
+        print("\r SSL Error with Azure:  {}".format(e))
+        sys.exit()
+    except InvalidCredsError as e:
+        print("\r Error with Azure Credentials:  {}".format(e))
+        sys.exit()
     return {"azure": az_obj}
 
 
@@ -195,6 +196,7 @@ def adj_nodes_az(az_nodes):
     """Retreive details specific to Azure."""
     for node in az_nodes:
         node.cloud = "azure"
+        node.cloud_disp = "Azure"
         node.private_ips = ip_to_str(node.private_ips)
         node.public_ips = ip_to_str(node.public_ips)
         node.zone = node.extra['location']
@@ -214,12 +216,12 @@ def conn_gcp(cred):
         gcp_obj = driver(cred['gcp_svc_acct_email'],
                          gcp_pem,
                          project=cred['gcp_proj_id'])
-    except SSLError:
-        print("\r SSL Error with GCP               ", end='')
-        return []
-    except InvalidCredsError:
-        print("\r Error with GCP Credentials       ", end='')
-        return []
+    except SSLError as e:
+        print("\r SSL Error with GCP:  {}".format(e))
+        sys.exit()
+    except (InvalidCredsError, ValueError) as e:
+        print("\r Error with GCP Credentials:  {}".format(e))
+        sys.exit()
     return {"gcp": gcp_obj}
 
 
@@ -235,6 +237,7 @@ def adj_nodes_gcp(gcp_nodes):
     """Retreive details specific to GCP."""
     for node in gcp_nodes:
         node.cloud = "gcp"
+        node.cloud_disp = "GCP"
         node.private_ips = ip_to_str(node.private_ips)
         node.public_ips = ip_to_str(node.public_ips)
         node.zone = node.extra['zone'].name
