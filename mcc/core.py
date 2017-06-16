@@ -43,7 +43,8 @@ def main():
     while cmd_mode:
         nodes = cld.get_data(conn_objs, providers)
         node_dict = make_node_dict(nodes)
-        idx_tbl = table.indx_table(node_dict, True)
+        # idx_tbl = table.indx_table(node_dict, True)
+        idx_tbl = table.indx_table_new(node_dict, True)
         cmd_mode = ui.ui_main(idx_tbl, node_dict)
     print("\033[?25h")
 
@@ -53,7 +54,9 @@ def list_only():
     (cred, providers) = config_read()
     conn_objs = cld.get_conns(cred, providers)
     nodes = cld.get_data(conn_objs, providers)
-    table.list_table(nodes)
+    # table.list_table(nodes)
+    node_dict = make_node_dict(nodes)
+    table.indx_table_new(node_dict)
 
 
 def make_node_dict(outer_list, sort="zone"):
