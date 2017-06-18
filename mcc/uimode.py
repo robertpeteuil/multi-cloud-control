@@ -31,6 +31,7 @@ from mcc.cldcnct import busy_disp_on, busy_disp_off
 from time import sleep
 from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN, C_STAT
 from gevent import monkey
+from gevent import subprocess
 
 monkey.patch_all()
 term = Terminal()
@@ -38,12 +39,12 @@ term = Terminal()
 
 def ui_main(fmt_table, node_dict):
     """Create the base UI in command mode."""
-    cmd_action = {"quit": False,
-                  "run": node_cmd,
-                  "stop": node_cmd,
-                  "connect": node_cmd,
-                  "details": node_cmd,
-                  "update": True}
+    cmd_funct = {"quit": False,
+                 "run": node_cmd,
+                 "stop": node_cmd,
+                 "connect": node_cmd,
+                 "details": node_cmd,
+                 "update": True}
     uiprint("\033[?25l")  # cursor off
     print("{}\n".format(fmt_table))
     sys.stdout.flush()
@@ -52,14 +53,14 @@ def ui_main(fmt_table, node_dict):
     refresh_main = None
     while refresh_main is None:
         cmd_todo = get_cmd(node_dict)
-        if callable(cmd_action[cmd_todo]):
-            refresh_main = cmd_action[cmd_todo](cmd_todo, node_dict)
+        if callable(cmd_funct[cmd_todo]):
+            refresh_main = cmd_funct[cmd_todo](cmd_todo, node_dict)
         else:
-            refresh_main = cmd_action[cmd_todo]
+            refresh_main = cmd_funct[cmd_todo]
     if refresh_main:
         disp_clear(len(node_dict) + 2)
-    else:
-        uiprint("\033[?25h")  # cursor on
+    # else:
+    #     uiprint("\033[?25h")  # cursor on
     return refresh_main
 
 
@@ -86,20 +87,29 @@ def node_cmd(cmd_todo, node_dict):
     """Process commands that target specific nodes."""
     sc = {"run": cmd_startstop, "stop": cmd_startstop,
           "connect": cmd_conn, "details": cmd_details}
-    inst_num = tar_selection(cmd_todo, len(node_dict))
+    node_qty = len(node_dict)
+    inst_num = tar_selection(cmd_todo, node_qty)
     refresh_main = None
     if inst_num != 0:
         (tar_valid, tar_mess) = tar_validate(node_dict, inst_num, cmd_todo)
         if tar_valid:
             subcmd = sc[cmd_todo]  # get dynamic sub-command
-            cmd_result = subcmd(node_dict[inst_num], cmd_todo, tar_mess)
-            if cmd_result != "Command Aborted":
-                refresh_main = True
-                c_result = C_GOOD
-            else:
-                c_result = C_WARN
-            uiprint_suffix(cmd_result, c_result)
-            sleep(1)
+            refresh_main = subcmd(node_dict[inst_num], cmd_todo,
+                                  tar_mess, node_qty)
+            # cmd_result = subcmd(node_dict[inst_num], cmd_todo,
+            #                     tar_mess, node_qty)
+            # if cmd_result == "Connect Successful":
+            #     print(term.clear)  # clear screen after ssh session
+            #     print(term.move_y(node_qty + 2))
+            #     refresh_main = True
+            # else:
+            #     if cmd_result == "Command Aborted":
+            #         c_result = C_WARN
+            #     else:
+            #         refresh_main = True
+            #         c_result = C_GOOD
+            #     uiprint_suffix(cmd_result, c_result)
+            #     sleep(1)
         else:  # invalid target
             uiprint_suffix(tar_mess, C_ERR)
             sleep(1.5)
@@ -151,7 +161,7 @@ def tar_validate(node_dict, inst_num, cmdname):
     return (tar_valid, tar_mess)
 
 
-def cmd_startstop(tar_node, cmdname, tar_mess):
+def cmd_startstop(tar_node, cmdname, tar_mess, node_qty):
     """Confirm command and execute it."""
     cmd_lu = {"run": ["ex_start_node", "wait_until_running", "RUNNING"],
               "stop": ["ex_stop_node", "", "STOPPING"]}
@@ -160,6 +170,7 @@ def cmd_startstop(tar_node, cmdname, tar_mess):
     conf_mess = ("\r{0}{1}{2} {3} - Confirm [y/N]: ".
                  format(C_STAT[cmdname.upper()], cmdname.upper(), C_NORM,
                         tar_mess))
+    cmd_result = None
     if input_yn(conf_mess):
         exec_mess = ("\r{0}{1}{2} {3}:  ".
                      format(C_STAT[cmdname.upper()], cmd_lu[cmdname][2],
@@ -175,27 +186,33 @@ def cmd_startstop(tar_node, cmdname, tar_mess):
             seccmd = getattr(cmdpre, cmd_wait)
             response = seccmd([tar_node])  # noqa
         delay, cmd_end = cld_lu.get(tar_node.cloud,
-                                    {}).get(cmdname, [0, "Successfull"])
-        cmd_result = "{0} {1}".format(cmdname.title(), cmd_end)
+                                    {}).get(cmdname, [0, "Successful"])
+        # result_msg = "{0} {1}".format(cmdname.title(), cmd_end)
+        # uiprint_suffix(result_msg, C_GOOD)
         sleep(delay)
         busy_disp_off(busy_obj)  # busy indicator OFF
         uiprint("\033[D")  # remove extra space
+        cmd_result = True
+        uiprint_suffix("{0} {1}".format(cmdname.title(), cmd_end), C_GOOD)
     else:
-        cmd_result = "Command Aborted"
+        uiprint_suffix("Command Aborted")
+        # result_msg = "Command Aborted"
+        # result_clr = C_WARN
+    # uiprint_suffix(result_msg, result_clr)
+    sleep(1)
     return cmd_result
 
 
-def cmd_conn(tar_node, cmdname, tar_mess):
+def cmd_conn(tar_node, cmdname, tar_mess, node_qty):
     """Connect to node."""
     # FUTURE: call function to check for custom connection-info
-    conn_info = "Default"
-    conf_mess = ("\r{0}{1} TO{2} {3} using {4}{5}{2} Connection Info"
-                 " - Confirm [y/N]:  ".format(C_STAT[cmdname.upper()],
-                                              cmdname.upper(), C_NORM,
-                                              tar_mess, C_TI, conn_info))
+    conn_info = "Defaults"
+    conf_mess = ("\r{0}{1} TO{2} {3} using {4}{5}{2} - Confirm [y/N]: ".
+                 format(C_STAT[cmdname.upper()], cmdname.upper(), C_NORM,
+                        tar_mess, C_TI, conn_info))
+    cmd_result = None
     if input_yn(conf_mess):
-        exec_mess = ("\r{0}CONNECTING TO{1} {2} using {3}{4}{1}"
-                     " Connection Info:  ".
+        exec_mess = ("\r{0}CONNECTING TO{1} {2} using {3}{4}{1}:  ".
                      format(C_STAT[cmdname.upper()], C_NORM, tar_mess,
                             C_TI, conn_info))
         disp_erase_ln()
@@ -206,17 +223,31 @@ def cmd_conn(tar_node, cmdname, tar_mess):
                                               tar_node.public_ips)
         else:
             ssh_cmd = "ssh {0}{1}".format(ssh_key, tar_node.public_ips)
-        # TEMP - display ssh connect string
-        disp_erase_ln()
-        uiprint("\rSSH Command: {}".format(ssh_cmd))
-        sleep(15)
-        cmd_result = "Connect Sucessfull"
-        # turn on cursor before calling ssh command
-        #   use subprocess.call
-        #       is there a gevent version i can call in cldcnt module?
-        #   avoids importing subprocess in this module
+        print("\n")
+        uiprint("\033[?25h")  # cursor on
+        # retval = subprocess.call(ssh_cmd, shell=True)
+        subprocess.call(ssh_cmd, shell=True)
+        uiprint("\033[?25l")  # cursor off
+        # print(retval)
+        # sleep(2)
+        # result_msg = "Connect Successful"
+        uiprint("\033[D")  # remove extra space
+        cmd_result = True
+        uiprint_suffix("Connect Successful", C_GOOD)
+        print(term.clear)  # clear screen after ssh session
+        print(term.move_y(node_qty + 2))
+        # if retval:
+        #     uiprint("\033[A\033[A\033[A")
+        #     disp_erase_ln()
+        #     uiprint("\nFailed wit SSH Command: {}".format(ssh_cmd))
+        #     sleep(10)
+        #     result_msg = "Connect Failed"
+        # else:
+        #     result_msg = "Connect Successful"
     else:
-        cmd_result = "Command Aborted"
+        # result_msg = "Command Aborted"
+        uiprint_suffix("Command Aborted")
+        sleep(1)
     return cmd_result
 
 
@@ -251,10 +282,10 @@ def calc_awsssh(node):
     return username
 
 
-def cmd_details(tar_node, cmdname, tar_mess):
+def cmd_details(tar_node, cmdname, tar_mess, node_qty):
     """Display Node details."""
-    cmd_result = "Command Aborted"
-    return cmd_result
+    uiprint_suffix("Command Aborted")
+    return None
 
 
 def input_yn(conf_mess):
@@ -273,7 +304,7 @@ def uiprint(toprint):
     sys.stdout.flush()
 
 
-def uiprint_suffix(toprint, clr):
+def uiprint_suffix(toprint, clr=C_WARN):
     """Print Colored Suffix Message after command."""
     uiprint(" - {1}{0}{2}".format(toprint, clr, C_NORM))
 
