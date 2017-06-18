@@ -41,7 +41,7 @@ def ui_main(fmt_table, node_dict):
                   "run": node_cmd,
                   "stop": node_cmd,
                   "update": True}
-    uiprint("\033[?25l")  # turn cursor off
+    uiprint("\033[?25l")  # cursor off
     print("{}\n".format(fmt_table))
     sys.stdout.flush()
     # refresh_main values:
@@ -56,7 +56,7 @@ def ui_main(fmt_table, node_dict):
     if refresh_main:
         disp_clear(len(node_dict) + 2)
     else:
-        uiprint("\033[?25h")  # turn cursor on
+        uiprint("\033[?25h")  # cursor on
     return refresh_main
 
 
@@ -85,23 +85,24 @@ def node_cmd(cmd_todo, node_dict):
     if inst_num != 0:
         (tar_valid, tar_mess) = tar_validate(node_dict, inst_num, cmd_todo)
         if tar_valid:
+            # call function to get dynamic sub-command for commands
+            #   that use the node logic up to this point, but now deviate
+            #   like CONNECT and DETAILS
+            # line below will call the returned sub-command dynamically
             cmd_result = cmd_exec(node_dict[inst_num], cmd_todo, tar_mess)
             if cmd_result != "Command Aborted":
                 refresh_main = True
                 c_result = C_GOOD
             else:
                 c_result = C_WARN
-                # uiprint("\033[D\033[D")  # eliminate extra space
-            # uiprint(" - {1}{0}{2}".format(cmd_result, c_result, C_NORM))
             uiprint_suffix(cmd_result, c_result)
             sleep(1)
-        else:  # invalid target node
+        else:  # invalid target
             uiprint_suffix(tar_mess, C_ERR)
-            # uiprint(tar_mess)  # used when it was pre-formatted
             sleep(1)
-    else:  # 0 selected - exit command but not program
+    else:  # 0 - exit command but not program
         uiprint(" - Exit")
-        sleep(0.2)
+        sleep(0.5)
     return refresh_main
 
 
@@ -124,7 +125,6 @@ def tar_selection(cmdname, inst_max):
             if inst_num <= inst_max:
                 inst_valid = True
             else:
-                # uiprint(" - {0}Invalid Entry{1}".format(C_ERR, C_NORM))
                 uiprint_suffix("Invalid Entry", C_ERR)
                 sleep(0.5)
                 disp_cmd_title(cmd_title)
@@ -136,19 +136,26 @@ def tar_validate(node_dict, inst_num, cmdname):
     # cmd: [required-state, action-to-displayed, error-statement]
     req_lu = {"run": ["stopped", "START", "Already Running"],
               "stop": ["running", "STOP", "Already Stopped"],
-              "connect": ["running", "CONNECT TO", "Not Running"]}
-    if req_lu[cmdname][0] == node_dict[inst_num].state:
-        tar_valid = True
-        tar_mess = ("{0}{2}{1} Node {3}{4}{1} ({7}{5}{1} on {3}{6}{1})".
-                    format(C_STAT[req_lu[cmdname][1]], C_NORM,
-                           req_lu[cmdname][1], C_WARN, inst_num,
-                           node_dict[inst_num].name,
-                           node_dict[inst_num].cloud_disp, C_TI))
-    else:
-        tar_valid = False
-        tar_mess = req_lu[cmdname][2]
-        # tar_mess = (" - Node {2} - {0}Aborting{1}".
-        #             format(C_ERR, C_NORM, req_lu[cmdname][2].title()))
+              "connect": ["running", "CONNECT to", "Not Running"],
+              "details": [node_dict[inst_num].state, "DETAILS for", ""]}
+    tm = {True: ("{0}{2}{1} Node {3}{4}{1} ({7}{5}{1} on {3}{6}{1})".
+                 format(C_STAT[req_lu[cmdname][1]], C_NORM,
+                        req_lu[cmdname][1], C_WARN, inst_num,
+                        node_dict[inst_num].name,
+                        node_dict[inst_num].cloud_disp, C_TI)),
+          False: req_lu[cmdname][2]}
+    tar_valid = bool(req_lu[cmdname][0] == node_dict[inst_num].state)
+    tar_mess = tm[tar_valid]
+    # if req_lu[cmdname][0] == node_dict[inst_num].state:
+    #     tar_valid = True
+    #     tar_mess = ("{0}{2}{1} Node {3}{4}{1} ({7}{5}{1} on {3}{6}{1})".
+    #                 format(C_STAT[req_lu[cmdname][1]], C_NORM,
+    #                        req_lu[cmdname][1], C_WARN, inst_num,
+    #                        node_dict[inst_num].name,
+    #                        node_dict[inst_num].cloud_disp, C_TI))
+    # else:
+    #     tar_valid = False
+    #     tar_mess = req_lu[cmdname][2]
     return (tar_valid, tar_mess)
 
 
@@ -163,25 +170,24 @@ def cmd_exec(tar_node, cmdname, tar_mess):
         exec_mess = "\rEXECUTING {0}:   ".format(tar_mess)
         disp_erase_ln()
         uiprint(exec_mess)
-        busy_obj = busy_disp_on()  # turn on busy indicator
-        cmd_one = cmd_lu[cmdname][0]
-        cmd_two = cmd_lu[cmdname][1]
+        busy_obj = busy_disp_on()  # busy indicator ON
+        # cmd_one = cmd_lu[cmdname][0]
+        cmd_wait = cmd_lu[cmdname][1]
         cmdpre = getattr(tar_node, "driver")
-        maincmd = getattr(cmdpre, cmd_one)
+        # maincmd = getattr(cmdpre, cmd_one)
+        maincmd = getattr(cmdpre, cmd_lu[cmdname][0])
         response = maincmd(tar_node)  # noqa
-        if cmd_two:
-            cmdpre = getattr(tar_node, "driver")
-            seccmd = getattr(cmdpre, cmd_two)
+        if cmd_wait:
+            # cmdpre = getattr(tar_node, "driver")
+            seccmd = getattr(cmdpre, cmd_wait)
             response = seccmd([tar_node])  # noqa
         cmd_result = "{0} {1}".format(cmdname.title(),
                                       cmd_lu[cmdname][2])
-        # delay on Azure to allow status change as nodes refresh on return
-        # if cmdname == "stop" and tar_node.cloud == "azure":
-        #     sleep(5)
+        # delay on Azure to allow status to change before node-list refresh
         delay = delay_lu.get(tar_node.cloud, {}).get(cmdname, 0)
         sleep(delay)
-        busy_disp_off(busy_obj)  # turn off busy indicator
-        uiprint("\033[D\033[D")  # eliminate extra spaces
+        busy_disp_off(busy_obj)  # busy indicator OFF
+        uiprint("\033[D\033[D")  # remove extra spaces
     else:
         cmd_result = "Command Aborted"
     return cmd_result
@@ -255,11 +261,11 @@ def input_by_key():
     flush_input()
     with term.cbreak():
         while input_valid:
-            uiprint("\033[?25h")  # turn cursor on
+            uiprint("\033[?25h")  # cursor on
             key_raw = term.inkey()
             if key_raw.name == "KEY_ENTER":
                 input_valid = False
-                uiprint("\033[?25l")  # turn cursor off
+                uiprint("\033[?25l")  # cursor off
                 break
             if key_raw.name == 'KEY_DELETE':
                 usr_inp = usr_inp[:-1]
