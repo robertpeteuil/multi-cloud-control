@@ -90,13 +90,8 @@ def node_cmd(cmd_todo, node_dict):
     if inst_num != 0:
         (tar_valid, tar_mess) = tar_validate(node_dict, inst_num, cmd_todo)
         if tar_valid:
-            # get dynamic sub-command for commands
-            #   that use the node logic up to this point, but now deviate
-            #   like CONNECT and DETAILS
-            # line below will call the returned sub-command dynamically
-            subcmd = sc[cmd_todo]
+            subcmd = sc[cmd_todo]  # get dynamic sub-command
             cmd_result = subcmd(node_dict[inst_num], cmd_todo, tar_mess)
-            # cmd_result = cmd_startstop(node_dict[inst_num],cmd_todo,tar_mess)
             if cmd_result != "Command Aborted":
                 refresh_main = True
                 c_result = C_GOOD
@@ -108,7 +103,7 @@ def node_cmd(cmd_todo, node_dict):
             uiprint_suffix(tar_mess, C_ERR)
             sleep(1)
     else:  # 0 - exit command but not program
-        uiprint(" - Exit")
+        uiprint(" - Exit Command")
         sleep(0.5)
     return refresh_main
 
@@ -116,7 +111,7 @@ def node_cmd(cmd_todo, node_dict):
 def tar_selection(cmdname, inst_max):
     """Determine Node via alternate input method."""
     cmddisp = cmdname.upper()
-    cmd_title = ("\r{1}{0} NODE{2} - Enter {3}Node #{2}"
+    cmd_title = ("\r{1}{0} NODE{2} - Enter {3}#{2}"
                  " ({4}0 = Exit Command{2}): ".
                  format(cmddisp, C_TI, C_NORM, C_WARN, MAGENTA))
     disp_cmd_title(cmd_title)
@@ -141,32 +136,23 @@ def tar_selection(cmdname, inst_max):
 def tar_validate(node_dict, inst_num, cmdname):
     """Validate that command can be performed on target node."""
     # cmd: [required-state, action-to-displayed, error-statement]
-    req_lu = {"run": ["stopped", "RUN", "Already Running"],
-              "stop": ["running", "STOP", "Already Stopped"],
-              "connect": ["running", "CONNECT to", "Not Running"],
-              "details": [node_dict[inst_num].state, "DETAILS for", ""]}
-    # tm = {True: ("{0}{2}{1} Node {3}{4}{1} ({7}{5}{1} on {3}{6}{1})".
-    #              format(C_STAT[req_lu[cmdname][1]], C_NORM,
-    #                     req_lu[cmdname][1], C_WARN, inst_num,
-    #                     node_dict[inst_num].name,
-    #                     node_dict[inst_num].cloud_disp, C_TI)),
+    req_lu = {"run": ["stopped", "Already Running"],
+              "stop": ["running", "Already Stopped"],
+              "connect": ["running", "Not Running"],
+              "details": [node_dict[inst_num].state, ""]}
+    # OLD - 3 value list
+    # req_lu = {"run": ["stopped", "RUN", "Already Running"],
+    #           "stop": ["running", "STOP", "Already Stopped"],
+    #           "connect": ["running", "CONNECT to", "Not Running"],
+    #           "details": [node_dict[inst_num].state, "DETAILS for", ""]}
     tm = {True: ("Node {1}{2}{0} ({5}{3}{0} on {1}{4}{0})".
                  format(C_NORM, C_WARN, inst_num,
                         node_dict[inst_num].name,
                         node_dict[inst_num].cloud_disp, C_TI)),
-          False: req_lu[cmdname][2]}
+          # False: req_lu[cmdname][2]}  # OLD for 3 value list
+          False: req_lu[cmdname][1]}
     tar_valid = bool(req_lu[cmdname][0] == node_dict[inst_num].state)
     tar_mess = tm[tar_valid]
-    # if req_lu[cmdname][0] == node_dict[inst_num].state:
-    #     tar_valid = True
-    #     tar_mess = ("{0}{2}{1} Node {3}{4}{1} ({7}{5}{1} on {3}{6}{1})".
-    #                 format(C_STAT[req_lu[cmdname][1]], C_NORM,
-    #                        req_lu[cmdname][1], C_WARN, inst_num,
-    #                        node_dict[inst_num].name,
-    #                        node_dict[inst_num].cloud_disp, C_TI))
-    # else:
-    #     tar_valid = False
-    #     tar_mess = req_lu[cmdname][2]
     return (tar_valid, tar_mess)
 
 
@@ -174,39 +160,38 @@ def cmd_startstop(tar_node, cmdname, tar_mess):
     """Confirm command and execute it."""
     cmd_lu = {"run": ["ex_start_node", "wait_until_running", "RUNNING"],
               "stop": ["ex_stop_node", "", "STOPPING"]}
-    delay_lu = {"azure": {"stop": 5}}
-    endms_lu = {"azure": {"stop": "Initiated"}}
+    # OLD INDIVIDUAL LOOKUPS for DELAY and MESSAGE
+    # delay_lu = {"azure": {"stop": 5}}
+    # endms_lu = {"azure": {"stop": "Initiated"}}
+
+    # specific delay & message {provider: {command: [delay, message]}}
+    cld_lu = {"azure": {"stop": [5, "Initiated"]}}
     conf_mess = ("\r{0}{1}{2} {3} - Confirm [y/N]: ".
                  format(C_STAT[cmdname.upper()], cmdname.upper(), C_NORM,
                         tar_mess))
     if input_yn(conf_mess):
-        # exec_mess = "\rEXECUTING {0}:  ".format(tar_mess)
         exec_mess = ("\r{0}{1}{2} {3}:  ".
                      format(C_STAT[cmdname.upper()], cmd_lu[cmdname][2],
                             C_NORM, tar_mess))
         disp_erase_ln()
         uiprint(exec_mess)
         busy_obj = busy_disp_on()  # busy indicator ON
-        # cmd_one = cmd_lu[cmdname][0]
-        cmd_wait = cmd_lu[cmdname][1]
         cmdpre = getattr(tar_node, "driver")
-        # maincmd = getattr(cmdpre, cmd_one)
         maincmd = getattr(cmdpre, cmd_lu[cmdname][0])
         response = maincmd(tar_node)  # noqa
+        cmd_wait = cmd_lu[cmdname][1]
         if cmd_wait:
-            # cmdpre = getattr(tar_node, "driver")
             seccmd = getattr(cmdpre, cmd_wait)
             response = seccmd([tar_node])  # noqa
-        cmd_end = endms_lu.get(tar_node.cloud, {}).get(cmdname, "Successfull")
+        # delay = delay_lu.get(tar_node.cloud, {}).get(cmdname, 0)
+        # cmd_end=endms_lu.get(tar_node.cloud, {}).get(cmdname, "Successfull")
+        delay, cmd_end = cld_lu.get(tar_node.cloud,
+                                    {}).get(cmdname, [0, "Successfull"])
         cmd_result = "{0} {1}".format(cmdname.title(), cmd_end)
-        # cmd_result = "{0} {1}".format(cmdname.title(),
-        #                               cmd_lu[cmdname][2])
         # delay on Azure to allow status to change before node-list refresh
-        delay = delay_lu.get(tar_node.cloud, {}).get(cmdname, 0)
         sleep(delay)
         busy_disp_off(busy_obj)  # busy indicator OFF
-        # uiprint("\033[D\033[D")  # remove extra spaces
-        uiprint("\033[D")  # remove extra spaces
+        uiprint("\033[D")  # remove extra space
     else:
         cmd_result = "Command Aborted"
     return cmd_result
@@ -257,6 +242,7 @@ def disp_cmd_bar():
                "{3}(S){1}top   {0}(U){1}pdate Info"
                "   {4}(Q){1}uit: ".
                format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
+    # FUTURE - TO BE USED WHEN DETAILS IMPLEMENTED
     # cmd_bar = ("\rSELECT COMMAND -  {2}(R){1}un   {0}(C){1}onnect   "
     #            "{3}(S){1}top   {0}(D){1}etails   {0}(U){1}pdate Info"
     #            "   {4}(Q){1}uit: ".
@@ -306,7 +292,6 @@ def input_by_key():
             if key_raw.name == 'KEY_DELETE':
                 del_one_char(len(usr_inp))
                 usr_inp = usr_inp[:-1]
-                # uiprint("\033[D \033[D")
             if not key_raw.is_sequence:
                 usr_inp += key_raw
                 uiprint(key_raw)
