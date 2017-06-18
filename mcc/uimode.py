@@ -25,6 +25,7 @@ Author:    Robert Peteuil
 from __future__ import absolute_import, print_function
 from builtins import range
 from blessed import Terminal
+from mcc.confdir import CONFIG_DIR
 import sys
 from mcc.cldcnct import busy_disp_on, busy_disp_off
 from time import sleep
@@ -101,7 +102,7 @@ def node_cmd(cmd_todo, node_dict):
             sleep(1)
         else:  # invalid target
             uiprint_suffix(tar_mess, C_ERR)
-            sleep(1)
+            sleep(1.5)
     else:  # 0 - exit command but not program
         uiprint(" - Exit Command")
         sleep(0.5)
@@ -138,18 +139,12 @@ def tar_validate(node_dict, inst_num, cmdname):
     # cmd: [required-state, action-to-displayed, error-statement]
     req_lu = {"run": ["stopped", "Already Running"],
               "stop": ["running", "Already Stopped"],
-              "connect": ["running", "Not Running"],
+              "connect": ["running", "Can't Connect, Node Not Running"],
               "details": [node_dict[inst_num].state, ""]}
-    # OLD - 3 value list
-    # req_lu = {"run": ["stopped", "RUN", "Already Running"],
-    #           "stop": ["running", "STOP", "Already Stopped"],
-    #           "connect": ["running", "CONNECT to", "Not Running"],
-    #           "details": [node_dict[inst_num].state, "DETAILS for", ""]}
     tm = {True: ("Node {1}{2}{0} ({5}{3}{0} on {1}{4}{0})".
                  format(C_NORM, C_WARN, inst_num,
                         node_dict[inst_num].name,
                         node_dict[inst_num].cloud_disp, C_TI)),
-          # False: req_lu[cmdname][2]}  # OLD for 3 value list
           False: req_lu[cmdname][1]}
     tar_valid = bool(req_lu[cmdname][0] == node_dict[inst_num].state)
     tar_mess = tm[tar_valid]
@@ -160,10 +155,6 @@ def cmd_startstop(tar_node, cmdname, tar_mess):
     """Confirm command and execute it."""
     cmd_lu = {"run": ["ex_start_node", "wait_until_running", "RUNNING"],
               "stop": ["ex_stop_node", "", "STOPPING"]}
-    # OLD INDIVIDUAL LOOKUPS for DELAY and MESSAGE
-    # delay_lu = {"azure": {"stop": 5}}
-    # endms_lu = {"azure": {"stop": "Initiated"}}
-
     # specific delay & message {provider: {command: [delay, message]}}
     cld_lu = {"azure": {"stop": [5, "Initiated"]}}
     conf_mess = ("\r{0}{1}{2} {3} - Confirm [y/N]: ".
@@ -183,12 +174,9 @@ def cmd_startstop(tar_node, cmdname, tar_mess):
         if cmd_wait:
             seccmd = getattr(cmdpre, cmd_wait)
             response = seccmd([tar_node])  # noqa
-        # delay = delay_lu.get(tar_node.cloud, {}).get(cmdname, 0)
-        # cmd_end=endms_lu.get(tar_node.cloud, {}).get(cmdname, "Successfull")
         delay, cmd_end = cld_lu.get(tar_node.cloud,
                                     {}).get(cmdname, [0, "Successfull"])
         cmd_result = "{0} {1}".format(cmdname.title(), cmd_end)
-        # delay on Azure to allow status to change before node-list refresh
         sleep(delay)
         busy_disp_off(busy_obj)  # busy indicator OFF
         uiprint("\033[D")  # remove extra space
@@ -197,13 +185,73 @@ def cmd_startstop(tar_node, cmdname, tar_mess):
     return cmd_result
 
 
-def cmd_conn(tar_node, cmd_todo, tar_mess):
+def cmd_conn(tar_node, cmdname, tar_mess):
     """Connect to node."""
-    cmd_result = "Command Aborted"
+    # FUTURE: call function to check for custom connection-info
+    conn_info = "Default"
+    conf_mess = ("\r{0}{1} TO{2} {3} using {4}{5}{2} Connection Info"
+                 " - Confirm [y/N]:  ".format(C_STAT[cmdname.upper()],
+                                              cmdname.upper(), C_NORM,
+                                              tar_mess, C_TI, conn_info))
+    if input_yn(conf_mess):
+        exec_mess = ("\r{0}CONNECTING TO{1} {2} using {3}{4}{1}"
+                     " Connection Info:  ".
+                     format(C_STAT[cmdname.upper()], C_NORM, tar_mess,
+                            C_TI, conn_info))
+        disp_erase_ln()
+        uiprint(exec_mess)
+        (ssh_user, ssh_key) = get_sshinfo(tar_node)
+        if ssh_user:
+            ssh_cmd = "ssh {0}{1}@{2}".format(ssh_key, ssh_user,
+                                              tar_node.public_ips)
+        else:
+            ssh_cmd = "ssh {0}{1}".format(ssh_key, tar_node.public_ips)
+        # TEMP - display ssh connect string
+        disp_erase_ln()
+        uiprint("\rSSH Command: {}".format(ssh_cmd))
+        sleep(15)
+        cmd_result = "Connect Sucessfull"
+        # turn on cursor before calling ssh command
+        #   use subprocess.call
+        #       is there a gevent version i can call in cldcnt module?
+        #   avoids importing subprocess in this module
+    else:
+        cmd_result = "Command Aborted"
     return cmd_result
 
 
-def cmd_details(tar_node, cmd_todo, tar_mess):
+def get_sshinfo(node):
+    """Determine ssh-user and ssh-key for node."""
+    ssh_key = ""
+    if node.cloud == "aws":
+        raw_key = node.extra['key_name']
+        ssh_key = "-i {0}{1}.pem ".format(CONFIG_DIR, raw_key)
+        ssh_user = calc_awsssh(node)
+    elif node.cloud == "azure":
+        ssh_user = node.extra['properties']['osProfile']['adminUsername']
+    else:
+        items = node.extra['metadata'].get('items', [{}])
+        keyname = items['key' == 'ssh-keys'].get('value', "")
+        pos = keyname.find(":")
+        ssh_user = keyname[0:pos]
+    return (ssh_user, ssh_key)
+
+
+def calc_awsssh(node):
+    """Calculate default ssh-user based on image-if of AWS instance."""
+    userlu = {"ubunt": "ubuntu", "debia": "admin", "fedor": "root",
+              "cento": "centos", "openb": "root"}
+    image_name = node.driver.get_image(node.extra['image_id']).name
+    if not image_name:
+        image_name = node.name
+    usertemp = ['name'] + [value for key, value in list(userlu.items())
+                           if key in image_name.lower()]
+    usertemp = dict(zip(usertemp[::2], usertemp[1::2]))
+    username = usertemp.get('name', 'ec2-user')
+    return username
+
+
+def cmd_details(tar_node, cmdname, tar_mess):
     """Display Node details."""
     cmd_result = "Command Aborted"
     return cmd_result
