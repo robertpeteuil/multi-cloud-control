@@ -164,6 +164,7 @@ def cmd_exec(tar_node, cmdname, tar_mess):
     cmd_lu = {"run": ["ex_start_node", "wait_until_running", "Successfull"],
               "stop": ["ex_stop_node", "", "Initiated"]}
     delay_lu = {"azure": {"stop": 5}}
+    endms_lu = {"azure": {"stop": "Initiated"}}
     conf_mess = ("\r{0} - Confirm [y/N]: ".
                  format(tar_mess))
     if input_yn(conf_mess):
@@ -181,8 +182,10 @@ def cmd_exec(tar_node, cmdname, tar_mess):
             # cmdpre = getattr(tar_node, "driver")
             seccmd = getattr(cmdpre, cmd_wait)
             response = seccmd([tar_node])  # noqa
-        cmd_result = "{0} {1}".format(cmdname.title(),
-                                      cmd_lu[cmdname][2])
+        cmd_end = endms_lu.get(tar_node.cloud, {}).get(cmdname, "Successfull")
+        cmd_result = "{0} {1}".format(cmdname.title(), cmd_end)
+        # cmd_result = "{0} {1}".format(cmdname.title(),
+        #                               cmd_lu[cmdname][2])
         # delay on Azure to allow status to change before node-list refresh
         delay = delay_lu.get(tar_node.cloud, {}).get(cmdname, 0)
         sleep(delay)
