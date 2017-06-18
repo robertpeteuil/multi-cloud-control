@@ -86,14 +86,20 @@ def node_cmd(cmd_todo, node_dict):
         (tar_valid, tar_mess) = tar_validate(node_dict, inst_num, cmd_todo)
         if tar_valid:
             cmd_result = cmd_exec(node_dict[inst_num], cmd_todo, tar_mess)
-            uiprint(" - {1}{0}{2}".format(cmd_result, C_WARN, C_NORM))
-            sleep(1)
             if cmd_result != "Command Aborted":
                 refresh_main = True
+                c_result = C_GOOD
+            else:
+                c_result = C_WARN
+                # uiprint("\033[D\033[D")  # eliminate extra space
+            # uiprint(" - {1}{0}{2}".format(cmd_result, c_result, C_NORM))
+            uiprint_suffix(cmd_result, c_result)
+            sleep(1)
         else:  # invalid target node
-            uiprint(tar_mess)
-            sleep(2)
-    else:  # 0 selected - exit command, but not entire program
+            uiprint_suffix(tar_mess, C_ERR)
+            # uiprint(tar_mess)  # used when it was pre-formatted
+            sleep(1)
+    else:  # 0 selected - exit command but not program
         uiprint(" - Exit")
         sleep(0.2)
     return refresh_main
@@ -103,7 +109,7 @@ def tar_selection(cmdname, inst_max):
     """Determine Node via alternate input method."""
     cmddisp = cmdname.upper()
     cmd_title = ("\r{1}{0} NODE{2} - Enter {3}Node #{2}"
-                 " ({4}0 = Exit Command{2}):  ".
+                 " ({4}0 = Exit Command{2}): ".
                  format(cmddisp, C_TI, C_NORM, C_WARN, MAGENTA))
     disp_cmd_title(cmd_title)
     inst_valid = False
@@ -118,7 +124,8 @@ def tar_selection(cmdname, inst_max):
             if inst_num <= inst_max:
                 inst_valid = True
             else:
-                uiprint(" - {0}Invalid Entry{1}".format(C_ERR, C_NORM))
+                # uiprint(" - {0}Invalid Entry{1}".format(C_ERR, C_NORM))
+                uiprint_suffix("Invalid Entry", C_ERR)
                 sleep(0.5)
                 disp_cmd_title(cmd_title)
     return inst_num
@@ -126,9 +133,10 @@ def tar_selection(cmdname, inst_max):
 
 def tar_validate(node_dict, inst_num, cmdname):
     """Validate that command can be performed on target node."""
-    # cmd: [required-state, action-to-be-displayed, already state]
-    req_lu = {"run": ["stopped", "START", "running"],
-              "stop": ["running", "STOP", "stopped"]}
+    # cmd: [required-state, action-to-displayed, error-statement]
+    req_lu = {"run": ["stopped", "START", "Already Running"],
+              "stop": ["running", "STOP", "Already Stopped"],
+              "connect": ["running", "CONNECT TO", "Not Running"]}
     if req_lu[cmdname][0] == node_dict[inst_num].state:
         tar_valid = True
         tar_mess = ("{0}{2}{1} Node {3}{4}{1} ({7}{5}{1} on {3}{6}{1})".
@@ -138,8 +146,9 @@ def tar_validate(node_dict, inst_num, cmdname):
                            node_dict[inst_num].cloud_disp, C_TI))
     else:
         tar_valid = False
-        tar_mess = (" - Node Already {2} - {0}Aborting{1}".
-                    format(C_ERR, C_NORM, req_lu[cmdname][2].title()))
+        tar_mess = req_lu[cmdname][2]
+        # tar_mess = (" - Node {2} - {0}Aborting{1}".
+        #             format(C_ERR, C_NORM, req_lu[cmdname][2].title()))
     return (tar_valid, tar_mess)
 
 
@@ -147,10 +156,11 @@ def cmd_exec(tar_node, cmdname, tar_mess):
     """Confirm command and execute it."""
     cmd_lu = {"run": ["ex_start_node", "wait_until_running", "Successfull"],
               "stop": ["ex_stop_node", "", "Initiated"]}
-    conf_mess = ("\r{0} - Continue? [y/N] ".
+    delay_lu = {"azure": {"stop": 5}}
+    conf_mess = ("\r{0} - Confirm [y/N]: ".
                  format(tar_mess))
     if input_yn(conf_mess):
-        exec_mess = "\rEXECUTING COMMAND - {0}:   ".format(tar_mess)
+        exec_mess = "\rEXECUTING {0}:   ".format(tar_mess)
         disp_erase_ln()
         uiprint(exec_mess)
         busy_obj = busy_disp_on()  # turn on busy indicator
@@ -165,9 +175,13 @@ def cmd_exec(tar_node, cmdname, tar_mess):
             response = seccmd([tar_node])  # noqa
         cmd_result = "{0} {1}".format(cmdname.title(),
                                       cmd_lu[cmdname][2])
-        if cmdname == "stop" and tar_node.cloud == "azure":
-            sleep(5)
+        # delay on Azure to allow status change as nodes refresh on return
+        # if cmdname == "stop" and tar_node.cloud == "azure":
+        #     sleep(5)
+        delay = delay_lu.get(tar_node.cloud, {}).get(cmdname, 0)
+        sleep(delay)
         busy_disp_off(busy_obj)  # turn off busy indicator
+        uiprint("\033[D\033[D")  # eliminate extra spaces
     else:
         cmd_result = "Command Aborted"
     return cmd_result
@@ -189,6 +203,11 @@ def uiprint(toprint):
     sys.stdout.flush()
 
 
+def uiprint_suffix(toprint, clr):
+    """Print Colored Suffix Message after command."""
+    uiprint(" - {1}{0}{2}".format(toprint, clr, C_NORM))
+
+
 def disp_cmd_title(cmd_title):
     """Display Title and function statement for current command."""
     disp_erase_ln()
@@ -198,7 +217,7 @@ def disp_cmd_title(cmd_title):
 def disp_cmd_bar():
     """Display Command Bar."""
     cmd_bar = ("\rSELECT COMMAND -   {2}(R){1}un Node   {3}"
-               "(S){1}top Node   {5}(U){1}pdate Info    {4}(Q){1}uit:  ".
+               "(S){1}top Node   {5}(U){1}pdate Info    {4}(Q){1}uit: ".
                format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA, C_WARN))
     disp_erase_ln()
     uiprint(cmd_bar)
