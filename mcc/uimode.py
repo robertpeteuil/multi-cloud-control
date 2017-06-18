@@ -59,8 +59,6 @@ def ui_main(fmt_table, node_dict):
             refresh_main = cmd_funct[cmd_todo]
     if refresh_main:
         disp_clear(len(node_dict) + 2)
-    # else:
-    #     uiprint("\033[?25h")  # cursor on
     return refresh_main
 
 
@@ -96,20 +94,6 @@ def node_cmd(cmd_todo, node_dict):
             subcmd = sc[cmd_todo]  # get dynamic sub-command
             refresh_main = subcmd(node_dict[inst_num], cmd_todo,
                                   tar_mess, node_qty)
-            # cmd_result = subcmd(node_dict[inst_num], cmd_todo,
-            #                     tar_mess, node_qty)
-            # if cmd_result == "Connect Successful":
-            #     print(term.clear)  # clear screen after ssh session
-            #     print(term.move_y(node_qty + 2))
-            #     refresh_main = True
-            # else:
-            #     if cmd_result == "Command Aborted":
-            #         c_result = C_WARN
-            #     else:
-            #         refresh_main = True
-            #         c_result = C_GOOD
-            #     uiprint_suffix(cmd_result, c_result)
-            #     sleep(1)
         else:  # invalid target
             uiprint_suffix(tar_mess, C_ERR)
             sleep(1.5)
@@ -187,8 +171,6 @@ def cmd_startstop(tar_node, cmdname, tar_mess, node_qty):
             response = seccmd([tar_node])  # noqa
         delay, cmd_end = cld_lu.get(tar_node.cloud,
                                     {}).get(cmdname, [0, "Successful"])
-        # result_msg = "{0} {1}".format(cmdname.title(), cmd_end)
-        # uiprint_suffix(result_msg, C_GOOD)
         sleep(delay)
         busy_disp_off(busy_obj)  # busy indicator OFF
         uiprint("\033[D")  # remove extra space
@@ -196,9 +178,6 @@ def cmd_startstop(tar_node, cmdname, tar_mess, node_qty):
         uiprint_suffix("{0} {1}".format(cmdname.title(), cmd_end), C_GOOD)
     else:
         uiprint_suffix("Command Aborted")
-        # result_msg = "Command Aborted"
-        # result_clr = C_WARN
-    # uiprint_suffix(result_msg, result_clr)
     sleep(1)
     return cmd_result
 
@@ -225,27 +204,14 @@ def cmd_conn(tar_node, cmdname, tar_mess, node_qty):
             ssh_cmd = "ssh {0}{1}".format(ssh_key, tar_node.public_ips)
         print("\n")
         uiprint("\033[?25h")  # cursor on
-        # retval = subprocess.call(ssh_cmd, shell=True)
         subprocess.call(ssh_cmd, shell=True)
         uiprint("\033[?25l")  # cursor off
-        # print(retval)
-        # sleep(2)
-        # result_msg = "Connect Successful"
         uiprint("\033[D")  # remove extra space
         cmd_result = True
         uiprint_suffix("Connect Successful", C_GOOD)
         print(term.clear)  # clear screen after ssh session
         print(term.move_y(node_qty + 2))
-        # if retval:
-        #     uiprint("\033[A\033[A\033[A")
-        #     disp_erase_ln()
-        #     uiprint("\nFailed wit SSH Command: {}".format(ssh_cmd))
-        #     sleep(10)
-        #     result_msg = "Connect Failed"
-        # else:
-        #     result_msg = "Connect Successful"
     else:
-        # result_msg = "Command Aborted"
         uiprint_suffix("Command Aborted")
         sleep(1)
     return cmd_result
