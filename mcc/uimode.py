@@ -141,13 +141,17 @@ def tar_selection(cmdname, inst_max):
 def tar_validate(node_dict, inst_num, cmdname):
     """Validate that command can be performed on target node."""
     # cmd: [required-state, action-to-displayed, error-statement]
-    req_lu = {"run": ["stopped", "START", "Already Running"],
+    req_lu = {"run": ["stopped", "RUN", "Already Running"],
               "stop": ["running", "STOP", "Already Stopped"],
               "connect": ["running", "CONNECT to", "Not Running"],
               "details": [node_dict[inst_num].state, "DETAILS for", ""]}
-    tm = {True: ("{0}{2}{1} Node {3}{4}{1} ({7}{5}{1} on {3}{6}{1})".
-                 format(C_STAT[req_lu[cmdname][1]], C_NORM,
-                        req_lu[cmdname][1], C_WARN, inst_num,
+    # tm = {True: ("{0}{2}{1} Node {3}{4}{1} ({7}{5}{1} on {3}{6}{1})".
+    #              format(C_STAT[req_lu[cmdname][1]], C_NORM,
+    #                     req_lu[cmdname][1], C_WARN, inst_num,
+    #                     node_dict[inst_num].name,
+    #                     node_dict[inst_num].cloud_disp, C_TI)),
+    tm = {True: ("Node {1}{2}{0} ({5}{3}{0} on {1}{4}{0})".
+                 format(C_NORM, C_WARN, inst_num,
                         node_dict[inst_num].name,
                         node_dict[inst_num].cloud_disp, C_TI)),
           False: req_lu[cmdname][2]}
@@ -168,14 +172,18 @@ def tar_validate(node_dict, inst_num, cmdname):
 
 def cmd_startstop(tar_node, cmdname, tar_mess):
     """Confirm command and execute it."""
-    cmd_lu = {"run": ["ex_start_node", "wait_until_running", "Success"],
-              "stop": ["ex_stop_node", "", "Init"]}
+    cmd_lu = {"run": ["ex_start_node", "wait_until_running", "RUNNING"],
+              "stop": ["ex_stop_node", "", "STOPPING"]}
     delay_lu = {"azure": {"stop": 5}}
     endms_lu = {"azure": {"stop": "Initiated"}}
-    conf_mess = ("\r{0} - Confirm [y/N]: ".
-                 format(tar_mess))
+    conf_mess = ("\r{0}{1}{2} {3} - Confirm [y/N]: ".
+                 format(C_STAT[cmdname.upper()], cmdname.upper(), C_NORM,
+                        tar_mess))
     if input_yn(conf_mess):
-        exec_mess = "\rEXECUTING {0}:   ".format(tar_mess)
+        # exec_mess = "\rEXECUTING {0}:  ".format(tar_mess)
+        exec_mess = ("\r{0}{1}{2} {3}:  ".
+                     format(C_STAT[cmdname.upper()], cmd_lu[cmdname][2],
+                            C_NORM, tar_mess))
         disp_erase_ln()
         uiprint(exec_mess)
         busy_obj = busy_disp_on()  # busy indicator ON
@@ -197,7 +205,8 @@ def cmd_startstop(tar_node, cmdname, tar_mess):
         delay = delay_lu.get(tar_node.cloud, {}).get(cmdname, 0)
         sleep(delay)
         busy_disp_off(busy_obj)  # busy indicator OFF
-        uiprint("\033[D\033[D")  # remove extra spaces
+        # uiprint("\033[D\033[D")  # remove extra spaces
+        uiprint("\033[D")  # remove extra spaces
     else:
         cmd_result = "Command Aborted"
     return cmd_result
@@ -295,9 +304,18 @@ def input_by_key():
                 uiprint("\033[?25l")  # cursor off
                 break
             if key_raw.name == 'KEY_DELETE':
+                del_one_char(len(usr_inp))
                 usr_inp = usr_inp[:-1]
-                uiprint("\033[D \033[D")
+                # uiprint("\033[D \033[D")
             if not key_raw.is_sequence:
                 usr_inp += key_raw
                 uiprint(key_raw)
+    if not usr_inp:
+        uiprint("\033[D")
     return usr_inp
+
+
+def del_one_char(check_len):
+    """Move Left and delete one character."""
+    if check_len:
+        uiprint("\033[D \033[D")
