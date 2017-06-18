@@ -246,11 +246,11 @@ def disp_cmd_bar():
     """Display Command Bar."""
     cmd_bar = ("\rSELECT COMMAND -  {2}(R){1}un   {0}(C){1}onnect   "
                "{3}(S){1}top   {0}(U){1}pdate Info"
-               "   {5}(Q){1}uit: ".
+               "   {4}(Q){1}uit: ".
                format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
     # cmd_bar = ("\rSELECT COMMAND -  {2}(R){1}un   {0}(C){1}onnect   "
     #            "{3}(S){1}top   {0}(D){1}etails   {0}(U){1}pdate Info"
-    #            "   {5}(Q){1}uit: ".
+    #            "   {4}(Q){1}uit: ".
     #            format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
     disp_erase_ln()
     uiprint(cmd_bar)
