@@ -62,7 +62,7 @@ C_STAT = {"running": C_GOOD, "starting": C_GOOD, "rebooting": C_WARN,
           "pending": C_WARN, "suspended": C_WARN, "paused": C_WARN,
           "stopping": C_WARN, "stopped": C_NORM, "error": C_ERR,
           "unknown": C_WARN, "reconfiguring": C_WARN, "terminated": C_NORM,
-          "START": C_GOOD, "STOP": C_ERR}
+          "RUN": C_GOOD, "STOP": C_ERR, "CONNECT": C_TI, "DETAILS": C_TI}
 """Color dictionary for instance status colors.
 
 Any value encountered in the AWS data must be listed or a KeyError is
