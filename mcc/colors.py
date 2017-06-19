@@ -33,19 +33,19 @@ try:
                          colorama.Fore.WHITE)
     MAGENTA = colorama.Fore.MAGENTA
     BRIGHT, RESET = colorama.Style.BRIGHT, colorama.Fore.RESET
+    NORMAL, DIM = colorama.Style.NORMAL, colorama.Style.DIM
 except ImportError:  # pragma: no cover
     # No colorama, fallback to no-color mode
     GREEN = YELLOW = RED = BLUE = CYAN = WHITE = MAGENTA = BRIGHT = RESET = ''
 
-
-C_NORM = RESET
-C_HEAD = GREEN
-C_HEAD2 = BLUE
-C_TI = CYAN
-C_TI2 = YELLOW
-C_GOOD = GREEN
-C_WARN = YELLOW
-C_ERR = RED
+C_NORM = RESET + NORMAL
+C_HEAD = NORMAL + GREEN
+C_HEAD2 = BRIGHT + BLUE
+C_TI = BRIGHT + CYAN
+C_TI2 = BRIGHT + YELLOW
+C_GOOD = NORMAL + GREEN
+C_WARN = BRIGHT + YELLOW
+C_ERR = BRIGHT + RED
 """Functionally titled vars as a psuedo color theme.
 
 It's intended that modules will import and use these functionaly-named
