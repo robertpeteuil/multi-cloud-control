@@ -203,12 +203,19 @@ def cmd_connect(node, cmd_name, node_info):
             ssh_cmd = "ssh {0}{1}".format(ssh_key, node.public_ips)
         with term.fullscreen():
             ui_print("\033[?25h")  # cursor on
-            subprocess.call(ssh_cmd, shell=True)
+            cmd_status = subprocess.call(ssh_cmd, shell=True)
             ui_print("\033[?25l")  # cursor off
         ui_print("\033[D")  # remove extra space
+        # DEBUG CODE
+        ui_print(" - SSH Return Val: {} (press key)".format(str(cmd_status)))
+        with term.cbreak():
+            term.inkey()
+        # ui_print("\033[A")
+        # END DEBUG
+
         cmd_result = True
-        ui_print_suffix("Connect Successful", C_GOOD)
-        sleep(2)
+        # ui_print_suffix("Connect Successful", C_GOOD)
+        # sleep(2)
     else:
         ui_print_suffix("Command Aborted")
         sleep(0.75)
