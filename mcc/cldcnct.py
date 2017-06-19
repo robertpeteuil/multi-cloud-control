@@ -43,7 +43,7 @@ def get_conns(cred, providers):
                    "azure": [conn_az, nodes_az],
                    "gcp": [conn_gcp, nodes_gcp]}
     # turn on display-indicator to indicated working
-    sys.stdout.write("\rEstablishing Connections:   ")
+    sys.stdout.write("\rEstablishing Connections:  ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
     # Authenticate
@@ -71,7 +71,7 @@ def get_data(conn_objs, providers):
                    "azure": nodes_az,
                    "gcp": nodes_gcp}
     # turn on display-indicator to indicated working
-    sys.stdout.write("\rCollecting Info:   ")
+    sys.stdout.write("\rCollecting Info:  ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
     # Gather Nodes
