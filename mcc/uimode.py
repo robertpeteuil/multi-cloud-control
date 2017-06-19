@@ -29,7 +29,7 @@ from mcc.confdir import CONFIG_DIR
 import sys
 from mcc.cldcnct import busy_disp_on, busy_disp_off
 from time import sleep
-from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, MAGENTA, C_WARN, C_STAT
+from mcc.colors import C_NORM, C_TI, C_GOOD, C_ERR, C_WARN, C_STAT, C_HEAD2
 from gevent import monkey
 from gevent import subprocess
 
@@ -106,7 +106,7 @@ def node_selection(cmd_name, node_qty):
     cmd_disp = cmd_name.upper()
     cmd_title = ("\r{1}{0} NODE{2} - Enter {3}#{2}"
                  " ({4}0 = Exit Command{2}): ".
-                 format(cmd_disp, C_TI, C_NORM, C_WARN, MAGENTA))
+                 format(cmd_disp, C_TI, C_NORM, C_WARN, C_HEAD2))
     ui_cmd_title(cmd_title)
     selection_valid = False
     input_flush()
@@ -185,14 +185,14 @@ def cmd_connect(node, cmd_name, node_info):
     """Connect to node."""
     # FUTURE: call function to check for custom connection-info
     conn_info = "Defaults"
-    conf_mess = ("\r{0}{1} TO{2} {3} using {4}{5}{2} - Confirm [y/N]: ".
+    conf_mess = ("\r{0}{1} TO{2} {3} using {5}{4}{2} - Confirm [y/N]: ".
                  format(C_STAT[cmd_name.upper()], cmd_name.upper(), C_NORM,
-                        node_info, C_TI, conn_info))
+                        node_info, conn_info, C_HEAD2))
     cmd_result = None
     if input_yn(conf_mess):
-        exec_mess = ("\r{0}CONNECTING TO{1} {2} using {3}{4}{1}: ".
+        exec_mess = ("\r{0}CONNECTING TO{1} {2} using {4}{3}{1}: ".
                      format(C_STAT[cmd_name.upper()], C_NORM, node_info,
-                            C_TI, conn_info))
+                            conn_info, C_HEAD2))
         ui_erase_ln()
         ui_print(exec_mess)
         (ssh_user, ssh_key) = ssh_get_info(node)
@@ -205,7 +205,7 @@ def cmd_connect(node, cmd_name, node_info):
         ui_print("\033[?25h")  # cursor on
         subprocess.call(ssh_cmd, shell=True)
         ui_print("\033[?25l")  # cursor off
-        print("\n")
+        print()
         cmd_result = True
     else:
         ui_print_suffix("Command Aborted")
@@ -271,13 +271,13 @@ def ui_cmd_bar():
     """Display Command Bar."""
     cmd_bar = ("\rSELECT COMMAND -  {2}(R){1}un   {0}(C){1}onnect   "
                "{3}(S){1}top   {0}(U){1}pdate Info"
-               "   {4}(Q){1}uit: ".
-               format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
+               "   {0}(Q){1}uit: ".
+               format(C_TI, C_NORM, C_GOOD, C_ERR))
     # FUTURE - TO BE USED WHEN DETAILS IMPLEMENTED
     # cmd_bar = ("\rSELECT COMMAND -  {2}(R){1}un   {0}(C){1}onnect   "
     #            "{3}(S){1}top   {0}(D){1}etails   {0}(U){1}pdate Info"
     #            "   {4}(Q){1}uit: ".
-    #            format(C_TI, C_NORM, C_GOOD, C_ERR, MAGENTA))
+    #            format(C_TI, C_NORM, C_GOOD, C_ERR, C_HEAD2))
     ui_erase_ln()
     ui_print(cmd_bar)
 
