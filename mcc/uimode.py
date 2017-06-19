@@ -91,8 +91,7 @@ def node_cmd(cmd_name, node_dict):
         (node_valid, node_info) = node_validate(node_dict, node_num, cmd_name)
         if node_valid:
             sub_cmd = sc[cmd_name]  # get sub-command
-            refresh_main = sub_cmd(node_dict[node_num], cmd_name,
-                                   node_info, len(node_dict))
+            refresh_main = sub_cmd(node_dict[node_num], cmd_name, node_info)
         else:  # invalid target
             ui_print_suffix(node_info, C_ERR)
             sleep(1.5)
@@ -144,7 +143,7 @@ def node_validate(node_dict, node_num, cmd_name):
     return (node_valid, node_info)
 
 
-def cmd_startstop(node, cmd_name, node_info, node_qty):
+def cmd_startstop(node, cmd_name, node_info):
     """Confirm command and execute it."""
     cmd_lu = {"run": ["ex_start_node", "wait_until_running", "RUNNING"],
               "stop": ["ex_stop_node", "", "STOPPING"]}
@@ -182,7 +181,7 @@ def cmd_startstop(node, cmd_name, node_info, node_qty):
     return cmd_result
 
 
-def cmd_connect(node, cmd_name, node_info, node_qty):
+def cmd_connect(node, cmd_name, node_info):
     """Connect to node."""
     # FUTURE: call function to check for custom connection-info
     conn_info = "Defaults"
@@ -202,32 +201,19 @@ def cmd_connect(node, cmd_name, node_info, node_qty):
                                               node.public_ips)
         else:
             ssh_cmd = "ssh {0}{1}".format(ssh_key, node.public_ips)
-        # with term.fullscreen():
         print("\n")
         ui_print("\033[?25h")  # cursor on
         subprocess.call(ssh_cmd, shell=True)
-        # cmd_status = subprocess.call(ssh_cmd, shell=True)
         ui_print("\033[?25l")  # cursor off
-        print("")
-        # DEBUG CODE
-        # ui_print("\033[D")  # remove extra space
-        # ui_print("\n SSH Return Val: {} (press key)".format(str(cmd_status)))
-        # with term.cbreak():
-        #     term.inkey()
-        # END DEBUG
-        # ui_print_suffix("Connect Successful", C_GOOD)
-        # sleep(2)
-        # NEED NODE QTY FOR THIS - NOT NECESSARY WITH FULL-SCREEN MODE
+        print("\n")
         cmd_result = True
-        # print(term.clear)  # clear screen after ssh session
-        # print(term.move_y(-(node_qty + 4)))
     else:
         ui_print_suffix("Command Aborted")
         sleep(0.75)
     return cmd_result
 
 
-def cmd_details(node, cmd_name, node_info, node_qty):
+def cmd_details(node, cmd_name, node_info):
     """Display Node details."""
     ui_print_suffix("Command Aborted")
     return None
