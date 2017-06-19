@@ -33,6 +33,7 @@ from libcloud.common.types import InvalidCredsError
 from mcc.confdir import CONFIG_DIR
 import sys
 from requests.exceptions import SSLError
+# from pprint import pprint
 
 monkey.patch_all()
 
@@ -47,10 +48,12 @@ def get_conns(cred, providers):
     busy_obj = busy_disp_on()
     conn_fn = []
     for item in providers:
-        conn_fn.append([cld_svc_map[item][0], cred])
+        cld = item.rstrip('1234567890')  # new
+        conn_fn.append([cld_svc_map[cld][0], cred[item], item])  # new
+        # conn_fn.append([cld_svc_map[item][0], cred])
     cgroup = Group()
     conn_res = []
-    conn_res = cgroup.map(get_conn_new, conn_fn)
+    conn_res = cgroup.map(get_conn, conn_fn)
     cgroup.join()
     conn_objs = {}
     for item in conn_res:
@@ -59,6 +62,8 @@ def get_conns(cred, providers):
     sys.stdout.write("\r                                                 \r")
     sys.stdout.write("\033[?25h")  # turn cusor back on
     sys.stdout.flush()
+    # print("\nConnection Objects")
+    # pprint(conn_objs)
     return conn_objs
 
 
@@ -72,20 +77,32 @@ def get_data(conn_objs, providers):
     busy_obj = busy_disp_on()
     collec_fn = []
     for item in providers:
-        collec_fn.append([cld_svc_map[item], conn_objs[item]])
+        cld = item.rstrip('1234567890')  # new
+        collec_fn.append([cld_svc_map[cld], conn_objs[item]])  # new
+        # collec_fn.append([cld_svc_map[item], conn_objs[item]])
     ngroup = Group()
     node_list = []
-    node_list = ngroup.map(get_conn_new, collec_fn)
+    node_list = ngroup.map(get_nodes, collec_fn)
     ngroup.join()
     busy_disp_off(dobj=busy_obj)
     sys.stdout.write("\r                                                 \r")
     sys.stdout.write("\033[?25h")  # turn cusor back on
     sys.stdout.flush()
+    # print("\nNode List")
+    # pprint(node_list)
     return node_list
 
 
-def get_conn_new(flist):
+def get_conn(flist):
     """Call function for each provider."""
+    cnodes = []
+    # cnodes = flist[0](flist[1])
+    cnodes = flist[0](flist[1], flist[2])  # new
+    return cnodes
+
+
+def get_nodes(flist):
+    """Call node collection function for each provider."""
     cnodes = []
     cnodes = flist[0](flist[1])
     return cnodes
@@ -124,7 +141,7 @@ def ip_to_str(raw_ip):
     return raw_ip
 
 
-def conn_aws(cred):
+def conn_aws(cred, crid):
     """Establish connection to AWS service."""
     driver = get_driver(Provider.EC2)
     try:
@@ -137,7 +154,8 @@ def conn_aws(cred):
     except InvalidCredsError as e:
         print("\r Error with AWS Credentials:  {}".format(e))
         sys.exit()
-    return {"aws": aws_obj}
+    return {crid: aws_obj}
+    # return {"aws": aws_obj}
 
 
 def nodes_aws(c_obj):
@@ -161,7 +179,7 @@ def adj_nodes_aws(aws_nodes):
     return aws_nodes
 
 
-def conn_az(cred):
+def conn_az(cred, crid):
     """Establish connection to Azure service."""
     driver = get_driver(Provider.AZURE_ARM)
     try:
@@ -175,7 +193,8 @@ def conn_az(cred):
     except InvalidCredsError as e:
         print("\r Error with Azure Credentials:  {}".format(e))
         sys.exit()
-    return {"azure": az_obj}
+    return {crid: az_obj}
+    # return {"azure": az_obj}
 
 
 def nodes_az(c_obj):
@@ -202,7 +221,7 @@ def adj_nodes_az(az_nodes):
     return az_nodes
 
 
-def conn_gcp(cred):
+def conn_gcp(cred, crid):
     """Establish connection to GCP."""
     gcp_auth_type = cred.get('gcp_auth_type', "S")
     if gcp_auth_type == "A":  # Application Auth
@@ -228,7 +247,8 @@ def conn_gcp(cred):
     except (InvalidCredsError, ValueError) as e:
         print("\r Error with GCP Credentials:  {}".format(e))
         sys.exit()
-    return {"gcp": gcp_obj}
+    return {crid: gcp_obj}
+    # return {"gcp": gcp_obj}
 
 
 def nodes_gcp(c_obj):
