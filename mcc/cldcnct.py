@@ -210,22 +210,38 @@ def adj_nodes_az(az_nodes):
 
 def conn_gcp(cred):
     """Establish connection to GCP."""
-    # gcp_pem = CONFIG_DIR + cred['gcp_pem_file']
-    gcp_cred_app = CONFIG_DIR + ".gcp_libcloud_a_auth." + cred['gcp_proj_id']
-    # gcp_cred_svc = CONFIG_DIR + ".gcp_libcloud_s_auth." + cred['gcp_proj_id']
+    gcp_auth_type = cred.get('gcp_auth_type', "S")
+    if gcp_auth_type == "A":  # Application Auth
+        gcp_crd_ia = CONFIG_DIR + ".gcp_libcloud_a_auth." + cred['gcp_proj_id']
+        gcp_crd = {'user_id': cred['gcp_client_id'],
+                   'key': cred['gcp_client_sec'],
+                   'project': cred['gcp_proj_id'],
+                   'auth_type': "IA",
+                   'credential_file': gcp_crd_ia}
+    else:  # Service Account Auth
+        gcp_pem = CONFIG_DIR + cred['gcp_pem_file']
+        gcp_crd_sa = CONFIG_DIR + ".gcp_libcloud_s_auth." + cred['gcp_proj_id']
+        gcp_crd = {'user_id': cred['gcp_svc_acct_email'],
+                   'key': gcp_pem,
+                   'project': cred['gcp_proj_id'],
+                   'auth_type': "SA",
+                   'credential_file': gcp_crd_sa}
+
     driver = get_driver(Provider.GCE)
     try:
-        gcp_obj = driver(user_id=cred['gcp_client_id'],
-                         key=cred['gcp_client_sec'],
-                         project=cred['gcp_proj_id'],
-                         auth_type="IA",
-                         credential_file=gcp_cred_app)
+        gcp_obj = driver(**gcp_crd)
     # try:
-    #     gcp_obj = driver(user_id=cred['gcp_svc_acct_email'],
-    #                      key=gcp_pem,
+    #     gcp_obj = driver(user_id=cred['gcp_client_id'],
+    #                      key=cred['gcp_client_sec'],
     #                      project=cred['gcp_proj_id'],
-    #                      auth_type="SA",
-    #                      credential_file=gcp_cred_svc)
+    #                      auth_type="IA",
+    #                      credential_file=gcp_cred_app)
+    # try:
+    #    gcp_obj = driver(user_id=cred['gcp_svc_acct_email'],
+    #                     key=gcp_pem,
+    #                     project=cred['gcp_proj_id'],
+    #                     auth_type="SA",
+    #                     credential_file=gcp_cred_svc)
     except SSLError as e:
         print("\r SSL Error with GCP:  {}".format(e))
         sys.exit()
