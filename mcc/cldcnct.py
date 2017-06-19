@@ -42,11 +42,9 @@ def get_conns(cred, providers):
     cld_svc_map = {"aws": [conn_aws, nodes_aws],
                    "azure": [conn_az, nodes_az],
                    "gcp": [conn_gcp, nodes_gcp]}
-    # turn on display-indicator to indicated working
     sys.stdout.write("\rEstablishing Connections:  ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
-    # Authenticate
     conn_fn = []
     for item in providers:
         conn_fn.append([cld_svc_map[item][0], cred])
@@ -57,7 +55,6 @@ def get_conns(cred, providers):
     conn_objs = {}
     for item in conn_res:
         conn_objs.update(item)
-    # turn off busy display-indicator
     busy_disp_off(dobj=busy_obj)
     sys.stdout.write("\r                                                 \r")
     sys.stdout.write("\033[?25h")  # turn cusor back on
@@ -70,11 +67,9 @@ def get_data(conn_objs, providers):
     cld_svc_map = {"aws": nodes_aws,
                    "azure": nodes_az,
                    "gcp": nodes_gcp}
-    # turn on display-indicator to indicated working
     sys.stdout.write("\rCollecting Info:  ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
-    # Gather Nodes
     collec_fn = []
     for item in providers:
         collec_fn.append([cld_svc_map[item], conn_objs[item]])
@@ -82,7 +77,6 @@ def get_data(conn_objs, providers):
     node_list = []
     node_list = ngroup.map(get_conn_new, collec_fn)
     ngroup.join()
-    # turn off busy display-indicator
     busy_disp_off(dobj=busy_obj)
     sys.stdout.write("\r                                                 \r")
     sys.stdout.write("\033[?25h")  # turn cusor back on
@@ -224,24 +218,10 @@ def conn_gcp(cred):
         gcp_crd = {'user_id': cred['gcp_svc_acct_email'],
                    'key': gcp_pem,
                    'project': cred['gcp_proj_id'],
-                   'auth_type': "SA",
                    'credential_file': gcp_crd_sa}
-
     driver = get_driver(Provider.GCE)
     try:
         gcp_obj = driver(**gcp_crd)
-    # try:
-    #     gcp_obj = driver(user_id=cred['gcp_client_id'],
-    #                      key=cred['gcp_client_sec'],
-    #                      project=cred['gcp_proj_id'],
-    #                      auth_type="IA",
-    #                      credential_file=gcp_cred_app)
-    # try:
-    #    gcp_obj = driver(user_id=cred['gcp_svc_acct_email'],
-    #                     key=gcp_pem,
-    #                     project=cred['gcp_proj_id'],
-    #                     auth_type="SA",
-    #                     credential_file=gcp_cred_svc)
     except SSLError as e:
         print("\r SSL Error with GCP:  {}".format(e))
         sys.exit()
