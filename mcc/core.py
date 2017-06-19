@@ -50,13 +50,7 @@ def main():
 
 def list_only():
     """Retreive and display instance data then exit."""
-    # from pprint import pprint
     (cred, providers) = config_read()
-    # print("\nproviders -")
-    # pprint(providers)
-    # print("\ncred -")
-    # pprint(cred)
-    # sys.exit()
     conn_objs = cld.get_conns(cred, providers)
     nodes = cld.get_data(conn_objs, providers)
     node_dict = make_node_dict(nodes)
@@ -96,9 +90,9 @@ def config_read():
     except IOError:
         print("Error reading config file: {}".format(config_file))
         sys.exit()
-    # Read and de-duplicate provider-list
+    # De-duplicate provider-list
     providers = config_prov(config)
-    # Read credentials for each provider specified
+    # Read credentials for listed providers
     (cred, to_remove) = config_cred(config, providers)
     # remove unsupported and credentialess providers
     for item in to_remove:
@@ -124,10 +118,8 @@ def config_cred(config, providers):
     cred = {}
     to_remove = []
     for item in providers:
-        # if item in expected:
         if any(item.startswith(itemb) for itemb in expected):
             try:
-                # cred.update(dict(list(config[item].items())))
                 cred[item] = dict(list(config[item].items()))
             except KeyError as e:
                 print("No credentials section in config file for {} -"
