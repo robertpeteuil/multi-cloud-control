@@ -52,17 +52,17 @@ def ui_main(fmt_table, node_dict):
     #   None = loop main-cmd, True = refresh-list, False = exit-program
     refresh_main = None
     while refresh_main is None:
-        cmd_todo = get_cmd(node_dict)
-        if callable(cmd_funct[cmd_todo]):
-            refresh_main = cmd_funct[cmd_todo](cmd_todo, node_dict)
+        cmd_name = get_user_cmd(node_dict)
+        if callable(cmd_funct[cmd_name]):
+            refresh_main = cmd_funct[cmd_name](cmd_name, node_dict)
         else:
-            refresh_main = cmd_funct[cmd_todo]
+            refresh_main = cmd_funct[cmd_name]
     if refresh_main:
         ui_clear(len(node_dict) + 2)
     return refresh_main
 
 
-def get_cmd(node_dict):
+def get_user_cmd(node_dict):
     """Get main command selection."""
     key_lu = {"q": ["quit", True], "r": ["run", True],
               "s": ["stop", True], "u": ["update", True],
@@ -73,79 +73,77 @@ def get_cmd(node_dict):
     with term.cbreak():
         while not cmd_valid:
             val = input_by_key()
-            cmd_todo, cmd_valid = key_lu.get(val.lower(), ["invalid", False])
+            cmd_name, cmd_valid = key_lu.get(val.lower(), ["invalid", False])
             if not cmd_valid:
                 ui_print(" - {0}Invalid Entry{1}".format(C_ERR, C_NORM))
                 sleep(0.5)
                 ui_cmd_bar()
-    return cmd_todo
+    return cmd_name
 
 
-def node_cmd(cmd_todo, node_dict):
+def node_cmd(cmd_name, node_dict):
     """Process commands that target specific nodes."""
     sc = {"run": cmd_startstop, "stop": cmd_startstop,
           "connect": cmd_connect, "details": cmd_details}
-    node_qty = len(node_dict)
-    inst_num = node_selection(cmd_todo, node_qty)
+    node_num = node_selection(cmd_name, len(node_dict))
     refresh_main = None
-    if inst_num != 0:
-        (node_valid, node_info) = node_validate(node_dict, inst_num, cmd_todo)
+    if node_num != 0:
+        (node_valid, node_info) = node_validate(node_dict, node_num, cmd_name)
         if node_valid:
-            sub_cmd = sc[cmd_todo]  # get dynamic sub-command
-            refresh_main = sub_cmd(node_dict[inst_num], cmd_todo,
-                                   node_info, node_qty)
+            sub_cmd = sc[cmd_name]  # get sub-command
+            refresh_main = sub_cmd(node_dict[node_num], cmd_name, node_info)
         else:  # invalid target
             ui_print_suffix(node_info, C_ERR)
             sleep(1.5)
-    else:  # 0 - exit command but not program
+    else:  # '0' entered - exit command but not program
         ui_print(" - Exit Command")
         sleep(0.5)
     return refresh_main
 
 
-def node_selection(cmd_name, inst_max):
+def node_selection(cmd_name, node_qty):
     """Determine Node via alternate input method."""
-    cmddisp = cmd_name.upper()
+    cmd_disp = cmd_name.upper()
     cmd_title = ("\r{1}{0} NODE{2} - Enter {3}#{2}"
                  " ({4}0 = Exit Command{2}): ".
-                 format(cmddisp, C_TI, C_NORM, C_WARN, MAGENTA))
+                 format(cmd_disp, C_TI, C_NORM, C_WARN, MAGENTA))
     ui_cmd_title(cmd_title)
-    inst_valid = False
+    selection_valid = False
     input_flush()
     with term.cbreak():
-        while not inst_valid:
-            inst_num = input_by_key()
+        while not selection_valid:
+            node_num = input_by_key()
             try:
-                inst_num = int(inst_num)
+                node_num = int(node_num)
             except ValueError:
-                inst_num = 99999
-            if inst_num <= inst_max:
-                inst_valid = True
+                node_num = 99999
+            if node_num <= node_qty:
+                selection_valid = True
             else:
                 ui_print_suffix("Invalid Entry", C_ERR)
                 sleep(0.5)
                 ui_cmd_title(cmd_title)
-    return inst_num
+    return node_num
 
 
-def node_validate(node_dict, inst_num, cmd_name):
+def node_validate(node_dict, node_num, cmd_name):
     """Validate that command can be performed on target node."""
     # cmd: [required-state, action-to-displayed, error-statement]
     req_lu = {"run": ["stopped", "Already Running"],
               "stop": ["running", "Already Stopped"],
               "connect": ["running", "Can't Connect, Node Not Running"],
-              "details": [node_dict[inst_num].state, ""]}
+              "details": [node_dict[node_num].state, ""]}
     tm = {True: ("Node {1}{2}{0} ({5}{3}{0} on {1}{4}{0})".
-                 format(C_NORM, C_WARN, inst_num,
-                        node_dict[inst_num].name,
-                        node_dict[inst_num].cloud_disp, C_TI)),
+                 format(C_NORM, C_WARN, node_num,
+                        node_dict[node_num].name,
+                        node_dict[node_num].cloud_disp, C_TI)),
           False: req_lu[cmd_name][1]}
-    node_valid = bool(req_lu[cmd_name][0] == node_dict[inst_num].state)
+    node_valid = bool(req_lu[cmd_name][0] == node_dict[node_num].state)
     node_info = tm[node_valid]
     return (node_valid, node_info)
 
 
-def cmd_startstop(tar_node, cmd_name, node_info, node_qty):
+def cmd_startstop(node, cmd_name, node_info):
     """Confirm command and execute it."""
     cmd_lu = {"run": ["ex_start_node", "wait_until_running", "RUNNING"],
               "stop": ["ex_stop_node", "", "STOPPING"]}
@@ -162,14 +160,14 @@ def cmd_startstop(tar_node, cmd_name, node_info, node_qty):
         ui_erase_ln()
         ui_print(exec_mess)
         busy_obj = busy_disp_on()  # busy indicator ON
-        node_drv = getattr(tar_node, "driver")
+        node_drv = getattr(node, "driver")
         main_cmd = getattr(node_drv, cmd_lu[cmd_name][0])
-        response = main_cmd(tar_node)  # noqa
+        response = main_cmd(node)  # noqa
         cmd_wait = cmd_lu[cmd_name][1]
         if cmd_wait:
             seccmd = getattr(node_drv, cmd_wait)
-            response = seccmd([tar_node])  # noqa
-        delay, cmd_end = cld_lu.get(tar_node.cloud,
+            response = seccmd([node])  # noqa
+        delay, cmd_end = cld_lu.get(node.cloud,
                                     {}).get(cmd_name, [0, "Successful"])
         sleep(delay)
         busy_disp_off(busy_obj)  # busy indicator OFF
@@ -183,7 +181,7 @@ def cmd_startstop(tar_node, cmd_name, node_info, node_qty):
     return cmd_result
 
 
-def cmd_connect(tar_node, cmd_name, node_info, node_qty):
+def cmd_connect(node, cmd_name, node_info):
     """Connect to node."""
     # FUTURE: call function to check for custom connection-info
     conn_info = "Defaults"
@@ -197,14 +195,12 @@ def cmd_connect(tar_node, cmd_name, node_info, node_qty):
                             C_TI, conn_info))
         ui_erase_ln()
         ui_print(exec_mess)
-        (ssh_user, ssh_key) = ssh_get_info(tar_node)
+        (ssh_user, ssh_key) = ssh_get_info(node)
         if ssh_user:
             ssh_cmd = "ssh {0}{1}@{2}".format(ssh_key, ssh_user,
-                                              tar_node.public_ips)
+                                              node.public_ips)
         else:
-            ssh_cmd = "ssh {0}{1}".format(ssh_key, tar_node.public_ips)
-        # NOT NECESSARY WITH FULL-SCREEN MODE
-        # print("\n")
+            ssh_cmd = "ssh {0}{1}".format(ssh_key, node.public_ips)
         with term.fullscreen():
             ui_print("\033[?25h")  # cursor on
             subprocess.call(ssh_cmd, shell=True)
@@ -213,13 +209,16 @@ def cmd_connect(tar_node, cmd_name, node_info, node_qty):
         cmd_result = True
         ui_print_suffix("Connect Successful", C_GOOD)
         sleep(2)
-        # NOT NECESSARY WITH FULL-SCREEN MODE
-        # print(term.clear)  # clear screen after ssh session
-        # print(term.move_y(node_qty + 2))
     else:
         ui_print_suffix("Command Aborted")
         sleep(0.75)
     return cmd_result
+
+
+def cmd_details(node, cmd_name, node_info):
+    """Display Node details."""
+    ui_print_suffix("Command Aborted")
+    return None
 
 
 def ssh_get_info(node):
@@ -253,31 +252,15 @@ def ssh_calc_aws(node):
     return username
 
 
-def cmd_details(tar_node, cmd_name, node_info, node_qty):
-    """Display Node details."""
-    ui_print_suffix("Command Aborted")
-    return None
-
-
-def input_yn(conf_mess):
-    """Print Confirmation Message and Get Y/N response from user."""
-    ui_erase_ln()
-    ui_print(conf_mess)
-    with term.cbreak():
-        input_flush()
-        val = input_by_key()
-    return bool(val.lower() == 'y')
-
-
-def ui_print(toprint):
+def ui_print(to_print):
     """Print text without charrage return."""
-    sys.stdout.write(toprint)
+    sys.stdout.write(to_print)
     sys.stdout.flush()
 
 
-def ui_print_suffix(toprint, clr=C_WARN):
+def ui_print_suffix(to_print, clr=C_WARN):
     """Print Colored Suffix Message after command."""
-    ui_print(" - {1}{0}{2}".format(toprint, clr, C_NORM))
+    ui_print(" - {1}{0}{2}".format(to_print, clr, C_NORM))
 
 
 def ui_cmd_title(cmd_title):
@@ -301,10 +284,16 @@ def ui_cmd_bar():
     ui_print(cmd_bar)
 
 
-def ui_clear(numlines):
+def ui_del_char(check_len):
+    """Move Left and delete one character."""
+    if check_len:
+        ui_print("\033[D \033[D")
+
+
+def ui_clear(num_lines):
     """Clear previous display info from screen in prep for new data."""
     ui_erase_ln()
-    for i in range(numlines, 0, -1):
+    for i in range(num_lines, 0, -1):
         ui_print("\033[A")
         ui_erase_ln()
 
@@ -350,7 +339,11 @@ def input_by_key():
     return usr_inp
 
 
-def ui_del_char(check_len):
-    """Move Left and delete one character."""
-    if check_len:
-        ui_print("\033[D \033[D")
+def input_yn(conf_mess):
+    """Print Confirmation Message and Get Y/N response from user."""
+    ui_erase_ln()
+    ui_print(conf_mess)
+    with term.cbreak():
+        input_flush()
+        val = input_by_key()
+    return bool(val.lower() == 'y')
