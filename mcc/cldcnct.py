@@ -30,9 +30,10 @@ import gevent
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from libcloud.common.types import InvalidCredsError
+from libcloud.common.exceptions import BaseHTTPError
+from requests.exceptions import SSLError
 from mcc.confdir import CONFIG_DIR
 import sys
-from requests.exceptions import SSLError
 # from pprint import pprint
 
 monkey.patch_all()
@@ -149,11 +150,9 @@ def conn_aws(cred, crid):
                          cred['aws_secret_access_key'],
                          region=cred['aws_default_region'])
     except SSLError as e:
-        print("\r SSL Error with AWS:  {}".format(e))
-        sys.exit()
+        abort_err("\r SSL Error with AWS: {}".format(e))
     except InvalidCredsError as e:
-        print("\r Error with AWS Credentials:  {}".format(e))
-        sys.exit()
+        abort_err("\r Error with AWS Credentials: {}".format(e))
     return {crid: aws_obj}
     # return {"aws": aws_obj}
 
@@ -161,7 +160,10 @@ def conn_aws(cred, crid):
 def nodes_aws(c_obj):
     """Get node objects from AWS."""
     aws_nodes = []
-    aws_nodes = c_obj.list_nodes()
+    try:
+        aws_nodes = c_obj.list_nodes()
+    except BaseHTTPError as e:
+        abort_err("\r HTTP Error with AWS: {}".format(e))
     aws_nodes = adj_nodes_aws(aws_nodes)
     return aws_nodes
 
@@ -188,11 +190,9 @@ def conn_az(cred, crid):
                         key=cred['az_app_id'],
                         secret=cred['az_app_sec'])
     except SSLError as e:
-        print("\r SSL Error with Azure:  {}".format(e))
-        sys.exit()
+        abort_err("\r SSL Error with Azure: {}".format(e))
     except InvalidCredsError as e:
-        print("\r Error with Azure Credentials:  {}".format(e))
-        sys.exit()
+        abort_err("\r Error with Azure Credentials: {}".format(e))
     return {crid: az_obj}
     # return {"azure": az_obj}
 
@@ -200,7 +200,10 @@ def conn_az(cred, crid):
 def nodes_az(c_obj):
     """Get node objects from Azure."""
     az_nodes = []
-    az_nodes = c_obj.list_nodes()
+    try:
+        az_nodes = c_obj.list_nodes()
+    except BaseHTTPError as e:
+        abort_err("\r HTTP Error with Azure: {}".format(e))
     az_nodes = adj_nodes_az(az_nodes)
     return az_nodes
 
@@ -242,11 +245,9 @@ def conn_gcp(cred, crid):
     try:
         gcp_obj = driver(**gcp_crd)
     except SSLError as e:
-        print("\r SSL Error with GCP:  {}".format(e))
-        sys.exit()
+        abort_err("\r SSL Error with GCP: {}".format(e))
     except (InvalidCredsError, ValueError) as e:
-        print("\r Error with GCP Credentials:  {}".format(e))
-        sys.exit()
+        abort_err("\r Error with GCP Credentials: {}".format(e))
     return {crid: gcp_obj}
     # return {"gcp": gcp_obj}
 
@@ -254,7 +255,10 @@ def conn_gcp(cred, crid):
 def nodes_gcp(c_obj):
     """Get node objects from GCP."""
     gcp_nodes = []
-    gcp_nodes = c_obj.list_nodes(ex_use_disk_cache=True)
+    try:
+        gcp_nodes = c_obj.list_nodes(ex_use_disk_cache=True)
+    except BaseHTTPError as e:
+        abort_err("\r HTTP Error with GCP: {}".format(e))
     gcp_nodes = adj_nodes_gcp(gcp_nodes)
     return gcp_nodes
 
@@ -268,3 +272,10 @@ def adj_nodes_gcp(gcp_nodes):
         node.public_ips = ip_to_str(node.public_ips)
         node.zone = node.extra['zone'].name
     return gcp_nodes
+
+
+def abort_err(messg):
+    """Print Error Message and Exit."""
+    print(messg)
+    print("\033[?25h")
+    sys.exit()
