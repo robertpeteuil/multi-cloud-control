@@ -34,7 +34,6 @@ from libcloud.common.exceptions import BaseHTTPError
 from requests.exceptions import SSLError
 from mcc.confdir import CONFIG_DIR
 import sys
-# from pprint import pprint
 
 monkey.patch_all()
 
@@ -49,9 +48,8 @@ def get_conns(cred, providers):
     busy_obj = busy_disp_on()
     conn_fn = []
     for item in providers:
-        cld = item.rstrip('1234567890')  # new
-        conn_fn.append([cld_svc_map[cld][0], cred[item], item])  # new
-        # conn_fn.append([cld_svc_map[item][0], cred])
+        cld = item.rstrip('1234567890')
+        conn_fn.append([cld_svc_map[cld][0], cred[item], item])
     cgroup = Group()
     conn_res = []
     conn_res = cgroup.map(get_conn, conn_fn)
@@ -61,10 +59,8 @@ def get_conns(cred, providers):
         conn_objs.update(item)
     busy_disp_off(dobj=busy_obj)
     sys.stdout.write("\r                                                 \r")
-    sys.stdout.write("\033[?25h")  # turn cusor back on
+    sys.stdout.write("\033[?25h")  # cusor back on
     sys.stdout.flush()
-    # print("\nConnection Objects")
-    # pprint(conn_objs)
     return conn_objs
 
 
@@ -78,27 +74,23 @@ def get_data(conn_objs, providers):
     busy_obj = busy_disp_on()
     collec_fn = []
     for item in providers:
-        cld = item.rstrip('1234567890')  # new
-        collec_fn.append([cld_svc_map[cld], conn_objs[item]])  # new
-        # collec_fn.append([cld_svc_map[item], conn_objs[item]])
+        cld = item.rstrip('1234567890')
+        collec_fn.append([cld_svc_map[cld], conn_objs[item]])
     ngroup = Group()
     node_list = []
     node_list = ngroup.map(get_nodes, collec_fn)
     ngroup.join()
     busy_disp_off(dobj=busy_obj)
     sys.stdout.write("\r                                                 \r")
-    sys.stdout.write("\033[?25h")  # turn cusor back on
+    sys.stdout.write("\033[?25h")  # cusor back on
     sys.stdout.flush()
-    # print("\nNode List")
-    # pprint(node_list)
     return node_list
 
 
 def get_conn(flist):
     """Call function for each provider."""
     cnodes = []
-    # cnodes = flist[0](flist[1])
-    cnodes = flist[0](flist[1], flist[2])  # new
+    cnodes = flist[0](flist[1], flist[2])
     return cnodes
 
 
@@ -124,7 +116,7 @@ def busy_disp_off(dobj):
 
 def busy_display():
     """Display animation to show activity."""
-    sys.stdout.write("\033[?25l")  # turn cursor off
+    sys.stdout.write("\033[?25l")  # cursor off
     sys.stdout.flush()
     for x in range(1800):
         symb = ['\\', '|', '/', '-']
@@ -154,7 +146,6 @@ def conn_aws(cred, crid):
     except InvalidCredsError as e:
         abort_err("\r Error with AWS Credentials: {}".format(e))
     return {crid: aws_obj}
-    # return {"aws": aws_obj}
 
 
 def nodes_aws(c_obj):
@@ -194,7 +185,6 @@ def conn_az(cred, crid):
     except InvalidCredsError as e:
         abort_err("\r Error with Azure Credentials: {}".format(e))
     return {crid: az_obj}
-    # return {"azure": az_obj}
 
 
 def nodes_az(c_obj):
@@ -249,7 +239,6 @@ def conn_gcp(cred, crid):
     except (InvalidCredsError, ValueError) as e:
         abort_err("\r Error with GCP Credentials: {}".format(e))
     return {crid: gcp_obj}
-    # return {"gcp": gcp_obj}
 
 
 def nodes_gcp(c_obj):
