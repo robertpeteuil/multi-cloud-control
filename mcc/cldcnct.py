@@ -40,16 +40,20 @@ monkey.patch_all()
 
 def get_conns(cred, providers):
     """Collect node data asyncronously using gevent lib."""
-    cld_svc_map = {"aws": [conn_aws, nodes_aws],
-                   "azure": [conn_az, nodes_az],
-                   "gcp": [conn_gcp, nodes_gcp]}
+    cld_svc_map = {"aws": conn_aws,
+                   "azure": conn_az,
+                   "gcp": conn_gcp}
     sys.stdout.write("\rEstablishing Connections:  ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
-    conn_fn = []
-    for item in providers:
-        cld = item.rstrip('1234567890')
-        conn_fn.append([cld_svc_map[cld][0], cred[item], item])
+    # NEW LIST COMPREHENSION TO CREATE CONN_FN
+    conn_fn = [[cld_svc_map[x.rstrip('1234567890')], cred[x], x]
+               for x in providers]
+    # ORIGINAL METHOD TO CREATE CONN_FN
+    # conn_fn = []
+    # for item in providers:
+    #     cld = item.rstrip('1234567890')
+    #     conn_fn.append([cld_svc_map[cld][0], cred[item], item])
     cgroup = Group()
     conn_res = []
     conn_res = cgroup.map(get_conn, conn_fn)
@@ -72,10 +76,14 @@ def get_data(conn_objs, providers):
     sys.stdout.write("\rCollecting Info:  ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
-    collec_fn = []
-    for item in providers:
-        cld = item.rstrip('1234567890')
-        collec_fn.append([cld_svc_map[cld], conn_objs[item]])
+    # NEW LIST COMPREHENSION TO CREATE COLLEC_FN
+    collec_fn = [[cld_svc_map[x.rstrip('1234567890')], conn_objs[x]]
+                 for x in providers]
+    # ORIGINAL METHOD TO CREATE COLLEC_FN
+    # collec_fn = []
+    # for item in providers:
+    #     cld = item.rstrip('1234567890')
+    #     collec_fn.append([cld_svc_map[cld], conn_objs[item]])
     ngroup = Group()
     node_list = []
     node_list = ngroup.map(get_nodes, collec_fn)
@@ -128,10 +136,14 @@ def busy_display():
 def ip_to_str(raw_ip):
     """Convert IP Address list to string or null."""
     if raw_ip:
-        raw_ip = raw_ip[0]
+        return raw_ip[0]
     else:
-        raw_ip = None
-    return raw_ip
+        return None
+    # if raw_ip:
+    #     raw_ip = raw_ip[0]
+    # else:
+    #     raw_ip = None
+    # return raw_ip
 
 
 def conn_aws(cred, crid):
