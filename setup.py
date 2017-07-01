@@ -56,7 +56,7 @@ setup(
     package_data={'mcc': ['config.ini']},
     entry_points={'console_scripts': ['mcc=mcc.core:main',
                                       'mccl=mcc.core:list_only']},
-    version='0.0.50',
+    version='0.0.51',
     author="Robert Peteuil",
     author_email="robert.s.peteuil@gmail.com",
     url='https://github.com/robertpeteuil/multi-cloud-control',
