@@ -32,7 +32,7 @@ import mcc.uimode as ui
 import os
 import sys
 
-__version__ = "0.0.50"
+__version__ = "0.0.51"
 
 
 def main():
@@ -42,7 +42,7 @@ def main():
     conn_objs = cld.get_conns(cred, providers)
     while cmd_mode:
         nodes = cld.get_data(conn_objs, providers)
-        node_dict = make_node_dict(nodes)
+        node_dict = make_node_dict(nodes, "name")
         idx_tbl = table.indx_table(node_dict, True)
         cmd_mode = ui.ui_main(idx_tbl, node_dict)
     print("\033[?25h")
@@ -53,7 +53,7 @@ def list_only():
     (cred, providers) = config_read()
     conn_objs = cld.get_conns(cred, providers)
     nodes = cld.get_data(conn_objs, providers)
-    node_dict = make_node_dict(nodes)
+    node_dict = make_node_dict(nodes, "name")
     table.indx_table(node_dict)
 
 
