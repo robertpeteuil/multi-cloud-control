@@ -32,16 +32,17 @@ import mcc.uimode as ui
 import os
 import sys
 
-__version__ = "0.0.33"
+__version__ = "0.0.51"
 
 
 def main():
     """Retreive and display instance data then process commands."""
     (cred, providers) = config_read()
     cmd_mode = True
+    conn_objs = cld.get_conns(cred, providers)
     while cmd_mode:
-        nodes = cld.collect_data(cred, providers)
-        node_dict = make_node_dict(nodes)
+        nodes = cld.get_data(conn_objs, providers)
+        node_dict = make_node_dict(nodes, "name")
         idx_tbl = table.indx_table(node_dict, True)
         cmd_mode = ui.ui_main(idx_tbl, node_dict)
     print("\033[?25h")
@@ -50,18 +51,31 @@ def main():
 def list_only():
     """Retreive and display instance data then exit."""
     (cred, providers) = config_read()
-    nodes = cld.collect_data(cred, providers)
-    table.list_table(nodes)
+    conn_objs = cld.get_conns(cred, providers)
+    nodes = cld.get_data(conn_objs, providers)
+    node_dict = make_node_dict(nodes, "name")
+    table.indx_table(node_dict)
 
 
-def make_node_dict(full_list):
-    """Convert node data from nested-list to dict."""
-    node_dict = {}
+def make_node_dict(outer_list, sort="zone"):
+    """Convert node data from nested-list to sorted dict."""
+    raw_dict = {}
     x = 1
-    for item in full_list:
-        for node in item:
-            node_dict[x] = node
+    for inner_list in outer_list:
+        for node in inner_list:
+            raw_dict[x] = node
             x += 1
+    if sort == "name":  # sort by provider - name
+        srt_dict = OrderedDict(sorted(raw_dict.items(), key=lambda k:
+                               (k[1].cloud, k[1].name.lower())))
+    else:  # sort by provider - zone - name
+        srt_dict = OrderedDict(sorted(raw_dict.items(), key=lambda k:
+                               (k[1].cloud, k[1].zone, k[1].name.lower())))
+    x = 1
+    node_dict = {}
+    for i, v in srt_dict.items():
+        node_dict[x] = v
+        x += 1
     return node_dict
 
 
@@ -76,9 +90,9 @@ def config_read():
     except IOError:
         print("Error reading config file: {}".format(config_file))
         sys.exit()
-    # Read and de-duplicate provider-list
+    # De-duplicate provider-list
     providers = config_prov(config)
-    # Read credentials for each provider specified
+    # Read credentials for listed providers
     (cred, to_remove) = config_cred(config, providers)
     # remove unsupported and credentialess providers
     for item in to_remove:
@@ -104,9 +118,9 @@ def config_cred(config, providers):
     cred = {}
     to_remove = []
     for item in providers:
-        if item in expected:
+        if any(item.startswith(itemb) for itemb in expected):
             try:
-                cred.update(dict(list(config[item].items())))
+                cred[item] = dict(list(config[item].items()))
             except KeyError as e:
                 print("No credentials section in config file for {} -"
                       " provider will be skipped.".format(e))

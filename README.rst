@@ -20,7 +20,7 @@ Multi-Cloud-Control is currently in alpha and runs in two modes:
 Supported Platforms & Python Versions
 -------------------------------------
 
-Python 2.7, 3.3, 3.4, 3.5
+Python 2.7, 3.4, 3.5, 3.6
 
 Platforms:
 
@@ -36,14 +36,13 @@ RedHat / CentOS Based Systems
 
 .. code:: shell
 
-  sudo yum install gcc libffi-devel python-devel openssl-devel
+  sudo yum install gcc python-devel openssl-devel libffi-devel
 
 Debian / Ubuntu Based Systems:
 
 .. code:: shell
 
-  sudo apt-get install gcc libssl-dev libffi-dev python-dev
-  sudo apt-get install python3-dev  #  if using python3.x
+  sudo apt-get install gcc python-dev libssl-dev libffi-dev
 
 Installation
 ------------
