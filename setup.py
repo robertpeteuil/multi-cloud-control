@@ -24,7 +24,6 @@ INSTALL_REQUIRES = ['apache-libcloud>=2.0.0',
                     'future>=0.14',
                     'gevent>=1.2.2',
                     'pycrypto>=2.6.1',
-                    # 'requests >=2.5.1, <=2.7.0',
                     'PrettyTable>=0.7.2']
 
 EXTRAS_REQUIRE = {
@@ -65,7 +64,7 @@ setup(
     package_data={'mcc': ['config.ini']},
     entry_points={'console_scripts': ['mcc=mcc.core:main',
                                       'mccl=mcc.core:list_only']},
-    version='0.0.53',
+    version='0.1.0',
     author="Robert Peteuil",
     author_email="robert.s.peteuil@gmail.com",
     url='https://github.com/robertpeteuil/multi-cloud-control',
@@ -76,7 +75,7 @@ setup(
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Intended Audience :: System Administrators',
         'Intended Audience :: Information Technology',
