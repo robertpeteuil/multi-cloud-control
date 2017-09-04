@@ -8,15 +8,16 @@ MCC: Command-Line Instance Control for Enterprise Cloud Providers
 
 ----------------------------
 
-Multi-Cloud-Control is is executed via using one of two commands, each running in a different mode:
+Multi-Cloud-Control runs in two modes: List Mode and UI Mode. The command used to launch the utility determines the mode of execution:
 
-- **mccl** - Display list of instances & data from all providers in formatted table and exit
+- **mccl** - List Mode - display list of instances and data from all providers in formatted table and exit
 
-- **mcc** - Runs in "UI" mode
+- **mcc** - Normal/UI Mode:
 
-  - Display a numbered list of instances & data from all providers in formatted table
-  - Accept Commands and execute them against node: Start Node, Stop Node, Connect (via ssh) and Quit Utility
-  - Future Commands planned: change node configuration (hardware, disks, network), create/delete node, image/snapshot node, storage control
+  - Display a numbered list of instances and data from all providers in formatted table
+  - Prompt for command to execute: Start Node, Stop Node, Connect (via ssh) and Quit Utility
+  - Upon command completion, instance data is refreshed, redisplayed and the utility loops back to the command prompt.
+  - Potential Future Commands: change node configuration (hardware, disks, network), create/delete node, image/snapshot node, storage control
 
 
 Supported Platforms & Python Versions
@@ -32,7 +33,7 @@ Platforms:
 Pre-Reqs
 --------
 
-Some Python libraries used for secure authentication may require compilation while installing.  If compilation is required, the following packages must be installed before the ``pip`` installation command below is executed: 
+Some libraries used for secure authentication may require compilation during the installation process.  If compilation is required, the following packages must be installed before the ``pip install`` command (listed below) is executed: 
 
 **Installing Pre-Reqs on Debian / Ubuntu Based Systems:**
 
