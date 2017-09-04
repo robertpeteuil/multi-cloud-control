@@ -1,21 +1,23 @@
 Unified CLI Utility for AWS, Azure and GCP Instance Control
 ===========================================================
 
-MCC: Command-Line Instance Control for Top 3 Enterprise Cloud Providers
+MCC: Command-Line Instance Control for Enterprise Cloud Providers
 -----------------------------------------------------------------------
 
 |PyPi release| |lang|
 
 ----------------------------
 
-Multi-Cloud-Control is currently in alpha and runs in two modes:
+Multi-Cloud-Control is is executed via using one of two commands, each running in a different mode:
 
-- **mcc** - Text UI that lists all instances from AWS, Azure and GCP in formatted table
+- **mccl** - Display list of instances & data from all providers in formatted table and exit
 
-  - Accepts Commands to Start Nodes, Stop Nodes or Quit
-  - Additional commands planned include: connect via ssh, image/snapshot nodes, and change nore configuration (hardware, disks, network)
+- **mcc** - Runs in "UI" mode
 
-- **mccl** - Display list of instances from all providers as table and exit
+  - Display a numbered list of instances & data from all providers in formatted table
+  - Accept Commands and execute them against node: Start Node, Stop Node, Connect (via ssh) and Quit Utility
+  - Future Commands planned: change node configuration (hardware, disks, network), create/delete node, image/snapshot node, storage control
+
 
 Supported Platforms & Python Versions
 -------------------------------------
@@ -30,19 +32,20 @@ Platforms:
 Pre-Reqs
 --------
 
-This utility uses some Python libraries which may require compilation during the installation process.
+Some Python libraries used for secure authentication may require compilation while installing.  If compilation is required, the following packages must be installed before the ``pip`` installation command below is executed: 
 
-RedHat / CentOS Based Systems
-
-.. code:: shell
-
-  sudo yum install gcc python-devel openssl-devel libffi-devel
-
-Debian / Ubuntu Based Systems:
+**Installing Pre-Reqs on Debian / Ubuntu Based Systems:**
 
 .. code:: shell
 
-  sudo apt-get install gcc python-dev libssl-dev libffi-dev
+  sudo apt-get install gcc python-dev libssl-dev libffi-dev -y
+
+**Installing Pre-Reqs on RedHat / CentOS Based Systems:**
+
+.. code:: shell
+
+  sudo yum install gcc python-devel openssl-devel libffi-devel -y
+
 
 Installation
 ------------
