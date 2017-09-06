@@ -1,8 +1,8 @@
-Unified CLI Utility for AWS, Azure and GCP Instance Control
-===========================================================
+Single Utility for Instance Management across AWS, Azure and GCP
+================================================================
 
 MCC: Command-Line Instance Control for Enterprise Cloud Providers
------------------------------------------------------------------------
+-----------------------------------------------------------------
 
 |PyPi release| |lang|
 
