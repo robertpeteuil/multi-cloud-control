@@ -124,7 +124,7 @@ Notes while editing the config.ini file:
   az_app_sec = 22918C9e1cCC7665a+b3e4052f942630aE979CF68/v=
 
 
-**[gcp] section** - specifies your Google Compute Service Account, the name of your access key (use JSON formatted key), and your Project ID.  `Information on Setting up Service Account Authentication <https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances>`_
+**[gcp] section** - supports two authentication types. Service Account is likely easier for many users, but both options are available.  Specify the type of Authentication: (S)ervice or (A)pplication (defaults to service if not specified), Google Compute project-id, and the remaining variables required for the authentication type as described below.  `Information on Setting up Service Account Authentication <https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances>`_
 
 
 .. code::
@@ -167,20 +167,18 @@ Notes while editing the config.ini file:
 
 .. code::
 
-  #   SPECIFYING MULTIPLE ACCOUNTS FOR A PROVIDER:
+  #   Step 1
+  #    - add an additional entry to the 'providers' list - in this exact format:
+  #      - the entry begins with the standard values: aws, azure, gcp
+  #      - it is immediately followed by a numeric suffix
+  #          ex: aws2 (for a 2nd set of aws credentials)
+  #      - no additional characters are allowed or it will not be recognized and fail
   #
-  #     Step 1
-  #      - add an additional entry to the 'providers' list - in this exact format:
-  #        - the entry begins with the standard values: aws, azure, gcp
-  #        - it is immediately followed by a numeric suffix
-  #            ex: aws2 (for a 2nd set of aws credentials)
-  #        - no additional characters are allowed or it will not be recognized and fail
-  #
-  #     Step 2
-  #      - add a section below of the same name containing the corresponding credentials
-  #        - ex: [aws2] (containing the 2nd set of aws credentials, for the earlier example)
-  #      - this new credentials section must include all credentials for the 2nd account,
-  #           even if some are the same as the primary account.
+  #   Step 2
+  #    - add a section below of the same name containing the corresponding credentials
+  #      - ex: [aws2] (containing the 2nd set of aws credentials, for the earlier example)
+  #    - this new credentials section must include all credentials for the 2nd account,
+  #         even if some are the same as the primary account.
 
 
 
