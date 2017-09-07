@@ -148,8 +148,8 @@ def cmd_startstop(node, cmd_name, node_info):
     cmd_lu = {"run": ["ex_start_node", "wait_until_running", "RUNNING"],
               "stop": ["ex_stop_node", "", "STOPPING"]}
     # specific delay & message {provider: {command: [delay, message]}}
-    cld_lu = {"azure": {"stop": [5, "Initiated"]},
-              "aws": {"stop": [5, "Initiated"]}}
+    cld_lu = {"azure": {"stop": [6, "Initiated"]},
+              "aws": {"stop": [6, "Initiated"]}}
     conf_mess = ("\r{0}{1}{2} {3} - Confirm [y/N]: ".
                  format(C_STAT[cmd_name.upper()], cmd_name.upper(), C_NORM,
                         node_info))
