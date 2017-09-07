@@ -10,7 +10,9 @@ MCC: Command-Line Instance Control for Enterprise Cloud Providers
 
 Multi-Cloud-Control runs in two modes: List Mode and UI Mode. The command used to launch the utility determines the mode of execution:
 
-- **mccl** - List Mode - display list of instances and data from all providers in formatted table and exit
+- **mccl** - List Mode:
+
+  - display list of instances and data from all providers in formatted table and exit
 
 - **mcc** - Normal/UI Mode:
 
@@ -33,7 +35,7 @@ Platforms:
 Pre-Reqs
 --------
 
-Some libraries used for secure authentication may require compilation during the installation process.  If compilation is required, the following packages must be installed before the ``pip install`` command (listed below) is executed: 
+Some libraries used for secure authentication may require compilation during the installation process.  If compilation is required, the following packages must be installed before the ``pip install`` command (listed below) is executed:
 
 **Installing Pre-Reqs on Debian / Ubuntu Based Systems:**
 
@@ -71,23 +73,34 @@ Notes while editing the config.ini file:
 - be careful not to change the names of the keys (titles left of the '=' symbol)
 - comment lines may be deleted (lines beginning with #)
 
-**config.ini sections**
+**config.ini - info section and providers list**
 
 .. code::
+  # 'INFO' SECTION AND 'PROVIDERS' LIST
+  # - There must be a section named [info] and it must contain the entry providers
+  #
+  # - providers is a list of the cloud providers the utility should connect to
+  #   - ONLY include providers you have credentials for AND want to use
+  #   - you must use the exact values listed to reference the providers:
+  #     - "aws", "azure", and "gcp"
+  #   - multiple account per provider is supported, see section at bottom for details
 
   [info]
-  # example - connect to all three providers
+  # this example - connects to all three providers
   providers = aws,azure,gcp
 
-  # the "providers" key specifies which cloud providers to connect to
-  # it may contain any subset or combination of "aws", "azure" and "gcp"
-  # each provider listed must have a corresponding credentials section of the same name
+  # CREDENTIALS DATA SECTIONS
+  #  - one section with matching name for each item listed in providers
+  #  - each section contains the credentials for that provider
+  #    ex: [aws] - specifies aws credentials
 
 
 **[aws] section** - specifies your AWS security credentials and default datacenter region. `Information on AWS Credentials <http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html>`_
 
 
 .. code::
+
+  # [aws] SECTION REQUIRED if aws is listed in providers
 
   [aws]
   aws_access_key_id = EXCEWDYSWRP7VZOW4VAW
@@ -99,6 +112,8 @@ Notes while editing the config.ini file:
 
 
 .. code::
+
+  # [azure] SECTION REQUIRED if azure is listed in providers
 
   [azure]
   az_tenant_id = a3b7de99-6c36-e71f-e7d7-c5a1eefd9c01
@@ -112,13 +127,60 @@ Notes while editing the config.ini file:
 
 .. code::
 
-  [gcp]
-  gcp_svc_acct_email = 37646997249-compute@developer.gserviceaccount.com
-  gcp_pem_file = SampleProject-72fcfdb29717.json
-  gcp_proj_id = sampleproject-634368
+  # [gcp] SECTION REQUIRED if gcp is listed in providers
 
-  # gcp_pem_file is the filename of the key (JSON file)
-  # copy the key (JSON file) to the config directory: {HOME}/.cloud
+  [gcp]
+  gcp_auth_type = S
+  gcp_proj_id = sampleproject-634368
+  gcp_svc_acct_email = 12345678911-compute@developer.gserviceaccount.com
+  gcp_pem_file = SampleProject-72fcfdb29717.json
+
+  # gcp SUPPORTS TWO AUTHENTICATION TYPES:
+  #
+  #   gcp_auth_type - specifies which type to use ( S or A )
+  #       - if omitted, it defaults to Service Account Auth
+  #
+  #   S = Service Account Auth (default)
+  #       - requires that the service account key (json file) copied or moved to config dir
+  #    (the example above lists the values needed for Service Account Auth)
+  #
+  #   A = Installed Application Auth - when using this auth type:
+  #       - the first time the program is run with the proper credentials listed
+  #         - it displays a URL in the terminal session
+  #         - this URL must be pasted into a web-browser to display a code
+  #         - copy the code from the web browser and paste it into the terminal
+  #         - then program will then continue running
+  #
+  #  The example below lists the values needed for Installed Application Auth
+  #
+  #  [gcp]
+  #  gcp_auth_type = A
+  #  gcp_proj_id = sampleproject-634368
+  #  gcp_client_id = 12345678911-LZXcWZmyzU3v3qNPPJNEimoKgh9Wruo4.apps.googleusercontent.com
+  #  gcp_client_sec = t4ugvWTocssrVtX448tDEWBW
+
+
+**specifying multiple accounts** - for one or more providers
+
+
+.. code::
+
+  #   SPECIFYING MULTIPLE ACCOUNTS FOR A PROVIDER:
+  #
+  #     Step 1
+  #      - add an additional entry to the 'providers' list - in this exact format:
+  #        - the entry begins with the standard values: aws, azure, gcp
+  #        - it is immediately followed by a numeric suffix
+  #            ex: aws2 (for a 2nd set of aws credentials)
+  #        - no additional characters are allowed or it will not be recognized and fail
+  #
+  #     Step 2
+  #      - add a section below of the same name containing the corresponding credentials
+  #        - ex: [aws2] (containing the 2nd set of aws credentials, for the earlier example)
+  #      - this new credentials section must include all credentials for the 2nd account,
+  #           even if some are the same as the primary account.
+
+
 
 .. |PyPi release| image:: https://img.shields.io/pypi/v/mcc.svg
    :target: https://pypi.python.org/pypi/mcc
