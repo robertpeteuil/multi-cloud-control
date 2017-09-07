@@ -75,7 +75,9 @@ Notes while editing the config.ini file:
 
 **config.ini - info section and providers list**
 
+
 .. code::
+
   # 'INFO' SECTION AND 'PROVIDERS' LIST
   # - There must be a section named [info] and it must contain the entry providers
   #
