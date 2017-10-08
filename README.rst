@@ -4,7 +4,7 @@ Single Utility for Instance Management across AWS, Azure and GCP
 MCC: Command-Line Instance Control for Enterprise Cloud Providers
 -----------------------------------------------------------------
 
-|PyPi release| |lang|
+|PyPi release| |lang| |Dependency|
 
 ----------------------------
 
@@ -187,3 +187,6 @@ Notes while editing the config.ini file:
 
 .. |lang| image:: https://img.shields.io/badge/language-python-3572A5.svg
    :target: https://github.com/robertpeteuil/multi-cloud-control
+
+.. |Dependency| image:: https://gemnasium.com/badges/github.com/robertpeteuil/multi-cloud-control.svg
+   :target: https://gemnasium.com/github.com/robertpeteuil/multi-cloud-control
