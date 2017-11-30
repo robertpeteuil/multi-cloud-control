@@ -1,23 +1,22 @@
-Unified VM-Instance Management Utility across AWS, Azure and GCP Platforms
+Unified Instance Management Utility across AWS, Azure and GCP Platforms
 ==========================================================================
 
 MCC: Command-Line Instance Control for Enterprise Cloud Providers
 -----------------------------------------------------------------
 
 |PyPi release| |lang|
-
-----------------------------
+---------------------
 
 Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances on AWS, Azure and GCP (including multiple accounts per provider).  This includes displaying a unified list of VM-instances across cloud providers, and Starting / Stopping / Connecting to VM-instances on any providers platforms.  This is extremely useful for companies, projects, and people that use VM-instances on multiple clouds.
 
-There are two commands that can be used depending on the needs at the time: ``mccl`` - "List Mode" and ``mcc`` - "Command Mode".  Each command is described below and screenshots of each are provided. 
+There are two commands that can be used depending on the needs at the time: ``mccl`` - "List Mode" and ``mcc`` - "Command Mode".  Each command is described below and screenshots of each are provided.
 
 ``mccl``
 --------
 
 - ``mccl`` displays list of VM-instances and data from all providers (and returns to the prompt)
 
-  - useful to quickly display a list of VM-instances - including name, location, cloud provider, machine-size, IP address and opperational-status
+  - useful to quickly display a list of VM-instances - including name, location, cloud provider, machine-size, IP address and operational-status
 
 
 **List Mode screenshot**
@@ -26,7 +25,7 @@ There are two commands that can be used depending on the needs at the time: ``mc
 .. image:: https://user-images.githubusercontent.com/1554603/33449863-4b1e182a-d5c7-11e7-958e-a1fac2ec1ee5.png
 
 
-``mcc`` 
+``mcc``
 -------
 
 - ``mcc`` displays a numbered list of VM-instances and data from all providers and awaits a command
@@ -56,7 +55,7 @@ Platforms:
 Pre-Reqs
 --------
 
-The libraries used for secure authentication may require compilation during the installation process on some systems.  In order to sucessfully compile these dependancies, the following packages must be installed before installation:
+The libraries used for secure authentication may require compilation during the installation process on some systems.  In order to successfully compile these dependencies, the following packages must be installed before installation:
 
 **Installing Pre-Reqs on Debian / Ubuntu Based Systems:**
 
@@ -100,7 +99,7 @@ Notes while editing the config.ini file:
 **config.ini - info section and providers list**
 
 
-.. code::
+.. code:: ini
 
   # 'INFO' SECTION AND 'PROVIDERS' LIST
   # - There must be a section named [info] and it must contain the entry providers
@@ -124,7 +123,7 @@ Notes while editing the config.ini file:
 **[aws] section** - specifies your AWS security credentials and default datacenter region. `Information on AWS Credentials <http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html>`_
 
 
-.. code::
+.. code:: ini
 
   # [aws] SECTION REQUIRED if aws is listed in providers
 
@@ -137,7 +136,7 @@ Notes while editing the config.ini file:
 **[azure] section** - specifies your Azure Tenant-ID, Subscription-ID, Application-ID and Application-Secret.  `Creating an Azure Service Principal <https://azure.microsoft.com/en-us/documentation/articles/resource-group-authenticate-service-principal>`_
 
 
-.. code::
+.. code:: ini
 
   # [azure] SECTION REQUIRED if azure is listed in providers
 
@@ -151,7 +150,7 @@ Notes while editing the config.ini file:
 **[gcp] section** - supports two authentication types. Service Account is likely easier for many users, but both options are available.  Specify the type of Authentication: (S)ervice or (A)pplication (defaults to service if not specified), Google Compute project-id, and the remaining variables required for the authentication type as described below.  `Information on Setting up Service Account Authentication <https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances>`_
 
 
-.. code::
+.. code:: ini
 
   # [gcp] SECTION REQUIRED if gcp is listed in providers
 
@@ -189,7 +188,7 @@ Notes while editing the config.ini file:
 **specifying multiple accounts** - for one or more providers
 
 
-.. code::
+.. code:: ini
 
   #   Step 1
   #    - add an additional entry to the 'providers' list - in this exact format:
