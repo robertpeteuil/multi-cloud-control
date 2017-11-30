@@ -8,7 +8,7 @@ MCC: Command-Line Instance Control for Enterprise Cloud Providers
 
 ----------------------------
 
-Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances on AWS, Azure and GCP (including multiple accounts per provider).  This includes displaying a unified list of VM-instances across all providers , and Starting / Stopping / Connecting to VM-instances on any of these platforms.  This is extremely useful for companies, projects, and people that are using VM-instances on multiple cloud platforms.
+Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances on AWS, Azure and GCP (including multiple accounts per provider).  This includes displaying a unified list of VM-instances across cloud providers, and Starting / Stopping / Connecting to VM-instances on any providers platforms.  This is extremely useful for companies, projects, and people that use VM-instances on multiple clouds.
 
 There are two commands that can be used depending on the needs at the time: ``mccl`` - "List Mode" and ``mcc`` - "Command Mode".  Each command is described below and screenshots of each are provided. 
 
@@ -32,7 +32,7 @@ There are two commands that can be used depending on the needs at the time: ``mc
 - ``mcc`` displays a numbered list of VM-instances and data from all providers and awaits a command
 
   - Useful when you need to start, stop or connect to VM-instances
-  - After running a command, the VM-instances data display is refreshed, and it awaits the next command
+  - After running a command, the VM-instance display is refreshed and it awaits the next command
   - Potential future commands include: change node configuration (hardware, disks, network), create/delete instance, create image/snapshot instance, storage control
 
 
