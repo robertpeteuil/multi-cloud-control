@@ -31,8 +31,8 @@ There are two commands that can be used depending on the needs at the time: ``mc
 
 - ``mcc`` displays a numbered list of VM-instances and data from all providers and awaits a command
 
-  - Useful when you need to start, stop, or connecting to VM-instances
-  - After running a command, the displayed VM-instances data is refreshed, and it awaits the next command
+  - Useful when you need to start, stop or connect to VM-instances
+  - After running a command, the VM-instances data display is refreshed, and it awaits the next command
   - Potential future commands include: change node configuration (hardware, disks, network), create/delete instance, create image/snapshot instance, storage control
 
 
