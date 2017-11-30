@@ -140,7 +140,7 @@ def node_validate(node_dict, node_num, cmd_name):
           False: req_lu[cmd_name][1]}
     node_valid = bool(req_lu[cmd_name][0] == node_dict[node_num].state)
     node_info = tm[node_valid]
-    return (node_valid, node_info)
+    return node_valid, node_info
 
 
 def cmd_startstop(node, cmd_name, node_info):
@@ -234,7 +234,7 @@ def ssh_get_info(node):
         keyname = items['key' == 'ssh-keys'].get('value', "")
         pos = keyname.find(":")
         ssh_user = keyname[0:pos]
-    return (ssh_user, ssh_key)
+    return ssh_user, ssh_key
 
 
 def ssh_calc_aws(node):
@@ -252,7 +252,7 @@ def ssh_calc_aws(node):
 
 
 def ui_print(to_print):
-    """Print text without charrage return."""
+    """Print text without carriage return."""
     sys.stdout.write(to_print)
     sys.stdout.flush()
 
@@ -271,7 +271,7 @@ def ui_cmd_title(cmd_title):
 def ui_cmd_bar():
     """Display Command Bar."""
     cmd_bar = ("\rSELECT COMMAND -  {2}(R){1}un   {0}(C){1}onnect   "
-               "{3}(S){1}top   {0}(U){1}pdate Info"
+               "{3}(S){1}top   {0}(U){1}pdate"
                "   {0}(Q){1}uit: ".
                format(C_TI, C_NORM, C_GOOD, C_ERR))
     # FUTURE - TO BE USED WHEN DETAILS IMPLEMENTED
@@ -315,7 +315,7 @@ def input_flush():
 
 
 def input_by_key():
-    """Get user input using inkey to prevent /n printing at end."""
+    """Get user input using term.inkey to prevent /n printing at end."""
     usr_inp = ''
     input_valid = True
     input_flush()

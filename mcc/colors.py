@@ -46,15 +46,15 @@ C_TI2 = YELLOW
 C_GOOD = GREEN
 C_WARN = YELLOW
 C_ERR = RED
-"""Functionally titled vars as a psuedo color theme.
+"""Functionally titled vars as a pseudo color theme.
 
-It's intended that modules will import and use these functionaly-named
+It's intended that modules will import and use these functionally-named
 vars instead of the color named vars.
 
 This simplifies changing colors in the module using them.  To change
 a color, the corresponding functional var only needs to be changed to a
 different color here.  If direct color names are used, changes
-require replacing all occurences of the color var being changed.
+require replacing all occurrences of the color var being changed.
 """
 
 

@@ -39,7 +39,7 @@ monkey.patch_all()
 
 
 def get_conns(cred, providers):
-    """Collect node data asyncronously using gevent lib."""
+    """Collect node data asynchronously using gevent lib."""
     cld_svc_map = {"aws": conn_aws,
                    "azure": conn_az,
                    "gcp": conn_gcp}
@@ -57,7 +57,7 @@ def get_conns(cred, providers):
         conn_objs.update(item)
     busy_disp_off(dobj=busy_obj)
     sys.stdout.write("\r                                                 \r")
-    sys.stdout.write("\033[?25h")  # cusor back on
+    sys.stdout.write("\033[?25h")  # cursor back on
     sys.stdout.flush()
     return conn_objs
 
@@ -78,7 +78,7 @@ def get_data(conn_objs, providers):
     ngroup.join()
     busy_disp_off(dobj=busy_obj)
     sys.stdout.write("\r                                                 \r")
-    sys.stdout.write("\033[?25h")  # cusor back on
+    sys.stdout.write("\033[?25h")  # cursor back on
     sys.stdout.flush()
     return node_list
 
@@ -155,7 +155,7 @@ def nodes_aws(c_obj):
 
 
 def adj_nodes_aws(aws_nodes):
-    """Retreive details specific to AWS."""
+    """Retrieve details specific to AWS."""
     for node in aws_nodes:
         node.cloud = "aws"
         node.cloud_disp = "AWS"
@@ -194,7 +194,7 @@ def nodes_az(c_obj):
 
 
 def adj_nodes_az(az_nodes):
-    """Retreive details specific to Azure."""
+    """Retrieve details specific to Azure."""
     for node in az_nodes:
         node.cloud = "azure"
         node.cloud_disp = "Azure"
@@ -248,7 +248,7 @@ def nodes_gcp(c_obj):
 
 
 def adj_nodes_gcp(gcp_nodes):
-    """Retreive details specific to GCP."""
+    """Retrieve details specific to GCP."""
     for node in gcp_nodes:
         node.cloud = "gcp"
         node.cloud_disp = "GCP"
