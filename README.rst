@@ -29,7 +29,7 @@ There are two commands that can be used depending on the needs at the time: ``mc
 ``mcc`` 
 -------
 
-- ``mcc`` displays a numbered list of VM-instances and data from all providers and await a command
+- ``mcc`` displays a numbered list of VM-instances and data from all providers and awaits a command
 
   - Useful when you need to start, stop, or connecting to VM-instances
   - After running a command, the displayed VM-instances data is refreshed, and it awaits the next command
