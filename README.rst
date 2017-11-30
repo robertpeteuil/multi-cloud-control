@@ -8,26 +8,36 @@ MCC: Command-Line Instance Control for Enterprise Cloud Providers
 
 ----------------------------
 
-Multi-Cloud-Control provides a unified command for controlling cloud Instances on AWS, Azure and GCP.  Supported commands include Listing, Starting / Stopping and Connecting directly to instances on any of those platforms.  The eliminates the need to install and configure seperate CLI's for each Cloud Provider, and run commands based on the location of the instance (which you may not know.)
+Multi-Cloud-Control provides single solution for controlling cloud Instances on AWS, Azure and GCP (including multiple accounts per provider).  This includes displaying a unified List of Instances across all providers , and Starting / Stopping / Connecting to Instances on any of these platforms.  This is extremely useful for companies/projects/people are using Instances on multiple cloud platforms.
 
-It supports two methods of execution: a "List Mode" and persistent "Command Mode".  The type of execution is based on the command used to launch it:
+There are two commands that can be used depending on the needs at the time: ``mccl`` or "List Mode" and ``mcc`` or "Command Mode".  Each command is described below and screenshots of each are provided. 
 
-- ``mccl`` - Displays list of instances and data from all providers (and return to prompt)
+``mccl``
+--------
 
-- ``mcc`` - Displays a numbered list of instances and data from all providers and await command
+- ``mccl`` displays list of instances and data from all providers (and return to prompt)
 
-  - Supported commands include: Run, Stop, Connect (via ssh), Refresh list display and Quit
-  - Upon command completion, instance data is refreshed, redisplayed and the utility loops back to the command prompt
-  - Potential Future Commands: change node configuration (hardware, disks, network), create/delete node, image/snapshot node, storage control
+  - useful to generate a list of instances, including name, location, cloud provider, machine-size, IP address and run-status
 
 
-Screenshot of List Mode - ``mccl``
-----------------------------------
+**List Mode screenshot**
+
 
 .. image:: https://user-images.githubusercontent.com/1554603/33449863-4b1e182a-d5c7-11e7-958e-a1fac2ec1ee5.png
 
-Screenshot of Command Mode - ``mcc``
-------------------------------------
+
+``mcc`` 
+-------
+
+- ``mcc`` displays a numbered list of instances and data from all providers and await command
+
+  - Useful when you need to start, stop, or connecting to instances.
+  - After running a command, the instance data is refreshed, and it awaits the next command
+  - Potential future commands include: change node configuration (hardware, disks, network), create/delete instance, create image/snapshot instance, storage control
+
+
+**Command Mode screenshot**
+
 
 .. image:: https://user-images.githubusercontent.com/1554603/33449859-47c4677e-d5c7-11e7-8974-9212c31e785f.png
 
