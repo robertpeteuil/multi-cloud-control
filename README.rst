@@ -1,5 +1,5 @@
-Single Utility for Instance Management across AWS, Azure and GCP
-================================================================
+Unified VM-Instance Management Utility across AWS, Azure and GCP Platforms
+==========================================================================
 
 MCC: Command-Line Instance Control for Enterprise Cloud Providers
 -----------------------------------------------------------------
