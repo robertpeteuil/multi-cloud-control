@@ -70,8 +70,8 @@ setup(
     url='https://github.com/robertpeteuil/multi-cloud-control',
     download_url='https://pypi.python.org/pypi/mcc',
     license='GNU General Public License v3 (GPLv3)',
-    description='Unified CLI Utility for AWS, Azure and GCP Instance Control',
-    keywords='Unified Cloud Utility Instance AWS EC2 Azure GCP Multi-Provider',
+    description='Unified VM-Instance Management Utility across AWS, Azure and GCP Platforms',
+    keywords='aws-ec2 gcp-compute azure-vm utility control ssh start stop connect',
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
     classifiers=[
