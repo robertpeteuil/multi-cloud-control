@@ -10,14 +10,14 @@ MCC: Command-Line Instance Control for Enterprise Cloud Providers
 
 Multi-Cloud-Control provides single solution for controlling cloud Instances on AWS, Azure and GCP (including multiple accounts per provider).  This includes displaying a unified List of Instances across all providers , and Starting / Stopping / Connecting to Instances on any of these platforms.  This is extremely useful for companies/projects/people are using Instances on multiple cloud platforms.
 
-There are two commands that can be used depending on the needs at the time: ``mccl`` or "List Mode" and ``mcc`` or "Command Mode".  Each command is described below and screenshots of each are provided. 
+There are two commands that can be used depending on the needs at the time: ``mccl`` - "List Mode" and ``mcc`` - "Command Mode".  Each command is described below and screenshots of each are provided. 
 
 ``mccl``
 --------
 
-- ``mccl`` displays list of instances and data from all providers (and return to prompt)
+- ``mccl`` displays list of instances and data from all providers (and returns to the prompt)
 
-  - useful to generate a list of instances, including name, location, cloud provider, machine-size, IP address and run-status
+  - useful to quickly display a list of instances - including name, location, cloud provider, machine-size, IP address and opperational-status
 
 
 **List Mode screenshot**
@@ -29,9 +29,9 @@ There are two commands that can be used depending on the needs at the time: ``mc
 ``mcc`` 
 -------
 
-- ``mcc`` displays a numbered list of instances and data from all providers and await command
+- ``mcc`` displays a numbered list of instances and data from all providers and await a command
 
-  - Useful when you need to start, stop, or connecting to instances.
+  - Useful when you need to start, stop, or connecting to instances
   - After running a command, the instance data is refreshed, and it awaits the next command
   - Potential future commands include: change node configuration (hardware, disks, network), create/delete instance, create image/snapshot instance, storage control
 
