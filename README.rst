@@ -8,7 +8,7 @@ MCC: Command-Line Instance Control for Enterprise Cloud Providers
 
 ----------------------------
 
-Multi-Cloud-Control provides single solution for controlling cloud Instances on AWS, Azure and GCP (including multiple accounts per provider).  This includes displaying a unified List of Instances across all providers , and Starting / Stopping / Connecting to Instances on any of these platforms.  This is extremely useful for companies/projects/people are using Instances on multiple cloud platforms.
+Multi-Cloud-Control provides a single solution for controlling cloud Instances on AWS, Azure and GCP (including multiple accounts per provider).  This includes displaying a unified List of Instances across all providers , and Starting / Stopping / Connecting to Instances on any of these platforms.  This is extremely useful for companies/projects/people are using Instances on multiple cloud platforms.
 
 There are two commands that can be used depending on the needs at the time: ``mccl`` - "List Mode" and ``mcc`` - "Command Mode".  Each command is described below and screenshots of each are provided. 
 
