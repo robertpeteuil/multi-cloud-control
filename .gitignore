@@ -17,3 +17,4 @@ testdata.py
 coverage.xml
 .coverage.*
 htmlcov/
+.idea/
