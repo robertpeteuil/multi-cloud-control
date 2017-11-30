@@ -8,21 +8,31 @@ MCC: Command-Line Instance Control for Enterprise Cloud Providers
 
 ----------------------------
 
-Multi-Cloud-Control runs in two modes: List Mode and UI Mode. The command used to launch the utility determines the mode of execution:
+Multi-Cloud-Control provides a unified command for controlling cloud Instances on AWS, Azure and GCP.  Supported commands include Listing, Starting / Stopping and Connecting directly to instances on any of those platforms.  The eliminates the need to install and configure seperate CLI's for each Cloud Provider, and run commands based on the location of the instance (which you may not know.)
 
-- **mccl** - List Mode:
+It supports two methods of execution: a "List Mode" and persistent "Command Mode".  The type of execution is based on the command used to launch it:
 
-  - display list of instances and data from all providers in formatted table and exit
+- ``mccl`` - Displays list of instances and data from all providers (and return to prompt)
 
-- **mcc** - Normal/UI Mode:
+- ``mcc`` - Displays a numbered list of instances and data from all providers and await command
 
-  - Display a numbered list of instances and data from all providers in formatted table
-  - Prompt for command to execute: Start Node, Stop Node, Connect (via ssh) and Quit Utility
-  - Upon command completion, instance data is refreshed, redisplayed and the utility loops back to the command prompt.
+  - Supported commands include: Run, Stop, Connect (via ssh), Refresh list display and Quit
+  - Upon command completion, instance data is refreshed, redisplayed and the utility loops back to the command prompt
   - Potential Future Commands: change node configuration (hardware, disks, network), create/delete node, image/snapshot node, storage control
 
 
-Supported Platforms & Python Versions
+Screenshot of List Mode - ``mccl``
+----------------------------------
+
+.. image:: https://user-images.githubusercontent.com/1554603/33449863-4b1e182a-d5c7-11e7-958e-a1fac2ec1ee5.png
+
+Screenshot of Command Mode - ``mcc``
+------------------------------------
+
+.. image:: https://user-images.githubusercontent.com/1554603/33449859-47c4677e-d5c7-11e7-8974-9212c31e785f.png
+
+
+Supported Python versions & Platforms
 -------------------------------------
 
 Python 2.7, 3.4, 3.5, 3.6
@@ -31,11 +41,12 @@ Platforms:
 
 - Linux
 - macOS (OS X)
+- Windows 10 'Bash on Windows'
 
 Pre-Reqs
 --------
 
-Some libraries used for secure authentication may require compilation during the installation process.  If compilation is required, the following packages must be installed before the ``pip install`` command (listed below) is executed:
+The libraries used for secure authentication may require compilation during the installation process on some systems.  In order to sucessfully compile these dependancies, the following packages must be installed before installation:
 
 **Installing Pre-Reqs on Debian / Ubuntu Based Systems:**
 
@@ -59,19 +70,22 @@ This utility can be installed with **pip**:
 
   sudo pip install mcc
 
+
 Configuration
 -------------
 
-The first time the utility is executed:
+The first time the utility is executed it performs the following setup tasks:
 
-- It creates its config directory **{HOME}/.cloud**
-- It copies a sample config.ini file to the config dir
-- It instructs the user to add their credential information to config.ini
+- Creates its config directory **{HOME}/.cloud**
+- Copies a sample config.ini file to the new config dir
+- Instructs the user to add their credential information to config.ini
+
+  - The sample config.ini contains sample configuration data, and extensive comments describing how to add your real data.
 
 Notes while editing the config.ini file:
 
-- be careful not to change the names of the keys (titles left of the '=' symbol)
-- comment lines may be deleted (lines beginning with #)
+- do not change the names of the keys (titles left of the '=' symbol)
+- lines with comments may be deleted (lines beginning with #)
 
 **config.ini - info section and providers list**
 
