@@ -14,9 +14,9 @@ There are two commands that can be used depending on the needs at the time: ``mc
 ``mccl``
 --------
 
-- ``mccl`` displays list of VM-instances and data from all providers (and returns to the prompt)
+- ``mccl`` displays a list of VM-Instances and data from all providers (and returns to the prompt)
 
-  - useful to quickly display a list of VM-instances - including name, location, cloud provider, machine-size, IP address and operational-status
+  - design for quickly displaying a unified list of VM-instance status across all providers 
 
 
 **List Mode screenshot**
@@ -28,11 +28,12 @@ There are two commands that can be used depending on the needs at the time: ``mc
 ``mcc``
 -------
 
-- ``mcc`` displays a numbered list of VM-instances and data from all providers and awaits a command
+- ``mcc`` displays a list of VM-Instances across providers then enables command execution on any of them
 
-  - Useful when you need to start, stop or connect to VM-instances
-  - After running a command, the VM-instance display is refreshed and it awaits the next command
-  - Potential future commands include: change node configuration (hardware, disks, network), create/delete instance, create image/snapshot instance, storage control
+  - Designed for use when VM-Instance control is needed
+  - After listing all instances and command options, it awaits user command selection
+  - Currently supports commands for starting, stopping and connecting
+  - Future commands may include: creating/deleting instances, changing configuration (hardware, disks, network), managing imaging/snapshots, managing disk/storage, add/remove to groups/clusters
 
 
 **Command Mode screenshot**
