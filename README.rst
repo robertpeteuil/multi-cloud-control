@@ -1,5 +1,5 @@
-Unified Instance Management Utility across AWS, Azure and GCP Platforms
-==========================================================================
+Instance Management across AWS, Azure and GCP Platforms
+=======================================================
 
 MCC: Command-Line Instance Control for Enterprise Cloud Providers
 -----------------------------------------------------------------
@@ -9,14 +9,16 @@ MCC: Command-Line Instance Control for Enterprise Cloud Providers
 
 Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances on AWS, Azure and GCP (including multiple accounts per provider).  This includes displaying a unified list of VM-instances across cloud providers, and Starting / Stopping / Connecting to VM-instances on any providers platforms.  This is extremely useful for companies, projects, and people that use VM-instances on multiple clouds.
 
-There are two commands that can be used depending on the needs at the time: ``mccl`` - "List Mode" and ``mcc`` - "Command Mode".  Each command is described below and screenshots of each are provided.
+There are two methods of using this utility, depending on the command used: 
+- ``mccl`` - "List Mode" - Displays a unified list of VM-Instances and parameters from all providers
+- ``mcc`` - "Command Mode" - Displays a unified list of VM-Instances across providers and enables command execution
 
 ``mccl``
 --------
 
-- ``mccl`` displays a list of VM-Instances and data from all providers (and returns to the prompt)
+- ``mccl`` Displays a unified list of VM-Instances and parameters from all providers
 
-  - design for quickly displaying a unified list of VM-instance status across all providers 
+  - design for quickly displaying a unified list across all providers, when quick access to information is needed
 
 
 **List Mode screenshot**
@@ -28,11 +30,11 @@ There are two commands that can be used depending on the needs at the time: ``mc
 ``mcc``
 -------
 
-- ``mcc`` displays a list of VM-Instances across providers then enables command execution on any of them
+- ``mcc`` Displays a unified list of VM-Instances across providers and enables command execution
 
-  - Designed for use when VM-Instance control is needed
-  - After listing all instances and command options, it awaits user command selection
-  - Currently supports commands for starting, stopping and connecting
+  - Designed for use when controlling cross-provider VM-Instance needed
+  - After listing instances and command options, it awaits user command selection
+  - Supports commands for starting, stopping and connecting
   - Future commands may include: creating/deleting instances, changing configuration (hardware, disks, network), managing imaging/snapshots, managing disk/storage, add/remove to groups/clusters
 
 
