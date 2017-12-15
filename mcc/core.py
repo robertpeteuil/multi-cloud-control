@@ -32,11 +32,11 @@ import mcc.uimode as ui
 import os
 import sys
 
-__version__ = "0.0.51"
+__version__ = "0.9.1"
 
 
 def main():
-    """Retreive and display instance data then process commands."""
+    """Retrieve and display instance data then process commands."""
     (cred, providers) = config_read()
     cmd_mode = True
     conn_objs = cld.get_conns(cred, providers)
@@ -49,7 +49,7 @@ def main():
 
 
 def list_only():
-    """Retreive and display instance data then exit."""
+    """Retrieve and display instance data then exit."""
     (cred, providers) = config_read()
     conn_objs = cld.get_conns(cred, providers)
     nodes = cld.get_data(conn_objs, providers)
@@ -94,10 +94,10 @@ def config_read():
     providers = config_prov(config)
     # Read credentials for listed providers
     (cred, to_remove) = config_cred(config, providers)
-    # remove unsupported and credentialess providers
+    # remove unsupported and credential-less providers
     for item in to_remove:
         providers.remove(item)
-    return (cred, providers)
+    return cred, providers
 
 
 def config_prov(config):
@@ -129,7 +129,7 @@ def config_cred(config, providers):
             print("Unsupported provider: '{}' listed in config - ignoring"
                   .format(item))
             to_remove.append(item)
-    return (cred, to_remove)
+    return cred, to_remove
 
 
 def config_make(config_file):

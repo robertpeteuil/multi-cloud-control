@@ -39,21 +39,15 @@ monkey.patch_all()
 
 
 def get_conns(cred, providers):
-    """Collect node data asyncronously using gevent lib."""
+    """Collect node data asynchronously using gevent lib."""
     cld_svc_map = {"aws": conn_aws,
                    "azure": conn_az,
                    "gcp": conn_gcp}
     sys.stdout.write("\rEstablishing Connections:  ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
-    # NEW LIST COMPREHENSION TO CREATE CONN_FN
     conn_fn = [[cld_svc_map[x.rstrip('1234567890')], cred[x], x]
                for x in providers]
-    # ORIGINAL METHOD TO CREATE CONN_FN
-    # conn_fn = []
-    # for item in providers:
-    #     cld = item.rstrip('1234567890')
-    #     conn_fn.append([cld_svc_map[cld][0], cred[item], item])
     cgroup = Group()
     conn_res = []
     conn_res = cgroup.map(get_conn, conn_fn)
@@ -63,7 +57,7 @@ def get_conns(cred, providers):
         conn_objs.update(item)
     busy_disp_off(dobj=busy_obj)
     sys.stdout.write("\r                                                 \r")
-    sys.stdout.write("\033[?25h")  # cusor back on
+    sys.stdout.write("\033[?25h")  # cursor back on
     sys.stdout.flush()
     return conn_objs
 
@@ -76,21 +70,15 @@ def get_data(conn_objs, providers):
     sys.stdout.write("\rCollecting Info:  ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
-    # NEW LIST COMPREHENSION TO CREATE COLLEC_FN
     collec_fn = [[cld_svc_map[x.rstrip('1234567890')], conn_objs[x]]
                  for x in providers]
-    # ORIGINAL METHOD TO CREATE COLLEC_FN
-    # collec_fn = []
-    # for item in providers:
-    #     cld = item.rstrip('1234567890')
-    #     collec_fn.append([cld_svc_map[cld], conn_objs[item]])
     ngroup = Group()
     node_list = []
     node_list = ngroup.map(get_nodes, collec_fn)
     ngroup.join()
     busy_disp_off(dobj=busy_obj)
     sys.stdout.write("\r                                                 \r")
-    sys.stdout.write("\033[?25h")  # cusor back on
+    sys.stdout.write("\033[?25h")  # cursor back on
     sys.stdout.flush()
     return node_list
 
@@ -139,11 +127,6 @@ def ip_to_str(raw_ip):
         return raw_ip[0]
     else:
         return None
-    # if raw_ip:
-    #     raw_ip = raw_ip[0]
-    # else:
-    #     raw_ip = None
-    # return raw_ip
 
 
 def conn_aws(cred, crid):
@@ -172,7 +155,7 @@ def nodes_aws(c_obj):
 
 
 def adj_nodes_aws(aws_nodes):
-    """Retreive details specific to AWS."""
+    """Retrieve details specific to AWS."""
     for node in aws_nodes:
         node.cloud = "aws"
         node.cloud_disp = "AWS"
@@ -211,7 +194,7 @@ def nodes_az(c_obj):
 
 
 def adj_nodes_az(az_nodes):
-    """Retreive details specific to Azure."""
+    """Retrieve details specific to Azure."""
     for node in az_nodes:
         node.cloud = "azure"
         node.cloud_disp = "Azure"
@@ -265,7 +248,7 @@ def nodes_gcp(c_obj):
 
 
 def adj_nodes_gcp(gcp_nodes):
-    """Retreive details specific to GCP."""
+    """Retrieve details specific to GCP."""
     for node in gcp_nodes:
         node.cloud = "gcp"
         node.cloud_disp = "GCP"

@@ -46,23 +46,24 @@ C_TI2 = YELLOW
 C_GOOD = GREEN
 C_WARN = YELLOW
 C_ERR = RED
-"""Functionally titled vars as a psuedo color theme.
+"""Functionally titled vars as a pseudo color theme.
 
-It's intended that modules will import and use these functionaly-named
+It's intended that modules will import and use these functionally-named
 vars instead of the color named vars.
 
 This simplifies changing colors in the module using them.  To change
 a color, the corresponding functional var only needs to be changed to a
 different color here.  If direct color names are used, changes
-require replacing all occurences of the color var being changed.
+require replacing all occurrences of the color var being changed.
 """
 
 
 C_STAT = {"running": C_GOOD, "starting": C_GOOD, "rebooting": C_WARN,
           "pending": C_WARN, "suspended": C_WARN, "paused": C_WARN,
           "stopping": C_WARN, "stopped": C_NORM, "error": C_ERR,
-          "unknown": C_WARN, "reconfiguring": C_WARN, "terminated": C_NORM,
-          "RUN": C_GOOD, "STOP": C_ERR, "CONNECT": C_TI, "DETAILS": C_TI}
+          "updating": C_WARN, "unknown": C_WARN, "reconfiguring": C_WARN,
+          "terminated": C_NORM, "RUN": C_GOOD, "STOP": C_ERR, "CONNECT": C_TI,
+          "DETAILS": C_TI}
 """Color dictionary for instance status colors.
 
 Any value encountered in the AWS data must be listed or a KeyError is
