@@ -1,8 +1,8 @@
-"""Unified CLI Utility for AWS, Azure and GCP Instance Control.
+"""Command-Line Instance Control for AWS, Azure and GCP.
 
 License:
 
-    MCC - Unified CLI Utility for AWS, Azure and GCP Instance Control.
+    MCC - Command-Line Instance Control for AWS, Azure and GCP.
     Copyright (C) 2017  Robert Peteuil
 
     This program is free software: you can redistribute it and/or modify
