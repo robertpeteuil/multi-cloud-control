@@ -71,7 +71,7 @@ setup(
     download_url='https://pypi.python.org/pypi/mcc',
     license='GNU General Public License v3 (GPLv3)',
     description='Command-Line Instance Control for AWS, Azure and GCP',
-    keywords='aws-ec2 gcp-compute azure-vm utility control ssh start stop connect',
+    keywords='aws-ec2 gcp-compute azure-vm utility ssh start stop connect',
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
     classifiers=[
