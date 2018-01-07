@@ -1,9 +1,9 @@
-"""Connect Authenticate and get node objects from AWS, Azure and GCP.
+"""Authenticate and get node objects from user-specified cloud providers.
 
 License:
 
-    MCC - Unified CLI Utility for AWS, Azure and GCP Instance Control.
-    Copyright (C) 2017  Robert Peteuil
+    MCC - Command-Line Instance Control for AWS, Azure and GCP.
+    Copyright (C) 2017-2018  Robert Peteuil
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ def get_conns(cred, providers):
 
 
 def get_data(conn_objs, providers):
-    """Refresh node data using previous connection-objects."""
+    """Refresh node data using existing connection-objects."""
     cld_svc_map = {"aws": nodes_aws,
                    "azure": nodes_az,
                    "gcp": nodes_gcp}
@@ -104,7 +104,7 @@ def busy_disp_on():
 
 
 def busy_disp_off(dobj):
-    """Turn OFF busy_display to show working statues."""
+    """Turn OFF busy_display to indicate completion."""
     dobj.kill(block=False)
     sys.stdout.write("\033[D \033[D")
     sys.stdout.flush()
@@ -155,7 +155,7 @@ def nodes_aws(c_obj):
 
 
 def adj_nodes_aws(aws_nodes):
-    """Retrieve details specific to AWS."""
+    """Adjust details specific to AWS."""
     for node in aws_nodes:
         node.cloud = "aws"
         node.cloud_disp = "AWS"
@@ -194,7 +194,7 @@ def nodes_az(c_obj):
 
 
 def adj_nodes_az(az_nodes):
-    """Retrieve details specific to Azure."""
+    """Adjust details specific to Azure."""
     for node in az_nodes:
         node.cloud = "azure"
         node.cloud_disp = "Azure"
@@ -248,7 +248,7 @@ def nodes_gcp(c_obj):
 
 
 def adj_nodes_gcp(gcp_nodes):
-    """Retrieve details specific to GCP."""
+    """Adjust details specific to GCP."""
     for node in gcp_nodes:
         node.cloud = "gcp"
         node.cloud_disp = "GCP"

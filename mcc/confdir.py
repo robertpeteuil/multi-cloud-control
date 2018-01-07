@@ -1,11 +1,9 @@
 """Calculate the dir contianing configuation information.
 
-Unified CLI Utility for AWS, Azure and GCP Instance Control.
-
 License:
 
-    MCC - Unified CLI Utility for AWS, Azure and GCP Instance Control.
-    Copyright (C) 2017  Robert Peteuil
+    MCC - Command-Line Instance Control for AWS, Azure and GCP.
+    Copyright (C) 2017-2018  Robert Peteuil
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

@@ -1,9 +1,9 @@
-"""Unified CLI Utility for AWS, Azure and GCP Instance Control.
+"""Command-Line Instance Control for AWS, Azure and GCP.
 
 License:
 
-    MCC - Unified CLI Utility for AWS, Azure and GCP Instance Control.
-    Copyright (C) 2017  Robert Peteuil
+    MCC - Command-Line Instance Control for AWS, Azure and GCP.
+    Copyright (C) 2017+2018  Robert Peteuil
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,11 +32,11 @@ import mcc.uimode as ui
 import os
 import sys
 
-__version__ = "0.9.1"
+__version__ = "0.9.2"
 
 
 def main():
-    """Retrieve and display instance data then process commands."""
+    """Command-Mode: Retrieve and display data then process commands."""
     (cred, providers) = config_read()
     cmd_mode = True
     conn_objs = cld.get_conns(cred, providers)
@@ -49,7 +49,7 @@ def main():
 
 
 def list_only():
-    """Retrieve and display instance data then exit."""
+    """List-Mode: Retrieve and display data then exit."""
     (cred, providers) = config_read()
     conn_objs = cld.get_conns(cred, providers)
     nodes = cld.get_data(conn_objs, providers)
