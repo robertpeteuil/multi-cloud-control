@@ -27,6 +27,8 @@ from builtins import range
 from gevent.pool import Group
 from gevent import monkey
 import gevent
+monkey.patch_all()
+
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from libcloud.common.types import InvalidCredsError
@@ -35,7 +37,6 @@ from requests.exceptions import SSLError
 from mcc.confdir import CONFIG_DIR
 import sys
 
-monkey.patch_all()
 
 
 def get_conns(cred, providers):
