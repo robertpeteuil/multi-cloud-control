@@ -32,7 +32,7 @@ import mcc.uimode as ui
 import os
 import sys
 
-__version__ = "0.9.3"
+__version__ = "0.9.3a"
 
 
 def main():
@@ -101,7 +101,7 @@ def config_read():
 
 
 def config_prov(config):
-    """Read providers from configfile and de-duplicate it."""
+    """Read providers from config-file and de-duplicate it."""
     try:
         providers = [e.strip() for e in (config['info']
                                          ['providers']).split(',')]
@@ -113,7 +113,7 @@ def config_prov(config):
 
 
 def config_cred(config, providers):
-    """Read credentials from configfile."""
+    """Read credentials from config-file."""
     expected = ['aws', 'azure', 'gcp']
     cred = {}
     to_remove = []
