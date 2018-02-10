@@ -25,7 +25,7 @@ Author:    Robert Peteuil
 from __future__ import absolute_import, print_function
 from builtins import range
 from blessed import Terminal
-from mcc.confdir import CONFIG_DIR
+from mcc.confdir import SSH_KEY_DIR, DEFAULT_SSH_USER
 import sys
 from mcc.cldcnct import busy_disp_on, busy_disp_off
 from time import sleep
@@ -198,8 +198,9 @@ def cmd_connect(node, cmd_name, node_info):
         ui_print(exec_mess)
         (ssh_user, ssh_key) = ssh_get_info(node)
         if ssh_user:
-            ssh_cmd = "ssh {0}{1}@{2}".format(ssh_key, ssh_user,
-                                              node.public_ips)
+            ssh_cmd = "ssh {0}{1}@{2}".format(ssh_key, ssh_user, node.public_ips)
+        elif DEFAULT_SSH_USER:
+            ssh_cmd = "ssh {0}{1}@{2}".format(ssh_key, DEFAULT_SSH_USER, node.public_ips)
         else:
             ssh_cmd = "ssh {0}{1}".format(ssh_key, node.public_ips)
         print("\n")
@@ -222,18 +223,25 @@ def cmd_details(node, cmd_name, node_info):
 
 def ssh_get_info(node):
     """Determine ssh-user and ssh-key for node."""
+    # BREAKING CHANGE - PEM KEY NOW PULLED FROM SSH DIR
     ssh_key = ""
     if node.cloud == "aws":
         raw_key = node.extra['key_name']
-        ssh_key = "-i {0}{1}.pem ".format(CONFIG_DIR, raw_key)
+        ssh_key = "-i {0}{1}.pem ".format(SSH_KEY_DIR, raw_key)
+        # ssh_key = "-i {0}{1}.pem ".format(CONFIG_DIR, raw_key)
         ssh_user = ssh_calc_aws(node)
     elif node.cloud == "azure":
         ssh_user = node.extra['properties']['osProfile']['adminUsername']
-    else:
+        ssh_key = "-i {0}id_rsa ".format(SSH_KEY_DIR)
+    elif node.cloud == "gcp":
         items = node.extra['metadata'].get('items', [{}])
-        keyname = items['key' == 'ssh-keys'].get('value', "")
-        pos = keyname.find(":")
-        ssh_user = keyname[0:pos]
+        ssh_data = items['key' == 'ssh-keys'].get('value', "")
+        pos = ssh_data.find(":")
+        ssh_user = ssh_data[0:pos]
+        # keyname = items['key' == 'ssh-keys'].get('value', "")
+        # pos = keyname.find(":")
+        # ssh_user = keyname[0:pos]
+        ssh_key = "-i {0}id_rsa ".format(SSH_KEY_DIR)
     return ssh_user, ssh_key
 
 
