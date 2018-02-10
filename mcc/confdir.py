@@ -1,4 +1,4 @@
-"""Calculate the dir contianing configuation information.
+"""Calculate the dir containing configuration information.
 
 License:
 
@@ -25,7 +25,28 @@ Author:    Robert Peteuil
 import os
 from os.path import expanduser
 
+try:
+  env_config_dir = os.environ['MCC_CONFIG_DIR']
+except KeyError:
+  env_config_dir = ".cloud"
+
 home_dir = expanduser("~")
 os_spec = {"nt": "\\"}
 fs_sep = os_spec.get(os.name, "/")
-CONFIG_DIR = (u"{0}{1}.cloud{1}".format(home_dir, fs_sep))
+
+CONFIG_DIR = (u"{0}{1}{2}{1}".format(home_dir, fs_sep, env_config_dir))
+# CONFIG_DIR = (u"{0}{1}.cloud{1}".format(home_dir, fs_sep))
+
+try:
+  env_ssh_key_dir = os.environ['MCC_SSH_KEY_DIR']
+except KeyError:
+  env_ssh_key_dir = ".ssh"
+
+SSH_KEY_DIR = (u"{0}{1}{2}{1}".format(home_dir, fs_sep, env_ssh_key_dir))
+
+try:
+  env_ssh_user = os.environ['USER']
+except KeyError:
+  env_ssh_user = ""
+
+DEFAULT_SSH_USER = (u"{0}".format(env_ssh_user))
