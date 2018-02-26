@@ -81,7 +81,7 @@ This utility can be installed with **pip**:
 
 .. code:: shell
 
-  sudo pip install mcc
+  pip install --user mcc
 
 
 Configuration
