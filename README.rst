@@ -1,26 +1,25 @@
-Instance Management across AWS, Azure and GCP Platforms
-=======================================================
+Multi Cloud Control of VM Instances on AWS, Azure and GCP
+=========================================================
 
-MCC: Command-Line Instance Control for Enterprise Cloud Providers
------------------------------------------------------------------
+Unified CLI utility across Enterprise Cloud Providers
+-----------------------------------------------------
 
 |PyPi release| |lang|
 ---------------------
 
-Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances on AWS, Azure and GCP (including multiple accounts per provider).  This includes displaying a unified list of VM-instances across cloud providers, and Starting / Stopping / Connecting to VM-instances on any providers platforms.  This is extremely useful for companies, projects, and people that use VM-instances on multiple clouds.
+Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances across AWS, Azure and GCP.  It displays a combined list of VM-instances across providers, and allows starting, stopping and making connections.  It's extremely useful for shell users who work in multi-cloud environments.
 
-There are two commands to run this utility: 
+This utility can be executed with two different commands: 
 
-- ``mccl`` - "List Mode" - Displays a unified list of VM-Instances and parameters from all providers
-- ``mcc`` - "Command Mode" - Displays a unified list of VM-Instances across providers and enables command execution
+- ``mccl`` - runs in "List Mode", which displays a unified list of instances and their state across providers
+- ``mcc`` - runs in "Command Mode", which displays a unified instance list and allows for command execution
 
 ``mccl``
 --------
 
-- ``mccl`` Displays a unified list of VM-Instances and parameters from all providers
+- ``mccl`` Displays a unified list of VM/instances and their parameters across providers
 
-  - design for quickly displaying a unified list across all providers, when quick access to information is needed
-
+  - useful when quick access to information is needed; it displays a list of instances and their state and exits
 
 **List Mode screenshot**
 
@@ -33,9 +32,9 @@ There are two commands to run this utility:
 
 - ``mcc`` Displays a unified list of VM-Instances across providers and enables command execution
 
-  - Designed for use when controlling cross-provider VM-Instance needed
-  - After listing instances and command options, it awaits user command selection
-  - Supports commands for starting, stopping and connecting
+  - Designed for use when control of VM/instance is needed
+  - After listing instances and command options, the authenticated connection to the provider is maintained, and it awaits user command selection
+  - Supports commands for starting, stopping and connecting (via ssh)
   - Future commands may include: creating/deleting instances, changing configuration (hardware, disks, network), managing imaging/snapshots, managing disk/storage, add/remove to groups/clusters
 
 
