@@ -4,12 +4,12 @@ Multi Cloud Control of VM Instances on AWS, Azure and GCP
 Unified CLI utility across Enterprise Cloud Providers
 -----------------------------------------------------
 
+**For Beta Alibaba Cloud Support manually install version on** `"alicloud" branch <https://github.com/robertpeteuil/multi-cloud-control/tree/alicloud>`_
+
 |PyPi release| |lang|
 ---------------------
 
 Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances across AWS, Azure and GCP.  It displays a combined list of VM-instances across providers, and allows starting, stopping and making connections.  It's extremely useful for shell users who work in multi-cloud environments.
-
-**Beta Support for Alibaba Cloud built into version on "alicloud" branch**
 
 This utility can be executed with two different commands: 
 
