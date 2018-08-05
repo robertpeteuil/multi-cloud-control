@@ -9,6 +9,8 @@ Unified CLI utility across Enterprise Cloud Providers
 
 Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances across AWS, Azure and GCP.  It displays a combined list of VM-instances across providers, and allows starting, stopping and making connections.  It's extremely useful for shell users who work in multi-cloud environments.
 
+**Beta Support for Alibaba Cloud built into version on `alicloud` branch**
+
 This utility can be executed with two different commands: 
 
 - ``mccl`` - runs in "List Mode", which displays a unified list of instances and their state across providers
