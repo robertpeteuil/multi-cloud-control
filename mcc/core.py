@@ -114,7 +114,7 @@ def config_prov(config):
 
 def config_cred(config, providers):
     """Read credentials from configfile."""
-    expected = ['aws', 'azure', 'gcp']
+    expected = ['aws', 'azure', 'gcp', 'alicloud']
     cred = {}
     to_remove = []
     for item in providers:
