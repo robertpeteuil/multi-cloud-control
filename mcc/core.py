@@ -1,8 +1,8 @@
-"""Command-Line Instance Control for AWS, Azure and GCP.
+"""Command-Line Instance Control for AWS, Azure, GCP and AliCloud.
 
 License:
 
-    MCC - Command-Line Instance Control for AWS, Azure and GCP.
+    MCC - Command-Line Instance Control for AWS, Azure, GCP and AliCloud.
     Copyright (C) 2017+2018  Robert Peteuil
 
     This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@ import mcc.uimode as ui
 import os
 import sys
 
-__version__ = "0.9.3"
+__version__ = "0.9.4"
 
 
 def main():
@@ -114,7 +114,7 @@ def config_prov(config):
 
 def config_cred(config, providers):
     """Read credentials from configfile."""
-    expected = ['aws', 'azure', 'gcp']
+    expected = ['aws', 'azure', 'gcp', 'alicloud']
     cred = {}
     to_remove = []
     for item in providers:

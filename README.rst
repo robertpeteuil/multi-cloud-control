@@ -1,17 +1,17 @@
-Multi Cloud Control of VM Instances on AWS, Azure and GCP
-=========================================================
+Multi Cloud Control of AWS, Azure, GCP & AliCloud Instances
+===========================================================
 
-Unified CLI utility across Enterprise Cloud Providers
------------------------------------------------------
+Unified Instance control across Enterprise Cloud Providers
+----------------------------------------------------------
 
 **For Beta Alibaba Cloud Support manually install version on** `"alicloud" branch <https://github.com/robertpeteuil/multi-cloud-control/tree/alicloud>`_
 
 |PyPi release| |lang|
 ---------------------
 
-Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances across AWS, Azure and GCP.  It displays a combined list of VM-instances across providers, and allows starting, stopping and making connections.  It's extremely useful for shell users who work in multi-cloud environments.
+Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances across AWS, Azure, GCP and Alibaba Cloud.  It displays a combined list of VM-instances across providers, and allows starting, stopping and making connections.  It's extremely useful for shell users who work in multi-cloud environments.
 
-This utility can be executed with two different commands: 
+This utility can be executed with two different commands:
 
 - ``mccl`` - runs in "List Mode", which displays a unified list of instances and their state across providers
 - ``mcc`` - runs in "Command Mode", which displays a unified instance list and allows for command execution
@@ -51,11 +51,13 @@ Supported Python versions & Platforms
 
 Python 2.7, 3.4, 3.5, 3.6
 
+- Python 3.7 NOT yet supported due to ``gevent`` library incompatabilities
+
 Platforms:
 
 - Linux
 - macOS (OS X)
-- Windows 10 'Bash on Windows'
+- Windows 10 - Linux Shells
 
 Pre-Reqs
 --------
@@ -84,9 +86,10 @@ This utility can be installed with **pip**:
 
   pip install --user mcc
 
-
 Configuration
 -------------
+
+New Configuration Instructions can be found on the `mcc wiki <https://github.com/robertpeteuil/multi-cloud-control/wiki/Configuration>`_
 
 The first time the utility is executed it performs the following setup tasks:
 
@@ -112,17 +115,29 @@ Notes while editing the config.ini file:
   # - providers is a list of the cloud providers the utility should connect to
   #   - ONLY include providers you have credentials for AND want to use
   #   - you must use the exact values listed to reference the providers:
-  #     - "aws", "azure", and "gcp"
+  #     - "alicloud", "aws", "azure", and "gcp"
   #   - multiple account per provider is supported, see section at bottom for details
 
   [info]
   # this example - connects to all three providers
-  providers = aws,azure,gcp
+  providers = alicloud,aws,azure,gcp
 
   # CREDENTIALS DATA SECTIONS
   #  - one section with matching name for each item listed in providers
   #  - each section contains the credentials for that provider
   #    ex: [aws] - specifies aws credentials
+
+
+**[alicloud] section** - specifies your Alibaba Cloud security credentials and default datacenter region.  `Alibaba Cloud region list <https://www.alibabacloud.com/help/doc-detail/40654.html?spm=a2c5t.11065259.1996646101.searchclickresult.9a6425a1BKQk58>`_
+
+.. code:: ini
+
+  # [alicloud] SECTION REQUIRED if alicloud is listed in providers
+
+  [alicloud]
+  ali_region = cn-hangzhou
+  ali_access_key_id = EXCEWDYSWRP7VZOW
+  ali_access_key_secret = CHVsdhV+YgBEjJuZsJNstLGgRY43kZggNHQ
 
 
 **[aws] section** - specifies your AWS security credentials and default datacenter region. `Information on AWS Credentials <http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html>`_
@@ -138,7 +153,7 @@ Notes while editing the config.ini file:
   aws_default_region = us-west-1
 
 
-**[azure] section** - specifies your Azure Tenant-ID, Subscription-ID, Application-ID and Application-Secret.  `Creating an Azure Service Principal <https://azure.microsoft.com/en-us/documentation/articles/resource-group-authenticate-service-principal>`_
+**[azure] section** - specifies your Azure Tenant-ID, Subscription-ID, Application-ID and Application-Secret. `Creating an Azure Service Principal <https://azure.microsoft.com/en-us/documentation/articles/resource-group-authenticate-service-principal>`_
 
 
 .. code:: ini

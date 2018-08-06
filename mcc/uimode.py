@@ -2,7 +2,7 @@
 
 License:
 
-    MCC - Command-Line Instance Control for AWS, Azure and GCP.
+    MCC - Command-Line Instance Control for AWS, Azure, GCP and AliCloud.
     Copyright (C) 2017-2018  Robert Peteuil
 
     This program is free software: you can redistribute it and/or modify
@@ -229,11 +229,13 @@ def ssh_get_info(node):
         ssh_user = ssh_calc_aws(node)
     elif node.cloud == "azure":
         ssh_user = node.extra['properties']['osProfile']['adminUsername']
-    else:
+    elif node.cloud == "gcp":
         items = node.extra['metadata'].get('items', [{}])
         keyname = items['key' == 'ssh-keys'].get('value', "")
         pos = keyname.find(":")
         ssh_user = keyname[0:pos]
+    elif node.cloud == "alicloud":
+        ssh_user = ""
     return ssh_user, ssh_key
 
 
