@@ -4,12 +4,10 @@ Multi Cloud Control of AWS, Azure, GCP & AliCloud Instances
 Unified Instance control across Enterprise Cloud Providers
 ----------------------------------------------------------
 
-**The version of MCC in this branch contains beta support for Alibaba Cloud.**  Once AliCLoud integration has been verified, this branch will be merged this into master, and submitted to PyPy so it can be installed with ``pip``.
-
 |PyPi release| |lang|
 ---------------------
 
-Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances across AWS, Azure, GCP and Alibaba Cloud (beta).  It displays a combined list of VM-instances across providers, and allows starting, stopping and making connections.  It's extremely useful for shell users who work in multi-cloud environments.
+Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances across AWS, Azure, GCP and Alibaba Cloud.  It displays a combined list of VM-instances across providers, and allows starting, stopping and making connections.  It's extremely useful for shell users who work in multi-cloud environments.
 
 This utility can be executed with two different commands:
 
@@ -51,13 +49,13 @@ Supported Python versions & Platforms
 
 Python 2.7, 3.4, 3.5, 3.6
 
-- Python 3.7 is NOT yet supported due to incompatabilities with the ``gevent`` library.
+- Python 3.7 NOT yet supported due to ``gevent`` library incompatabilities
 
 Platforms:
 
 - Linux
 - macOS (OS X)
-- Windows 10 'Bash on Windows'
+- Windows 10 - Linux Shells
 
 Pre-Reqs
 --------
@@ -80,18 +78,16 @@ The libraries used for secure authentication may require compilation during the 
 Installation
 ------------
 
-The ``alicloud`` version of the utility must be installed directly as it has not been submitted to PyPi.
+This utility can be installed with **pip**:
 
-To install the **alicloud** version:
+.. code:: shell
 
-- clone this repo locally & cd into the repo directory
-- checkout the ``alicloud`` branch
-- install locally with ``pip install -e .``
-
-  - use ``pip3`` and/or the ``--user`` parameter as desired
+  pip install --user mcc
 
 Configuration
 -------------
+
+New Configuration Instructions can be found on the `mcc wiki <https://github.com/robertpeteuil/multi-cloud-control/wiki/Configuration>`_
 
 The first time the utility is executed it performs the following setup tasks:
 
