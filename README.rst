@@ -1,5 +1,5 @@
-Multi Cloud Control of AWS, Azure, GCP and AliCloud
-===================================================
+Multi Cloud Control of AWS, Azure, GCP & AliCloud Instances
+===========================================================
 
 Unified Instance control across Enterprise Cloud Providers
 ----------------------------------------------------------
