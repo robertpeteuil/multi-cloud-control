@@ -85,7 +85,8 @@ To install the **alicloud** version:
 - clone this repo locally & cd into the repo directory
 - checkout the ``alicloud`` branch
 - install locally with ``pip install -e .`` 
-  - use ``pip3`` or the ``--user`` parameter as desired
+
+  - use ``pip3`` and/or the ``--user`` parameter as desired
 
 Configuration
 -------------
