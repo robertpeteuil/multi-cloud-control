@@ -1,8 +1,8 @@
-"""Command-Line Instance Control for AWS, Azure and GCP.
+"""Command-Line Instance Control for AWS, Azure, GCP and AliCloud.
 
 License:
 
-    MCC - Command-Line Instance Control for AWS, Azure and GCP.
+    MCC - Command-Line Instance Control for AWS, Azure, GCP and AliCloud.
     Copyright (C) 2017+2018  Robert Peteuil
 
     This program is free software: you can redistribute it and/or modify

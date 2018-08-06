@@ -2,7 +2,7 @@
 
 License:
 
-    MCC - Command-Line Instance Control for AWS, Azure and GCP.
+    MCC - Command-Line Instance Control for AWS, Azure, GCP and AliCloud.
     Copyright (C) 2017-2018  Robert Peteuil
 
     This program is free software: you can redistribute it and/or modify
@@ -36,7 +36,6 @@ from libcloud.common.exceptions import BaseHTTPError
 from requests.exceptions import SSLError
 from mcc.confdir import CONFIG_DIR
 import sys
-
 
 
 def get_conns(cred, providers):
