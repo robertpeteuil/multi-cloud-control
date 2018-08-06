@@ -11,7 +11,7 @@ Unified Instance control across Enterprise Cloud Providers
 
 Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances across AWS, Azure, GCP and Alibaba Cloud (beta).  It displays a combined list of VM-instances across providers, and allows starting, stopping and making connections.  It's extremely useful for shell users who work in multi-cloud environments.
 
-This utility can be executed with two different commands: 
+This utility can be executed with two different commands:
 
 - ``mccl`` - runs in "List Mode", which displays a unified list of instances and their state across providers
 - ``mcc`` - runs in "Command Mode", which displays a unified instance list and allows for command execution
@@ -51,6 +51,8 @@ Supported Python versions & Platforms
 
 Python 2.7, 3.4, 3.5, 3.6
 
+- Python 3.7 is NOT yet supported due to incompatabilities with the ``gevent`` library.
+
 Platforms:
 
 - Linux
@@ -84,7 +86,7 @@ To install the **alicloud** version:
 
 - clone this repo locally & cd into the repo directory
 - checkout the ``alicloud`` branch
-- install locally with ``pip install -e .`` 
+- install locally with ``pip install -e .``
 
   - use ``pip3`` and/or the ``--user`` parameter as desired
 
@@ -135,7 +137,7 @@ Notes while editing the config.ini file:
   # [alicloud] SECTION REQUIRED if alicloud is listed in providers
 
   [alicloud]
-  ali_region = cn-hangzhou 
+  ali_region = cn-hangzhou
   ali_access_key_id = EXCEWDYSWRP7VZOW
   ali_access_key_secret = CHVsdhV+YgBEjJuZsJNstLGgRY43kZggNHQ
 
@@ -153,7 +155,7 @@ Notes while editing the config.ini file:
   aws_default_region = us-west-1
 
 
-**[azure] section** - specifies your Azure Tenant-ID, Subscription-ID, Application-ID and Application-Secret.  _`Creating an Azure Service Principal <https://azure.microsoft.com/en-us/documentation/articles/resource-group-authenticate-service-principal>`_
+**[azure] section** - specifies your Azure Tenant-ID, Subscription-ID, Application-ID and Application-Secret. `Creating an Azure Service Principal <https://azure.microsoft.com/en-us/documentation/articles/resource-group-authenticate-service-principal>`_
 
 
 .. code:: ini
