@@ -4,8 +4,6 @@ Multi Cloud Control of AWS, Azure, GCP & AliCloud Instances
 Unified Instance control across Enterprise Cloud Providers
 ----------------------------------------------------------
 
-**For Beta Alibaba Cloud Support manually install version on** `"alicloud" branch <https://github.com/robertpeteuil/multi-cloud-control/tree/alicloud>`_
-
 |PyPi release| |lang|
 ---------------------
 
