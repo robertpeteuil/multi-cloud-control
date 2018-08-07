@@ -1,26 +1,25 @@
-Instance Management across AWS, Azure and GCP Platforms
-=======================================================
+Multi Cloud Control of AWS, Azure, GCP & AliCloud Instances
+===========================================================
 
-MCC: Command-Line Instance Control for Enterprise Cloud Providers
------------------------------------------------------------------
+Unified Instance control across Enterprise Cloud Providers
+----------------------------------------------------------
 
 |PyPi release| |lang|
 ---------------------
 
-Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances on AWS, Azure and GCP (including multiple accounts per provider).  This includes displaying a unified list of VM-instances across cloud providers, and Starting / Stopping / Connecting to VM-instances on any providers platforms.  This is extremely useful for companies, projects, and people that use VM-instances on multiple clouds.
+Multi-Cloud-Control provides a single solution for controlling cloud VMs/Instances across AWS, Azure, GCP and Alibaba Cloud.  It displays a combined list of VM-instances across providers, and allows starting, stopping and making connections.  It's extremely useful for shell users who work in multi-cloud environments.
 
-There are two commands to run this utility: 
+This utility can be executed with two different commands:
 
-- ``mccl`` - "List Mode" - Displays a unified list of VM-Instances and parameters from all providers
-- ``mcc`` - "Command Mode" - Displays a unified list of VM-Instances across providers and enables command execution
+- ``mccl`` - runs in "List Mode", which displays a unified list of instances and their state across providers
+- ``mcc`` - runs in "Command Mode", which displays a unified instance list and allows for command execution
 
 ``mccl``
 --------
 
-- ``mccl`` Displays a unified list of VM-Instances and parameters from all providers
+- ``mccl`` Displays a unified list of VM/instances and their parameters across providers
 
-  - design for quickly displaying a unified list across all providers, when quick access to information is needed
-
+  - useful when quick access to information is needed; it displays a list of instances and their state and exits
 
 **List Mode screenshot**
 
@@ -33,9 +32,9 @@ There are two commands to run this utility:
 
 - ``mcc`` Displays a unified list of VM-Instances across providers and enables command execution
 
-  - Designed for use when controlling cross-provider VM-Instance needed
-  - After listing instances and command options, it awaits user command selection
-  - Supports commands for starting, stopping and connecting
+  - Designed for use when control of VM/instance is needed
+  - After listing instances and command options, the authenticated connection to the provider is maintained, and it awaits user command selection
+  - Supports commands for starting, stopping and connecting (via ssh)
   - Future commands may include: creating/deleting instances, changing configuration (hardware, disks, network), managing imaging/snapshots, managing disk/storage, add/remove to groups/clusters
 
 
@@ -50,11 +49,13 @@ Supported Python versions & Platforms
 
 Python 2.7, 3.4, 3.5, 3.6
 
+- Python 3.7 NOT yet supported due to ``gevent`` library incompatabilities
+
 Platforms:
 
 - Linux
 - macOS (OS X)
-- Windows 10 'Bash on Windows'
+- Windows 10 - Linux Shells
 
 Pre-Reqs
 --------
@@ -81,11 +82,12 @@ This utility can be installed with **pip**:
 
 .. code:: shell
 
-  sudo pip install mcc
-
+  pip install --user mcc
 
 Configuration
 -------------
+
+New Configuration Instructions can be found on the `mcc wiki <https://github.com/robertpeteuil/multi-cloud-control/wiki/Configuration>`_
 
 The first time the utility is executed it performs the following setup tasks:
 
@@ -111,17 +113,29 @@ Notes while editing the config.ini file:
   # - providers is a list of the cloud providers the utility should connect to
   #   - ONLY include providers you have credentials for AND want to use
   #   - you must use the exact values listed to reference the providers:
-  #     - "aws", "azure", and "gcp"
+  #     - "alicloud", "aws", "azure", and "gcp"
   #   - multiple account per provider is supported, see section at bottom for details
 
   [info]
   # this example - connects to all three providers
-  providers = aws,azure,gcp
+  providers = alicloud,aws,azure,gcp
 
   # CREDENTIALS DATA SECTIONS
   #  - one section with matching name for each item listed in providers
   #  - each section contains the credentials for that provider
   #    ex: [aws] - specifies aws credentials
+
+
+**[alicloud] section** - specifies your Alibaba Cloud security credentials and default datacenter region.  `Alibaba Cloud region list <https://www.alibabacloud.com/help/doc-detail/40654.html?spm=a2c5t.11065259.1996646101.searchclickresult.9a6425a1BKQk58>`_
+
+.. code:: ini
+
+  # [alicloud] SECTION REQUIRED if alicloud is listed in providers
+
+  [alicloud]
+  ali_region = cn-hangzhou
+  ali_access_key_id = EXCEWDYSWRP7VZOW
+  ali_access_key_secret = CHVsdhV+YgBEjJuZsJNstLGgRY43kZggNHQ
 
 
 **[aws] section** - specifies your AWS security credentials and default datacenter region. `Information on AWS Credentials <http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html>`_
@@ -137,7 +151,7 @@ Notes while editing the config.ini file:
   aws_default_region = us-west-1
 
 
-**[azure] section** - specifies your Azure Tenant-ID, Subscription-ID, Application-ID and Application-Secret.  `Creating an Azure Service Principal <https://azure.microsoft.com/en-us/documentation/articles/resource-group-authenticate-service-principal>`_
+**[azure] section** - specifies your Azure Tenant-ID, Subscription-ID, Application-ID and Application-Secret. `Creating an Azure Service Principal <https://azure.microsoft.com/en-us/documentation/articles/resource-group-authenticate-service-principal>`_
 
 
 .. code:: ini

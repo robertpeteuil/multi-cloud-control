@@ -2,7 +2,7 @@
 
 License:
 
-    MCC - Command-Line Instance Control for AWS, Azure and GCP.
+    MCC - Command-Line Instance Control for AWS, Azure, GCP and AliCloud.
     Copyright (C) 2017-2018  Robert Peteuil
 
     This program is free software: you can redistribute it and/or modify
@@ -38,12 +38,12 @@ from mcc.confdir import CONFIG_DIR
 import sys
 
 
-
 def get_conns(cred, providers):
     """Collect node data asynchronously using gevent lib."""
     cld_svc_map = {"aws": conn_aws,
                    "azure": conn_az,
-                   "gcp": conn_gcp}
+                   "gcp": conn_gcp,
+                   "alicloud": conn_ali}
     sys.stdout.write("\rEstablishing Connections:  ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
@@ -67,7 +67,8 @@ def get_data(conn_objs, providers):
     """Refresh node data using existing connection-objects."""
     cld_svc_map = {"aws": nodes_aws,
                    "azure": nodes_az,
-                   "gcp": nodes_gcp}
+                   "gcp": nodes_gcp,
+                   "alicloud": nodes_ali}
     sys.stdout.write("\rCollecting Info:  ")
     sys.stdout.flush()
     busy_obj = busy_disp_on()
@@ -257,6 +258,43 @@ def adj_nodes_gcp(gcp_nodes):
         node.public_ips = ip_to_str(node.public_ips)
         node.zone = node.extra['zone'].name
     return gcp_nodes
+
+
+def conn_ali(cred, crid):
+    """Establish connection to AliCloud service."""
+    driver = get_driver(Provider.ALIYUN_ECS)
+    try:
+        ali_obj = driver(cred['ali_access_key_id'],
+                         cred['ali_access_key_secret'],
+                         region=cred['ali_region'])
+    except SSLError as e:
+        abort_err("\r SSL Error with AliCloud: {}".format(e))
+    except InvalidCredsError as e:
+        abort_err("\r Error with AliCloud Credentials: {}".format(e))
+    return {crid: ali_obj}
+
+
+def nodes_ali(c_obj):
+    """Get node objects from AliCloud."""
+    ali_nodes = []
+    try:
+        ali_nodes = c_obj.list_nodes()
+    except BaseHTTPError as e:
+        abort_err("\r HTTP Error with AliCloud: {}".format(e))
+    ali_nodes = adj_nodes_ali(ali_nodes)
+    return ali_nodes
+
+
+def adj_nodes_ali(ali_nodes):
+    """Adjust details specific to AliCloud."""
+    for node in ali_nodes:
+        node.cloud = "alicloud"
+        node.cloud_disp = "AliCloud"
+        node.private_ips = ip_to_str(node.extra['vpc_attributes']['private_ip_address'])
+        node.public_ips = ip_to_str(node.public_ips)
+        node.zone = node.extra['zone_id']
+        node.size = node.extra['instance_type']
+    return ali_nodes
 
 
 def abort_err(messg):
