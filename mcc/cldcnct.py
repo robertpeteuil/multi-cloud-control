@@ -294,6 +294,8 @@ def adj_nodes_ali(ali_nodes):
         node.public_ips = ip_to_str(node.public_ips)
         node.zone = node.extra['zone_id']
         node.size = node.extra['instance_type']
+        if node.size.startswith('ecs.'):
+            node.size = node.size[len('ecs.'):]
     return ali_nodes
 
 
