@@ -32,7 +32,7 @@ import mcc.uimode as ui
 import os
 import sys
 
-__version__ = "0.9.7"
+__version__ = "0.9.8"
 
 
 def main():

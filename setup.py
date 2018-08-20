@@ -65,7 +65,7 @@ setup(
     package_data={'mcc': ['config.ini']},
     entry_points={'console_scripts': ['mcc=mcc.core:main',
                                       'mccl=mcc.core:list_only']},
-    version='0.9.7',
+    version='0.9.8',
     author="Robert Peteuil",
     author_email="robert.s.peteuil@gmail.com",
     url='https://github.com/robertpeteuil/multi-cloud-control',
@@ -92,6 +92,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: System :: Distributed Computing',
         'Topic :: System :: Systems Administration'],
     long_description=long_description
