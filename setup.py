@@ -17,14 +17,15 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
-INSTALL_REQUIRES = ['apache-libcloud>=2.0.0',
-                    'blessed>=1.14.2',
-                    'colorama>=0.3.9',
-                    'configparser>=3.5.0',
-                    'future>=0.14',
-                    'gevent>=1.2.2',
-                    'pycrypto>=2.6.1',
-                    'PrettyTable>=0.7.2']
+INSTALL_REQUIRES = ['apache-libcloud >= 2.0.0',
+                    'blessed >= 1.14.2',
+                    'gevent >= 1.3.6; python_version>="3.7"',
+                    'gevent >= 1.2.2; python_version<"3.7"',
+                    'colorama >= 0.3.9',
+                    'configparser >= 3.5.0',
+                    'future >= 0.14',
+                    'pycrypto >= 2.6.1',
+                    'PrettyTable >= 0.7.2']
 
 EXTRAS_REQUIRE = {
     ":python_full_version<'2.7.9'": [
@@ -64,7 +65,7 @@ setup(
     package_data={'mcc': ['config.ini']},
     entry_points={'console_scripts': ['mcc=mcc.core:main',
                                       'mccl=mcc.core:list_only']},
-    version='0.9.6',
+    version='0.9.7',
     author="Robert Peteuil",
     author_email="robert.s.peteuil@gmail.com",
     url='https://github.com/robertpeteuil/multi-cloud-control',

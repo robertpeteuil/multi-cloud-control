@@ -47,9 +47,7 @@ This utility can be executed with two different commands:
 Supported Python versions & Platforms
 -------------------------------------
 
-Python 2.7, 3.4, 3.5, 3.6
-
-- Python 3.7 NOT yet supported due to ``gevent`` library incompatabilities
+Python 2.7, 3.4, 3.5, 3.6, 3.7
 
 Platforms:
 
