@@ -58,7 +58,7 @@ Platforms:
 Installation
 ------------
 
-This utility can be installed with **pip**, **brew** or downloading the repo and running ``python setup.py install``.
+This utility can be installed with **pip**, **brew** or downloading the repo and running ``python setup.py install``
 
 Installing with Brew
 --------------------
