@@ -58,10 +58,10 @@ Platforms:
 Installation
 ------------
 
-This utility can be installed with both **pip** and **brew**.
+This utility can be installed with **pip**, **brew** or downloading the repo and running ``python setup.py install``.
 
-Brew Installation
------------------
+Installing with Brew
+--------------------
 
 On macOS, this utility can be installed with `brew <https://brew.sh/>`_.  This simplifies the installation process and automatically installs the necessary Python libraries in a seperate virtual environment.
 
@@ -71,8 +71,8 @@ It can be installed via **brew** with the command:
 
   brew install robpco/tap/mcc
 
-Pip Installation
-----------------
+Installing with Pip
+-------------------
 
 This utility can be installed with **pip**:
 
